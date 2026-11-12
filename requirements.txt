@@ -1,0 +1,4 @@
+ultralytics
+pillow-heif
+opencv-python
+numpy
