@@ -3,15 +3,17 @@
 Recognise football referee hand signals (20 gesture classes) from photos/video using pose keypoints.
 Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → train → evaluate → infer**.
 
-> Status: data pre-labeling and Label Studio export are done. `Data_Pipeline/`, `Train/`, `Evaluate/`, `Inference/` are placeholders.
+> Status: pre-labeling, Data_Pipeline and Train are built. `Evaluate/` and `Inference/` are placeholders.
+> Only synthetic-data self-tests have been run so far; the Label Studio API path is untested against a live server.
 
 ## Layout
 
 ```
-Data_Preprocess/src/pre_Label.py            YOLO26-pose pre-labeling (+ Label Studio export in one run)
-Data_Preprocess/src/export_to_label_studio.py   YOLO-pose labels -> Label Studio tasks, label config, class list
-Data_Preprocess/output/                     generated output (git-ignored)
-Data_Preprocess/src/Dataset/                raw photos (git-ignored)
+Data_Preprocess/src/     pre_Label.py (YOLO26-pose pre-labeling) + export_to_label_studio.py
+Data_Pipeline/           main.py (entry) + Process/ (labelstudio, convert, split, build) + config/config.yaml
+Train/                   train_two_stage.py, train_one_stage.py, colab_one_stage.ipynb, features.py
+Evaluate/  Inference/    placeholders (confusion matrix / F1 report, FastAPI)
+.env.example             copy to .env (git-ignored) and fill in
 ```
 
 ## Setup
@@ -59,8 +61,27 @@ Every box starts as class `Referee` — the gesture is assigned during review. K
 | 8 | Substitution | 9 | 18 | Tripping | i |
 | 9 | Goal | 0 | 19 | Kicking | j |
 
+## 3. Data_Pipeline: Label Studio -> train/val/test
+
+```bash
+cp .env.example .env          # set LS_URL, LS_TOKEN, LS_PROJECT_IDS (never commit .env)
+python Data_Pipeline/main.py                          # export via API
+python Data_Pipeline/main.py --export-json raw.json   # or use a saved export
+python Data_Pipeline/test_pipeline.py                 # synthetic self-test
+```
+
+- Uses the latest non-cancelled annotation per task; predictions are ignored.
+- Split 70/15/15, stratified by class and grouped by photo burst (filename timestamps within `burst_seconds`), fixed seed.
+- Offline horizontal flip on **train only**, only for classes in `flip_classes` (`config/config.yaml`); an image is flipped only if every person in it has such a class. Left/right keypoints are swapped.
+- Output in `Data_Pipeline/output/dataset/` (git-ignored): `images/`, `labels/`, `data.yaml`, `keypoints.csv`, `split_manifest.csv`.
+
+## 4. Train
+
+See `Train/README.md`. Two approaches are compared: a two-stage keypoint classifier (CPU, MLflow) and a one-stage YOLO-pose fine-tune (Colab GPU). Target: test macro-F1 >= 0.80.
+
 ## Notes
 
-- Raw photos and generated labels are intentionally not committed (size, privacy).
-- Split train/val by photo burst, not randomly per image, to avoid near-duplicate leakage.
-- Converting the reviewed Label Studio export back to YOLO-pose labels for training is not written yet.
+- Raw photos, generated datasets, model weights, `.env` and MLflow runs are intentionally not committed (size, privacy, secrets).
+- The raw Label Studio export cache can contain base64 photos; it lives under the git-ignored `Data_Pipeline/output/`.
+- Do not reorder classes once labeling has started; class ids depend on the order.
+- Evaluation (confusion matrix, per-class F1 on the test split) and the FastAPI inference service are not written yet.

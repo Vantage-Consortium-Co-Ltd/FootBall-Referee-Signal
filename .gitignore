@@ -3,3 +3,10 @@ __pycache__/
 *.pt
 Data_Preprocess/output/
 Data_Preprocess/src/Dataset/
+Data_Pipeline/output/
+Train/models/
+Train/mlruns/
+mlruns/
+runs/
+.venv/
+docs

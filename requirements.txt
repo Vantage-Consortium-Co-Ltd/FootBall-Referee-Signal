@@ -2,3 +2,10 @@ ultralytics
 pillow-heif
 opencv-python
 numpy
+scikit-learn
+pandas
+joblib
+matplotlib
+mlflow
+pyyaml
+requests
