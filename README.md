@@ -11,7 +11,7 @@ Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → tr
 ```
 Data_Preprocess/src/     pre_Label.py (YOLO26-pose pre-labeling) + export_to_label_studio.py
 Data_Pipeline/           main.py (entry) + Process/ (labelstudio, convert, split, build) + config/config.yaml
-Train/                   train_two_stage.py, train_one_stage.py, colab_one_stage.ipynb, features.py
+Train/                   train_two_stage.py, train_one_stage.py, colab_one_stage.ipynb, features.py, augment.py, config.yaml
 Evaluate/  Inference/    placeholders (confusion matrix / F1 report, FastAPI)
 .env.example             copy to .env (git-ignored) and fill in
 ```
@@ -77,7 +77,7 @@ python Data_Pipeline/test_pipeline.py                 # synthetic self-test
 
 ## 4. Train
 
-See `Train/README.md`. Two approaches are compared: a two-stage keypoint classifier (CPU, MLflow) and a one-stage YOLO-pose fine-tune (Colab GPU). Target: test macro-F1 >= 0.80.
+See `Train/README.md`. Two approaches are compared: a two-stage keypoint classifier (CPU, grouped CV, keypoint augmentation, MLflow) and a one-stage YOLO-pose fine-tune (Colab GPU). Target: test macro-F1 >= 0.80.
 
 ## Notes
 

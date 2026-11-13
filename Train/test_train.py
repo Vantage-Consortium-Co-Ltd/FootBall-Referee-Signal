@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
+from augment import augment
 from features import KP_COLS, kp_features
 from train_two_stage import train
 
@@ -43,17 +44,34 @@ def test_features_invariant():
     assert kp_features(np.zeros((17, 3))).shape == (51,) and np.isfinite(kp_features(np.zeros((17, 3)))).all()
 
 
+def test_augment():
+    with tempfile.TemporaryDirectory() as d:
+        make_csv(Path(d) / "k.csv")
+        df = pd.read_csv(Path(d) / "k.csv").head(10)
+    a = augment(df, 3, 10, [0.9, 1.1], 0.005, seed=1)
+    assert len(a) == 30 and list(a.columns) == list(df.columns)
+    k0, k1 = df[KP_COLS].to_numpy().reshape(-1, 17, 3), a[KP_COLS].to_numpy().reshape(-1, 17, 3)[:10]
+    assert (k0[:, :, 2] == k1[:, :, 2]).all() and (k1[k0[:, :, 2] == 0][:, :2] == 0).all()  # v kept, missing stays 0
+    assert not np.allclose(k0, k1) and np.abs(k0[:, :, :2] - k1[:, :, :2]).max() < 0.2     # perturbed but close
+    assert len(augment(df, 0, 10, [0.9, 1.1], 0.005, 1)) == 0
+
+
 def test_train():
     with tempfile.TemporaryDirectory() as d:
         csv, out = Path(d) / "keypoints.csv", Path(d) / "model"
         make_csv(csv)
-        train(csv, out, mlruns=Path(d) / "mlruns")
+        grids = {"logreg": {"C": [0.1, 1]}, "mlp": {"hidden_layer_sizes": [[16], [32]]}}
+        cfg = {"two_stage": grids, "cv": {"folds": 3},
+               "augment": {"copies": 2, "rotate_deg": 10, "scale": [0.9, 1.1], "jitter": 0.005}}
+        train(csv, out, mlruns=Path(d) / "mlruns", cfg=cfg)
         assert (out / "model.joblib").exists()
         meta = json.loads((out / "meta.json").read_text())
-        assert meta["class_names"] == NAMES and meta["val_macro_f1"] > 0.5, meta
+        assert meta["class_names"] == NAMES and meta["cv_macro_f1"] > 0.5, meta
+        assert meta["n_trials"] == 4 and meta["model"] in grids, meta
 
 
 if __name__ == "__main__":
     test_features_invariant()
+    test_augment()
     test_train()
     print("OK")

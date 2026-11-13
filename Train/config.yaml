@@ -1,0 +1,27 @@
+# Every value is a LIST. All combinations are tried; the best one (val macro-F1 / YOLO fitness) is kept.
+two_stage:
+  logreg:
+    C: [0.1, 1, 10]
+  random_forest:
+    n_estimators: [100, 300]
+    max_depth: [null, 10, 20]
+  mlp:
+    hidden_layer_sizes: [[128, 64], [256, 128]]
+    alpha: [0.0001, 0.001]
+
+one_stage:   # Colab GPU: each combination is a full training run, keep these small
+  epochs: [100]
+  imgsz: [640]
+  batch: [16]
+  lr0: [0.01, 0.001]
+
+# Cross-validation over train+val (grouped by photo burst, stratified by class). Test is never used here.
+cv:
+  folds: 5
+
+# Keypoint augmentation, applied to the TRAINING part of each fold only.
+augment:
+  copies: 3
+  rotate_deg: 10
+  scale: [0.9, 1.1]   # independent x / y stretch
+  jitter: 0.005       # std of noise, in normalized image coords

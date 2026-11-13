@@ -10,3 +10,8 @@ mlruns/
 runs/
 .venv/
 docs
+*.log
+*.db
+*.joblib
+mlartifacts/
+.ipynb_checkpoints/

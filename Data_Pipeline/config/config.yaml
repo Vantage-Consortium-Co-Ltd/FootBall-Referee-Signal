@@ -4,4 +4,4 @@ output_dir: Data_Pipeline/output      # relative to repo root
 split: {train: 0.70, val: 0.15, test: 0.15}
 seed: 42
 burst_seconds: 5                      # photos <= this many seconds apart (chained) share a group
-flip_classes: [Corner_Kick, Direct_Free_Kick, Indirect_Free_Kick, Offside_Location]
+flip_classes: [Corner_Kick, Direct_Free_Kick, Indirect_Free_Kick, Offside_Location, Card]
