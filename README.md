@@ -3,7 +3,7 @@
 Recognise football referee hand signals (20 gesture classes) from photos/video using pose keypoints.
 Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → train → evaluate → infer**.
 
-> Status: pre-labeling, Data_Pipeline and Train are built. `Evaluate/` and `Inference/` are placeholders.
+> Status: pre-labeling, Data_Pipeline, Train and Evaluate (test-split evaluation + MLflow logging) are built. `Inference/` is a placeholder.
 > Only synthetic-data self-tests have been run so far; the Label Studio API path is untested against a live server.
 
 ## Layout
@@ -12,7 +12,9 @@ Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → tr
 Data_Preprocess/src/     pre_Label.py (YOLO26-pose pre-labeling) + export_to_label_studio.py
 Data_Pipeline/           main.py (entry) + Process/ (labelstudio, convert, split, build) + config/config.yaml
 Train/                   train_two_stage.py, train_one_stage.py, colab_one_stage.ipynb, features.py, augment.py, config.yaml
-Evaluate/  Inference/    placeholders (confusion matrix / F1 report, FastAPI)
+Evaluate/                evaluate_one_stage.py, evaluate_two_stage.py (test split), log_to_mlflow.py (versioned MLflow logging)
+Inference/               placeholder (FastAPI)
+.claude/skills/ship/     /ship skill: organize, update README, commit and push
 .env.example             copy to .env (git-ignored) and fill in
 ```
 
@@ -71,7 +73,7 @@ python Data_Pipeline/test_pipeline.py                 # synthetic self-test
 ```
 
 - Uses the latest non-cancelled annotation per task; predictions are ignored.
-- Split 70/15/15, stratified by class and grouped by photo burst (filename timestamps within `burst_seconds`), fixed seed.
+- Split 70/15/15, stratified by class and grouped by photo burst (filename timestamps within `burst_seconds`, cut where the gesture class changes), fixed seed.
 - Offline horizontal flip on **train only**, only for classes in `flip_classes` (`config/config.yaml`); an image is flipped only if every person in it has such a class. Left/right keypoints are swapped.
 - Output in `Data_Pipeline/output/dataset/` (git-ignored): `images/`, `labels/`, `data.yaml`, `keypoints.csv`, `split_manifest.csv`.
 
@@ -84,4 +86,5 @@ See `Train/README.md`. Two approaches are compared: a two-stage keypoint classif
 - Raw photos, generated datasets, model weights, `.env` and MLflow runs are intentionally not committed (size, privacy, secrets).
 - The raw Label Studio export cache can contain base64 photos; it lives under the git-ignored `Data_Pipeline/output/`.
 - Do not reorder classes once labeling has started; class ids depend on the order.
-- Evaluation (confusion matrix, per-class F1 on the test split) and the FastAPI inference service are not written yet.
+- The FastAPI inference service is not written yet.
+- Results are logged per version with `python Evaluate/log_to_mlflow.py --version vN --data-note "..."` (experiments `referee-one-stage` / `referee-two-stage`, models in the registry). Test numbers are only comparable within the same data split.

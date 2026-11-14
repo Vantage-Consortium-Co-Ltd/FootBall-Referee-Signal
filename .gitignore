@@ -15,3 +15,7 @@ docs
 *.joblib
 mlartifacts/
 .ipynb_checkpoints/
+Evaluate/output/
+results/
+output_classcut/
+Data_Pipeline/output*/
