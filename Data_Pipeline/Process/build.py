@@ -41,7 +41,8 @@ def build_dataset(tasks, cfg, out_dir: Path, fetch=None):
     if not items:
         raise SystemExit(f"no usable tasks: {dict(stats)}")
     flip = {GESTURES.index(n) for n in cfg["flip_classes"]}
-    group = burst_groups([i["name"] for i in items], cfg["burst_seconds"])
+    group = burst_groups([i["name"] for i in items], cfg["burst_seconds"],
+                         {i["name"]: frozenset(p["cls"] for p in i["persons"]) for i in items})
     counts = {}
     for i in items:
         c = counts.setdefault(group[i["name"]], Counter())

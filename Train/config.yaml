@@ -9,11 +9,17 @@ two_stage:
     hidden_layer_sizes: [[128, 64], [256, 128]]
     alpha: [0.0001, 0.001]
 
-one_stage:   # Colab GPU: each combination is a full training run, keep these small
-  epochs: [100]
+one_stage:   # Kaggle/Colab GPU: each combination is a full training run, keep these small
+  # Round 1 (see docs/research/one_stage_hyperparameter_tuning.md): optimizer / lr / freeze. Then round 2: mosaic, scale.
+  epochs: [80]
+  patience: [30]        # early stop after 30 epochs w/o fitness gain; val is only 182 imgs so <20 stops too early
   imgsz: [640]
   batch: [16]
-  lr0: [0.01, 0.001]
+  optimizer: [AdamW]    # must be explicit: with the default 'auto' Ultralytics IGNORES lr0 (old grid ran the same run twice)
+  lr0: [0.0004, 0.001]  # 0.0004 = what 'auto' picked before (baseline)
+  cos_lr: [true]
+  freeze: [null, 10]    # null = train all layers, 10 = freeze backbone layers 0-9
+  close_mosaic: [10]
 
 # Cross-validation over train+val (grouped by photo burst, stratified by class). Test is never used here.
 cv:

@@ -21,3 +21,4 @@ to Drive `MyDrive/referee/`, then run `colab_one_stage.ipynb`. Or directly:
 python Train/train_one_stage.py --data path/to/data.yaml --device 0
 ```
 `fliplr=0` is forced (flipping is done offline in Data_Pipeline, only for `flip_classes`). Outputs `best.pt` + MLflow run in `mlruns/`.
+Early stopping is on (`patience: 30` in `config.yaml`) and `optimizer` is set explicitly, because under the default `optimizer=auto` Ultralytics ignores `lr0`. Trials are named `trial{k}` with `exist_ok=True`, so pass a new `--project` for every round or you overwrite the previous one. Rationale and next rounds: `docs/research/one_stage_hyperparameter_tuning.md`.

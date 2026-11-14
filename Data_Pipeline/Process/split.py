@@ -8,8 +8,10 @@ SPLITS = ("train", "val", "test")
 TS_RE = re.compile(r"(\d{8})_(\d{6})")  # 20261110_113646(1).jpg
 
 
-def burst_groups(names, gap):
-    """Chain images whose filename timestamps are <= gap seconds from the previous one; others own group."""
+def burst_groups(names, gap, classes=None):
+    """Chain images whose filename timestamps are <= gap seconds from the previous one; others own group.
+    classes {name: hashable}: also cut the chain where it changes (a new gesture starts a new group), so a
+    chain of different gestures is not one indivisible block for the split."""
     ts = {}
     for n in names:
         m = TS_RE.search(n)
@@ -20,9 +22,9 @@ def burst_groups(names, gap):
                 pass
     group, k, prev = {}, 0, None
     for n in sorted(ts, key=ts.get):
-        if prev is None or (ts[n] - prev).total_seconds() > gap:
+        if prev is None or (ts[n] - ts[prev]).total_seconds() > gap or (classes and classes[n] != classes[prev]):
             k += 1
-        group[n], prev = f"g{k:04d}", ts[n]
+        group[n], prev = f"g{k:04d}", n
     for n in names:
         if n not in group:
             k += 1

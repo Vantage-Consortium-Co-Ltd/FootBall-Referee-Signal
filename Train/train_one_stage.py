@@ -49,10 +49,15 @@ def main():
         model = YOLO(a.weights)
         res = model.train(**args)
         pt, fitness = Path(model.trainer.best), float(res.results_dict["fitness"])
-        print(f"trial {k} {p}: fitness={fitness:.4f}")
+        tr = model.trainer
+        best_epoch, epochs_run = tr.stopper.best_epoch, tr.epoch + 1  # best_epoch is 1-based
+        print(f"trial {k} {p}: fitness={fitness:.4f} best_epoch={best_epoch} epochs_run={epochs_run} "
+              f"optimizer={tr.args.optimizer} lr0={tr.args.lr0}")
         if mlflow:
             with mlflow.start_run(run_name=f"one_stage_trial{k}"):
-                mlflow.log_params({**args, "weights": a.weights})
+                # optimizer/lr0 as actually used (optimizer='auto' rewrites them inside the trainer)
+                mlflow.log_params({**args, "weights": a.weights, "optimizer_used": tr.args.optimizer,
+                                   "lr0_used": tr.args.lr0, "best_epoch": best_epoch, "epochs_run": epochs_run})
                 # mlflow rejects "()" in metric names
                 mlflow.log_metrics({n.replace("(", "_").replace(")", ""): float(v) for n, v in res.results_dict.items()})
                 mlflow.log_artifact(str(pt))
