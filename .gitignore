@@ -19,3 +19,8 @@ Evaluate/output/
 results/
 output_classcut/
 Data_Pipeline/output*/
+
+# Graphify
+graphify-out/
+.graphify/
+*graphify*
