@@ -11,10 +11,9 @@ Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → tr
 ```
 Data_Preprocess/src/     pre_Label.py (YOLO26-pose pre-labeling) + export_to_label_studio.py
 Data_Pipeline/           main.py (entry) + Process/ (labelstudio, convert, split, build) + config/config.yaml
-Train/                   train_two_stage.py, train_one_stage.py, colab_one_stage.ipynb, features.py, augment.py, config.yaml
+Train/                   train_two_stage.py, train_one_stage.py, features.py, augment.py, config.yaml
 Evaluate/                evaluate_one_stage.py, evaluate_two_stage.py (test split), log_to_mlflow.py (versioned MLflow logging)
 Inference/               placeholder (FastAPI)
-.claude/skills/ship/     /ship skill: organize, update README, commit and push
 .env.example             copy to .env (git-ignored) and fill in
 ```
 
@@ -69,7 +68,6 @@ Every box starts as class `Referee` — the gesture is assigned during review. K
 cp .env.example .env          # set LS_URL, LS_TOKEN, LS_PROJECT_IDS (never commit .env)
 python Data_Pipeline/main.py                          # export via API
 python Data_Pipeline/main.py --export-json raw.json   # or use a saved export
-python Data_Pipeline/test_pipeline.py                 # synthetic self-test
 ```
 
 - Uses the latest non-cancelled annotation per task; predictions are ignored.
