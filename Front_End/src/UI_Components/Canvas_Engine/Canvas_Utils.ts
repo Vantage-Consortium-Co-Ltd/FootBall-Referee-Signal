@@ -3,6 +3,7 @@ import {
   GestureRule,
   Keypoint,
   PostureAngles,
+  TaggedPerson,
 } from "../../Data_Types/Referee_Types";
 import { generateMockKeypoints } from "../../Core_Lib/Microservices_Mock";
 
@@ -261,3 +262,92 @@ export function drawActiveArmHighlight(
 
   ctx.restore();
 }
+
+/**
+ * Draws AI person detection bounding box with tactical corner brackets and Tagging badge
+ */
+export function drawPersonBoundingBox(
+  ctx: CanvasRenderingContext2D,
+  person: TaggedPerson,
+  width: number,
+  height: number,
+  mirror: boolean = false
+): void {
+  ctx.save();
+
+  const [normX, normY, normW, normH] = person.bbox;
+  const rawX = mirror ? 1.0 - normX - normW : normX;
+  const x = rawX * width;
+  const y = normY * height;
+  const w = normW * width;
+  const h = normH * height;
+
+  const isTagged = person.isTagged;
+  const primaryColor = isTagged ? "#06B6D4" : "rgba(148, 163, 184, 0.5)"; // Cyan if tagged, slate if untagged
+  const accentColor = isTagged ? "#22C55E" : "#94A3B8";
+
+  // Box borders
+  ctx.strokeStyle = primaryColor;
+  ctx.lineWidth = isTagged ? 2.5 : 1.2;
+  if (!isTagged) {
+    ctx.setLineDash([4, 4]);
+  }
+
+  // Draw tactical corner brackets
+  const cornerLen = Math.min(18, Math.min(w, h) * 0.25);
+
+  ctx.beginPath();
+  // Top-left
+  ctx.moveTo(x, y + cornerLen);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + cornerLen, y);
+
+  // Top-right
+  ctx.moveTo(x + w - cornerLen, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w, y + cornerLen);
+
+  // Bottom-left
+  ctx.moveTo(x, y + h - cornerLen);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x + cornerLen, y + h);
+
+  // Bottom-right
+  ctx.moveTo(x + w - cornerLen, y + h);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x + w, y + h - cornerLen);
+  ctx.stroke();
+
+  // Subtle connecting rect
+  ctx.setLineDash([]);
+  ctx.strokeStyle = isTagged ? "rgba(6, 182, 212, 0.3)" : "rgba(148, 163, 184, 0.2)";
+  ctx.strokeRect(x, y, w, h);
+
+  // Tag Badge at top of box
+  ctx.font = "bold 11px sans-serif";
+  const badgeText = isTagged
+    ? `🎯 TAGGED: ${person.label.toUpperCase()} (${Math.round(person.confidence * 100)}%)`
+    : `👤 ${person.label} - คลิกเพื่อ Tag`;
+  const textWidth = ctx.measureText(badgeText).width;
+
+  const badgeH = 18;
+  const badgeY = Math.max(0, y - badgeH - 2);
+
+  // Badge background pill
+  ctx.fillStyle = isTagged ? "rgba(6, 182, 212, 0.9)" : "rgba(15, 23, 42, 0.85)";
+  ctx.beginPath();
+  ctx.roundRect(x, badgeY, textWidth + 12, badgeH, 4);
+  ctx.fill();
+
+  if (!isTagged) {
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
+    ctx.stroke();
+  }
+
+  // Badge text
+  ctx.fillStyle = isTagged ? "#042F2E" : "#E2E8F0";
+  ctx.fillText(badgeText, x + 6, badgeY + 13);
+
+  ctx.restore();
+}
+

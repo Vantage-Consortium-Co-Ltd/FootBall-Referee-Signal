@@ -1,23 +1,26 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FrameFeedbackPayload,
   GestureRule,
-  Keypoint,
-  PostureAngles,
+  TaggedPerson,
 } from "../../Data_Types/Referee_Types";
 import { Skeleton_Canvas } from "../Canvas_Engine/Skeleton_Canvas";
 import {
   evaluateMockPosture,
-  generateMockKeypoints,
+  generateMockPersons,
 } from "../../Core_Lib/Microservices_Mock";
 import {
   Camera,
   CameraOff,
+  Crosshair,
   FlipHorizontal,
   RefreshCw,
+  Scan,
   Sparkles,
+  UserCheck,
+  Users,
   Video,
 } from "lucide-react";
 
@@ -38,6 +41,12 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   const [mirror, setMirror] = useState<boolean>(true);
   const [showGhost, setShowGhost] = useState<boolean>(true);
   const [showAngles, setShowAngles] = useState<boolean>(true);
+  const [showBBoxes, setShowBBoxes] = useState<boolean>(true);
+
+  // Person Tagging States
+  const [activePersonId, setActivePersonId] = useState<string>("person-1");
+  const [autoTagReferee, setAutoTagReferee] = useState<boolean>(true);
+  const [lastTaggedAlert, setLastTaggedAlert] = useState<string | null>(null);
 
   // Simulation fallback states
   const [frameTick, setFrameTick] = useState<number>(0);
@@ -76,7 +85,6 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   };
 
   useEffect(() => {
-    // Attempt camera start on mount
     startCamera();
     return () => stopCamera();
   }, []);
@@ -87,7 +95,16 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     setHasTriggeredSuccess(false);
   }, [targetRule.id]);
 
-  // Main 60 FPS loop (Evaluator Engine)
+  // Handle Tagging Person
+  const handleTagPerson = (personId: string) => {
+    setActivePersonId(personId);
+    setAutoTagReferee(false);
+    const personName = personId === "person-1" ? "ผู้ตัดสิน (Referee)" : "ผู้เล่น #10 (Player)";
+    setLastTaggedAlert(`🎯 ล็อคเป้าหมาย: ${personName}`);
+    setTimeout(() => setLastTaggedAlert(null), 3000);
+  };
+
+  // Main 60 FPS loop
   useEffect(() => {
     let animId: number;
     let lastTime = performance.now();
@@ -99,12 +116,9 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       setFrameTick((prev) => (prev + 1) % 1000);
 
       // Advance hold timer
-      setHoldTimer((prev) => {
-        const next = prev + deltaSec;
-        return next;
-      });
+      setHoldTimer((prev) => prev + deltaSec);
 
-      // Compute posture evaluation
+      // Compute posture evaluation for active tagged person
       const feedback = evaluateMockPosture(targetRule, frameTick, holdTimer);
       onFeedbackUpdate(feedback);
 
@@ -120,16 +134,23 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     return () => cancelAnimationFrame(animId);
   }, [targetRule, frameTick, holdTimer, hasTriggeredSuccess, onFeedbackUpdate, onDrillSuccess]);
 
-  const { keypoints, angles } = generateMockKeypoints(targetRule.id, frameTick);
+  // Detected Persons list
+  const detectedPersons: TaggedPerson[] = generateMockPersons(
+    targetRule.id,
+    frameTick,
+    activePersonId
+  );
+  const activeTaggedPerson =
+    detectedPersons.find((p) => p.isTagged) || detectedPersons[0];
 
   return (
     <div className="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-      {/* Top Controls Bar */}
+      {/* Top Viewport Header */}
       <div className="px-5 py-3 bg-slate-900/90 border-b border-slate-800 flex justify-between items-center text-xs">
         <div className="flex items-center gap-2">
           <Video className="w-4 h-4 text-cyan-400" />
           <span className="font-semibold text-slate-200">
-            {cameraActive ? "Live Webcam Feed" : "Interactive Simulation Viewport"}
+            {cameraActive ? "Live Camera AI Tagging" : "Camera AI Tagging Simulation"}
           </span>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
             640x440
@@ -158,7 +179,55 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
         </div>
       </div>
 
-      {/* Video & Canvas Viewport Layer */}
+      {/* Person Tagging Control Bar */}
+      <div className="px-4 py-2 bg-slate-950/70 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400 font-medium flex items-center gap-1">
+            <Users className="w-3.5 h-3.5 text-cyan-400" /> ตรวจพบบุคคล ({detectedPersons.length}):
+          </span>
+
+          {/* Quick Tagging Buttons for each person */}
+          {detectedPersons.map((person) => {
+            const isSelected = person.isTagged;
+            return (
+              <button
+                key={person.id}
+                onClick={() => handleTagPerson(person.id)}
+                className={`px-2.5 py-1 rounded-lg font-medium text-[11px] transition flex items-center gap-1.5 border ${
+                  isSelected
+                    ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-sm"
+                    : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                }`}
+              >
+                <Crosshair className={`w-3 h-3 ${isSelected ? "text-cyan-400" : "text-slate-500"}`} />
+                <span>{person.labelTh}</span>
+                <span className="font-mono text-[9px] text-slate-500">
+                  {Math.round(person.confidence * 100)}%
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setAutoTagReferee(!autoTagReferee);
+              if (!autoTagReferee) setActivePersonId("person-1");
+            }}
+            className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition flex items-center gap-1.5 ${
+              autoTagReferee
+                ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-300"
+                : "bg-slate-900 border-slate-800 text-slate-400"
+            }`}
+          >
+            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+            Auto-Tag ผู้ตัดสิน: {autoTagReferee ? "เปิด" : "ปิด"}
+          </button>
+        </div>
+      </div>
+
+      {/* Video & Interactive Canvas Viewport Layer */}
       <div className="relative w-full h-[440px] bg-slate-950 flex items-center justify-center overflow-hidden">
         {/* Background Video Element (if camera active) */}
         <video
@@ -176,33 +245,48 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px]"></div>
         )}
 
-        {/* Skeleton Canvas Overlay (Task 2 Engine) */}
+        {/* Skeleton & Tagging Canvas Overlay */}
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <Skeleton_Canvas
-            keypoints={keypoints}
+            keypoints={activeTaggedPerson.keypoints}
+            persons={detectedPersons}
             targetRule={targetRule}
-            angles={angles}
+            angles={activeTaggedPerson.angles}
             width={640}
             height={440}
             mirror={mirror}
             showGhost={showGhost}
             showAngles={showAngles}
+            showBBoxes={showBBoxes}
+            onTagPerson={handleTagPerson}
             className="w-full h-full object-contain"
           />
         </div>
 
-        {/* Floating Indicator Status */}
+        {/* Floating Tagging Instructions & Status */}
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5">
-          <div className="bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2">
+          <div className="bg-slate-900/90 backdrop-blur border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2">
             <span
               className={`w-2 h-2 rounded-full ${
                 cameraActive ? "bg-emerald-500 animate-ping" : "bg-cyan-400"
               }`}
             ></span>
             <span className="font-mono text-slate-200">
-              {cameraActive ? "WEBCAM STREAM" : "OFFLINE AI SIMULATION"}
+              {cameraActive ? "LIVE CAMERA STREAM" : "AI CAMERA SIMULATION"}
             </span>
           </div>
+
+          {/* Click to Tag Hint */}
+          <div className="bg-slate-950/80 backdrop-blur border border-cyan-500/30 rounded-lg px-2.5 py-1 text-[11px] text-cyan-300 flex items-center gap-1.5">
+            <Scan className="w-3.5 h-3.5 text-cyan-400" />
+            <span>คลิกที่กรอบตัวบุคคลบนจอเพื่อสลับเป้าหมาย Tagging</span>
+          </div>
+
+          {lastTaggedAlert && (
+            <div className="bg-emerald-950/90 border border-emerald-500/60 rounded-lg px-3 py-1 text-xs text-emerald-200 font-semibold animate-pulse">
+              {lastTaggedAlert}
+            </div>
+          )}
 
           {cameraError && (
             <div className="bg-amber-950/80 border border-amber-600/50 rounded-lg px-3 py-1 text-[11px] text-amber-200">
@@ -215,6 +299,17 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       {/* Bottom Display Controls */}
       <div className="px-5 py-3 bg-slate-900 border-t border-slate-800 flex flex-wrap justify-between items-center gap-3 text-xs">
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowBBoxes(!showBBoxes)}
+            className={`px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${
+              showBBoxes
+                ? "bg-slate-800 border-slate-700 text-cyan-400"
+                : "bg-slate-900 border-slate-800 text-slate-400"
+            }`}
+          >
+            <Scan className="w-3.5 h-3.5" />
+            กรอบ Tagging: {showBBoxes ? "แสดง" : "ซ่อน"}
+          </button>
           <button
             onClick={() => setMirror(!mirror)}
             className={`px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${

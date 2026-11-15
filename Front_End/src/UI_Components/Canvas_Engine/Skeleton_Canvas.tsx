@@ -5,6 +5,7 @@ import {
   GestureRule,
   Keypoint,
   PostureAngles,
+  TaggedPerson,
 } from "../../Data_Types/Referee_Types";
 import {
   drawActiveArmHighlight,
@@ -12,6 +13,7 @@ import {
   drawBones,
   drawGhostSkeleton,
   drawJoints,
+  drawPersonBoundingBox,
   toCanvasCoords,
 } from "./Canvas_Utils";
 
@@ -19,26 +21,64 @@ export interface SkeletonCanvasProps {
   keypoints?: Keypoint[];
   targetRule?: GestureRule;
   angles?: PostureAngles;
+  persons?: TaggedPerson[];
   width?: number;
   height?: number;
   showGhost?: boolean;
   showAngles?: boolean;
+  showBBoxes?: boolean;
   mirror?: boolean;
   className?: string;
+  onTagPerson?: (personId: string) => void;
 }
 
 export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
   keypoints = [],
   targetRule,
   angles,
+  persons = [],
   width = 640,
   height = 480,
   showGhost = true,
   showAngles = true,
+  showBBoxes = true,
   mirror = true,
   className = "",
+  onTagPerson,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Handle click on canvas to select/tag a detected person
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onTagPerson || persons.length === 0) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clickX = ((e.clientX - rect.left) / rect.width) * width;
+    const clickY = ((e.clientY - rect.top) / rect.height) * height;
+
+    // Hit-test persons bounding boxes
+    for (const p of persons) {
+      const [normX, normY, normW, normH] = p.bbox;
+      const rawX = mirror ? 1.0 - normX - normW : normX;
+      const px = rawX * width;
+      const py = normY * height;
+      const pw = normW * width;
+      const ph = normH * height;
+
+      if (
+        clickX >= px &&
+        clickX <= px + pw &&
+        clickY >= py &&
+        clickY <= py + ph
+      ) {
+        onTagPerson(p.id);
+        break;
+      }
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,22 +98,34 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
     // Clear previous frame
     ctx.clearRect(0, 0, width, height);
 
-    // 1. Draw Ghost Target Skeleton if targetRule is provided
+    // 1. Draw Person Bounding Boxes & Tagging Labels
+    if (showBBoxes && persons && persons.length > 0) {
+      persons.forEach((person) => {
+        drawPersonBoundingBox(ctx, person, width, height, mirror);
+      });
+    }
+
+    // 2. Draw Ghost Target Skeleton if targetRule is provided
     if (showGhost && targetRule) {
       drawGhostSkeleton(ctx, targetRule, width, height, mirror);
     }
 
-    // 2. Draw Detected User Skeleton
-    if (keypoints && keypoints.length >= 17) {
-      drawBones(ctx, keypoints, width, height, mirror);
-      drawJoints(ctx, keypoints, width, height, mirror);
+    // Determine which keypoints to render (use active tagged person's keypoints if available)
+    const activePerson = persons.find((p) => p.isTagged);
+    const activeKps = activePerson ? activePerson.keypoints : keypoints;
+    const activeAngles = activePerson ? activePerson.angles : angles;
 
-      // 3. Draw Angle Arcs & Direction Vectors
-      if (showAngles && angles) {
+    // 3. Draw Detected User Skeleton for the tagged person
+    if (activeKps && activeKps.length >= 17) {
+      drawBones(ctx, activeKps, width, height, mirror);
+      drawJoints(ctx, activeKps, width, height, mirror);
+
+      // 4. Draw Angle Arcs & Direction Vectors
+      if (showAngles && activeAngles) {
         // Right arm angles: Sho=6, Elb=8, Wri=10
-        const rSho = keypoints[6];
-        const rElb = keypoints[8];
-        const rWri = keypoints[10];
+        const rSho = activeKps[6];
+        const rElb = activeKps[8];
+        const rWri = activeKps[10];
 
         if (
           rSho &&
@@ -87,18 +139,16 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
           const cElb = toCanvasCoords(rElb, width, height, mirror);
           const cWri = toCanvasCoords(rWri, width, height, mirror);
 
-          // Elbow straightness arc
           drawAngleArc(
             ctx,
             cElb,
             cSho,
             cWri,
-            angles.rElbowAngle,
+            activeAngles.rElbowAngle,
             "R-Elbow",
             targetRule?.targetStraightnessDeg
           );
 
-          // Highlight arrow if active arm is right or either
           if (
             targetRule?.activeArm === "right" ||
             targetRule?.activeArm === "either"
@@ -108,9 +158,9 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
         }
 
         // Left arm angles: Sho=5, Elb=7, Wri=9
-        const lSho = keypoints[5];
-        const lElb = keypoints[7];
-        const lWri = keypoints[9];
+        const lSho = activeKps[5];
+        const lElb = activeKps[7];
+        const lWri = activeKps[9];
 
         if (
           lSho &&
@@ -129,7 +179,7 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
             cElb,
             cSho,
             cWri,
-            angles.lElbowAngle,
+            activeAngles.lElbowAngle,
             "L-Elbow",
             targetRule?.targetStraightnessDeg
           );
@@ -145,13 +195,25 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
     }
 
     ctx.restore();
-  }, [keypoints, targetRule, angles, width, height, showGhost, showAngles, mirror]);
+  }, [
+    keypoints,
+    persons,
+    targetRule,
+    angles,
+    width,
+    height,
+    showGhost,
+    showAngles,
+    showBBoxes,
+    mirror,
+  ]);
 
   return (
     <canvas
       ref={canvasRef}
       style={{ width: `${width}px`, height: `${height}px` }}
-      className={`pointer-events-none ${className}`}
+      onClick={handleCanvasClick}
+      className={`cursor-crosshair ${className}`}
     />
   );
 };

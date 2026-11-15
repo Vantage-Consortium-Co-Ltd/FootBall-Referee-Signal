@@ -133,3 +133,17 @@ export interface SystemHealth {
   services: MicroserviceStatus[];
   lastChecked: string;
 }
+
+export type PersonTagRole = "Referee" | "Assistant_Referee" | "Player" | "Coach" | "Unknown";
+
+export interface TaggedPerson {
+  id: string; // e.g. "person-1", "person-2"
+  label: PersonTagRole;
+  labelTh: string;
+  bbox: [number, number, number, number]; // [normX, normY, normWidth, normHeight]
+  confidence: number; // 0..1
+  isTagged: boolean; // active subject for posture analysis
+  keypoints: Keypoint[];
+  angles: PostureAngles;
+}
+

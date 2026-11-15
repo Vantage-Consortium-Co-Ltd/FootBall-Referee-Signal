@@ -5,6 +5,7 @@ import {
   Keypoint,
   PostureAngles,
   SystemHealth,
+  TaggedPerson,
 } from "../Data_Types/Referee_Types";
 import ifabSignalsData from "../Data_Sources/Ifab_Signals.json";
 
@@ -327,3 +328,67 @@ export function generateMockAssessmentReport(): AssessmentReport {
     ],
   };
 }
+
+/**
+ * Generates simulated multi-person detection for camera tagging
+ */
+export function generateMockPersons(
+  targetGestureId: number,
+  frameTick: number,
+  activePersonId: string = "person-1"
+): TaggedPerson[] {
+  // Person 1: Primary referee performing the signal
+  const p1Data = generateMockKeypoints(targetGestureId, frameTick);
+
+  // Compute bounding box around keypoints [minX, minY, width, height]
+  const xs1 = p1Data.keypoints.map((k) => k.x);
+  const ys1 = p1Data.keypoints.map((k) => k.y);
+  const minX1 = Math.max(0.05, Math.min(...xs1) - 0.08);
+  const maxX1 = Math.min(0.95, Math.max(...xs1) + 0.08);
+  const minY1 = Math.max(0.05, Math.min(...ys1) - 0.06);
+  const maxY1 = Math.min(0.98, Math.max(...ys1) + 0.06);
+
+  const person1: TaggedPerson = {
+    id: "person-1",
+    label: "Referee",
+    labelTh: "ผู้ตัดสินหลัก (Main Referee)",
+    bbox: [minX1, minY1, maxX1 - minX1, maxY1 - minY1],
+    confidence: 0.98,
+    isTagged: activePersonId === "person-1",
+    keypoints: p1Data.keypoints,
+    angles: p1Data.angles,
+  };
+
+  // Person 2: Nearby player standing on the right
+  const sway2 = Math.cos(frameTick * 0.07) * 0.006;
+  const p2Keypoints: Keypoint[] = p1Data.keypoints.map((k) => ({
+    x: Math.min(0.94, k.x + 0.32 + sway2),
+    y: Math.min(0.96, k.y + 0.05),
+    confidence: 0.88,
+  }));
+  const xs2 = p2Keypoints.map((k) => k.x);
+  const ys2 = p2Keypoints.map((k) => k.y);
+  const minX2 = Math.max(0.05, Math.min(...xs2) - 0.06);
+  const maxX2 = Math.min(0.98, Math.max(...xs2) + 0.06);
+  const minY2 = Math.max(0.05, Math.min(...ys2) - 0.05);
+  const maxY2 = Math.min(0.98, Math.max(...ys2) + 0.05);
+
+  const person2: TaggedPerson = {
+    id: "person-2",
+    label: "Player",
+    labelTh: "ผู้เล่น #10 (Player)",
+    bbox: [minX2, minY2, maxX2 - minX2, maxY2 - minY2],
+    confidence: 0.89,
+    isTagged: activePersonId === "person-2",
+    keypoints: p2Keypoints,
+    angles: {
+      rElbowAngle: 165,
+      lElbowAngle: 168,
+      rElevationAngle: 18,
+      lElevationAngle: 20,
+    },
+  };
+
+  return [person1, person2];
+}
+
