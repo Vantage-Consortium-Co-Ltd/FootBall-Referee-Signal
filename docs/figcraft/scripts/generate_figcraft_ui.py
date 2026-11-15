@@ -66,26 +66,28 @@ ICONS = {
 VIEWBOX_ANCHORS = " M0 0h.01v.01H0z M23.99 23.99h.01v.01h-.01z"
 
 # ==============================================================================
-# DESIGN TOKENS (Untitled UI palette)
+# DESIGN TOKENS (Apple HIG Dark & Light Studio System)
 # ==============================================================================
 DARK = {
-    "name": "dark", "bg": "#090D16", "surface": "#0F172A", "surface2": "#0B1220",
-    "border": "#1E293B", "text": "#F8FAFC", "text2": "#94A3B8", "text3": "#64748B",
-    "accent": "#22D3EE", "accent_bg": "#083344", "accent_border": "#155E75",
+    "name": "dark", "bg": "#000000", "surface": "#1C1C1E", "surface2": "#141416",
+    "elevated": "#2C2C2E", "border": "#38383A", "text": "#F5F5F7",
+    "text2": "#A1A1A6", "text3": "#6E6E73", "accent": "#0A84FF",
+    "accent_bg": "#0A84FF24", "accent_border": "#0A84FF55",
 }
 LIGHT = {
-    "name": "light", "bg": "#F9FAFB", "surface": "#FFFFFF", "surface2": "#F8FAFC",
-    "border": "#EAECF0", "text": "#101828", "text2": "#475467", "text3": "#98A2B3",
-    "accent": "#0E7490", "accent_bg": "#F0FDFA", "accent_border": "#99F6E4",
+    "name": "light", "bg": "#F5F5F7", "surface": "#FFFFFF", "surface2": "#F2F2F7",
+    "elevated": "#FFFFFF", "border": "#E5E5EA", "text": "#1D1D1F",
+    "text2": "#6E6E73", "text3": "#8E8E93", "accent": "#007AFF",
+    "accent_bg": "#007AFF1A", "accent_border": "#007AFF44",
 }
 TONES = {
     # name: (dark bg, dark fg, dark border, light bg, light fg, light border)
-    "success": ("#052E1C", "#34D399", "#065F46", "#ECFDF3", "#027A48", "#ABEFC6"),
-    "warning": ("#2A1A05", "#FBBF24", "#78350F", "#FFFAEB", "#B54708", "#FEDF89"),
-    "error":   ("#2A0A12", "#FB7185", "#881337", "#FEF3F2", "#B42318", "#FECDCA"),
-    "info":    ("#0C1E3A", "#60A5FA", "#1E3A8A", "#EFF8FF", "#175CD3", "#B2DDFF"),
-    "accent":  ("#083344", "#22D3EE", "#155E75", "#F0FDFA", "#0E7490", "#99F6E4"),
-    "neutral": ("#1E293B", "#CBD5E1", "#334155", "#F2F4F7", "#344054", "#EAECF0"),
+    "success": ("#062614", "#30D158", "#30D15855", "#EAFBF0", "#1E8E3E", "#34C75955"),
+    "warning": ("#2C1A04", "#FF9F0A", "#FF9F0A55", "#FFF5E5", "#C97200", "#FF950055"),
+    "error":   ("#2B0B0D", "#FF453A", "#FF453A55", "#FFECEB", "#D70015", "#FF3B3055"),
+    "info":    ("#08223D", "#64D2FF", "#64D2FF55", "#EAF5FF", "#0066CC", "#007AFF55"),
+    "accent":  ("#082240", "#0A84FF", "#0A84FF66", "#EBF3FF", "#007AFF", "#007AFF55"),
+    "neutral": ("#2C2C2E", "#E5E5EA", "#3A3A3C", "#E8E8ED", "#3A3A3C", "#D2D2D7"),
 }
 
 
@@ -214,7 +216,7 @@ class FigCraftDoc:
         return b
 
     def button(self, parent, label, bg, fg, x=0, y=0, w=None, h=36, icon=None,
-               border=None, size=13, radius=8, weight="SemiBold"):
+               border=None, size=13, radius=10, weight="SemiBold"):
         props = {"layout": "horizontal", "gap": 6, "mainAlign": "center",
                  "crossAlign": "center", "cornerRadius": radius,
                  "sizingH": "fixed" if w else "hug", "sizingV": "fixed"}
@@ -231,7 +233,7 @@ class FigCraftDoc:
             self.text(b, label, size=size, weight=weight, color=fg)
         return b
 
-    def card(self, parent, x, y, w, h, theme, fill=None, stroke=None, radius=16, name=None):
+    def card(self, parent, x, y, w, h, theme, fill=None, stroke=None, radius=20, name=None):
         return self.frame(parent, x, y, w, h, name=name, fill=fill or theme["surface"],
                           stroke=stroke or theme["border"], strokeWeight=1,
                           cornerRadius=radius, clip=True)
@@ -299,22 +301,23 @@ def header(doc, frame, theme, active, profile):
     row = doc.hstack(frame, 0, 0, w=1440, h=64, main="spaceBetween", pad=[0, 32, 0, 32],
                      fill=theme["surface"], name="header")
     logo = doc.hstack(row, gap=10)
-    doc.icon(logo, "sports_soccer", 26, theme["accent"])
+    doc.icon(logo, "sports_soccer", 24, theme["accent"])
     doc.text(logo, "Referee Academy AI", size=17, weight="Bold", color=theme["text"])
 
-    nav = doc.hstack(row, gap=4, name="nav")
+    nav = doc.hstack(row, gap=4, pad=[4, 4, 4, 4], radius=14,
+                     fill=theme["surface2"], stroke=theme["border"], name="nav")
     for idx, (ic, label) in enumerate(NAV_TABS):
         is_active = idx == active
-        color = theme["accent"] if is_active else theme["text2"]
-        tab = doc.hstack(nav, gap=6, pad=[8, 14, 8, 12], radius=8,
-                         fill=theme["accent_bg"] if is_active else "none",
-                         stroke=theme["accent_border"] if is_active else None)
-        doc.icon(tab, ic, 16, color)
-        doc.text(tab, label, size=13, weight="SemiBold" if is_active else "Medium", color=color)
+        tab = doc.hstack(nav, gap=6, pad=[6, 14, 6, 12], radius=10,
+                         fill=theme["elevated"] if is_active else "none",
+                         stroke=theme["border"] if is_active else None)
+        doc.icon(tab, ic, 16, theme["accent"] if is_active else theme["text2"])
+        doc.text(tab, label, size=13, weight="SemiBold" if is_active else "Medium",
+                 color=theme["text"] if is_active else theme["text2"])
 
-    chip = doc.hstack(row, gap=8, pad=[4, 14, 4, 4], radius=16, fill=theme["surface2"],
+    chip = doc.hstack(row, gap=8, pad=[4, 14, 4, 4], radius=18, fill=theme["surface2"],
                       stroke=theme["border"], name="profile")
-    doc.avatar(chip, "IR", theme["accent"] if theme["name"] == "light" else "#0E7490")
+    doc.avatar(chip, "IR", theme["accent"])
     doc.text(chip, profile, size=12, weight="Medium", color=theme["text"])
     doc.rect(frame, 0, 63, 1440, 1, fill=theme["border"])
 
@@ -345,16 +348,16 @@ def build_drills(doc, f):
     doc.card_header(vp, 792, t, "videocam", "กล้องตรวจจับท่าทาง (Live Camera Feed)",
                     right=[("YOLOv8x-Pose · ONNX", tone(t, "neutral"))])
 
-    video = doc.frame(vp, 20, 56, 752, 368, name="video", fill="#0B132B",
-                      cornerRadius=12, clip=True)
-    for gx in range(0, 752, 47):  # subtle pitch grid
-        doc.line(video, gx, 0, gx, 368, "#1E293B66", weight=1)
+    video = doc.frame(vp, 20, 56, 752, 368, name="video", fill="#0A0A0D",
+                      cornerRadius=16, clip=True)
+    for gx in range(0, 752, 47):  # subtle optical calibration grid
+        doc.line(video, gx, 0, gx, 368, "#2C2C2E66", weight=1)
     doc.badge(video, "LIVE · 1080p 60FPS", tone(t, "error"), dot=True, x=12, y=12)
 
     # Tactical reticle on the referee
     rx, ry, rw, rh = 248, 44, 214, 312
-    doc.rect(video, rx, ry, rw, rh, fill="#22D3EE0D", stroke="#22D3EE40",
-             strokeWeight=1, cornerRadius=10)
+    doc.rect(video, rx, ry, rw, rh, fill="#0A84FF0D", stroke="#0A84FF4D",
+             strokeWeight=1, cornerRadius=14)
     bl = 22
     for cx, cy, dx, dy in ((rx, ry, 1, 1), (rx + rw, ry, -1, 1),
                            (rx, ry + rh, 1, -1), (rx + rw, ry + rh, -1, -1)):
@@ -370,18 +373,18 @@ def build_drills(doc, f):
         "l_an": (328, 340), "r_an": (384, 340),
     }
     # Ghost target guide (IFAB 180°) drawn under the live skeleton
-    doc.line(video, 391, 138, 391, 50, "#38BDF8AA", weight=2, dashes=[6, 5])
-    doc.ellipse(video, 384, 42, 14, 14, stroke="#38BDF8", strokeWeight=2, dashes=[3, 3])
-    doc.skeleton(video, joints, BODY_BONES, t["accent"], "#34D399", "#065F46",
-                 glow="#0891B240")
+    doc.line(video, 391, 138, 391, 50, "#64D2FFAA", weight=2, dashes=[6, 5])
+    doc.ellipse(video, 384, 42, 14, 14, stroke="#64D2FF", strokeWeight=2, dashes=[3, 3])
+    doc.skeleton(video, joints, BODY_BONES, t["accent"], "#30D158", "#0A3A1E",
+                 glow="#0A84FF38")
     doc.badge(video, "เป้าหมาย IFAB 180°", tone(t, "info"), x=470, y=42)
     doc.badge(video, "176° มุมยกแขน", tone(t, "accent"), icon="straighten", x=470, y=76)
     doc.badge(video, "ศอกเหยียด 172°", tone(t, "success"), icon="check_circle", x=470, y=110)
     doc.badge(video, "แขนซ้าย 24°", tone(t, "neutral"), x=138, y=204)
 
     # Untagged second person
-    doc.rect(video, 616, 104, 114, 236, fill="#0F172A66", stroke="#475569",
-             strokeWeight=1, dashes=[6, 4], cornerRadius=8)
+    doc.rect(video, 616, 104, 114, 236, fill="#1C1C1E80", stroke="#6E6E73",
+             strokeWeight=1, dashes=[6, 4], cornerRadius=12)
     doc.badge(video, "Player #10 · แตะเพื่อ Tag", tone(t, "neutral"), icon="person", x=594, y=72)
 
     # Toolbar under the video
@@ -395,7 +398,7 @@ def build_drills(doc, f):
     doc.button(left, "Mirror", n_bg, n_fg, h=32, icon="flip", border=n_bd, size=12)
     doc.button(left, "Angles", n_bg, n_fg, h=32, icon="straighten", border=n_bd, size=12)
     right = doc.hstack(bar, gap=8)
-    doc.button(right, "Auto-Tag ผู้ตัดสิน", "#14B8A6", "#042F2E", h=32, icon="how_to_reg", size=12)
+    doc.button(right, "Auto-Tag ผู้ตัดสิน", "#0A84FF", "#FFFFFF", h=32, icon="how_to_reg", size=12)
     doc.button(right, "", n_bg, n_fg, w=32, h=32, icon="refresh", border=n_bd, size=12)
 
     # ---- Left column: telemetry card ----------------------------------------
@@ -403,12 +406,12 @@ def build_drills(doc, f):
     doc.card_header(tel, 792, t, "monitoring", "ความนิ่งของท่าทาง (Telemetry Waveform)",
                     right=[("STABLE HOLD · 98.2%", tone(t, "success"), "check_circle")])
     wave = doc.frame(tel, 20, 52, 752, 76, name="waveform", fill=t["surface2"],
-                     cornerRadius=8, clip=True)
+                     cornerRadius=12, clip=True)
     for i in range(40):
         hv = 22 + 30 * math.sin(i * 0.3) * math.cos(i * 0.1) + (30 if i > 25 else 8)
         hv = int(max(8, min(60, hv)))
         doc.rect(wave, 14 + i * 18.2, 76 - 8 - hv, 10, hv,
-                 fill="#34D399" if i > 25 else t["accent"], cornerRadius=3)
+                 fill="#30D158" if i > 25 else t["accent"], cornerRadius=4)
     foot = doc.hstack(tel, 20, 140, w=752, h=28, main="spaceBetween")
     doc.badge(foot, "ตรวจพบ: ฟรีคิกทางอ้อม (INDIRECT_FREE_KICK)", tone(t, "accent"),
               icon="my_location")
@@ -421,36 +424,36 @@ def build_drills(doc, f):
     doc.ellipse(hold, cx - r, cy - r, 2 * r, 2 * r, stroke=t["border"], strokeWeight=10)
     ang = math.radians(360 * 0.8)  # 1.2s / 1.5s
     ex, ey = cx + r * math.sin(ang), cy - r * math.cos(ang)
-    doc.path(hold, f"M {cx} {cy - r} A {r} {r} 0 1 1 {ex:.2f} {ey:.2f}", stroke="#10B981",
+    doc.path(hold, f"M {cx} {cy - r} A {r} {r} 0 1 1 {ex:.2f} {ey:.2f}", stroke="#30D158",
              weight=10, strokeCap="round", name="hold-arc")
     center = doc.vstack(hold, 24, 56, w=112, h=112, gap=0, main="center", cross="center")
-    doc.text(center, "1.2s", size=22, weight="Bold", color="#34D399")
+    doc.text(center, "1.2s", size=22, weight="Bold", color="#30D158")
     doc.text(center, "/ 1.5s", size=11, color=t["text3"])
 
     score = doc.vstack(hold, 172, 60, gap=6)
     doc.text(score, "คะแนนความถูกต้อง (Posture Score)", size=12, color=t["text2"])
     num = doc.hstack(score, gap=6, cross="baseline")
-    doc.text(num, "94", size=44, weight="Bold", color="#34D399")
+    doc.text(num, "94", size=44, weight="Bold", color="#30D158")
     doc.text(num, "/ 100", size=16, weight="Bold", color=t["text3"])
     doc.badge(score, "EXCELLENT POSTURE FORM", tone(t, "success"), icon="check_circle")
 
     s_bg, s_fg, s_bd = tone(t, "success")
     toast = doc.hstack(f, 848, 372, w=560, h=76, gap=12, pad=[0, 20, 0, 20], fill=s_bg,
-                       radius=12, stroke=s_bd, name="coaching-toast")
+                       radius=16, stroke=s_bd, name="coaching-toast")
     doc.icon(toast, "check_circle", 24, s_fg)
     msg = doc.vstack(toast, gap=4)
     doc.text(msg, "ยอดเยี่ยม! สัญญาณถูกต้องตาม IFAB Law 13", size=13, weight="Bold",
-             color="#A7F3D0")
+             color="#30D158")
     doc.text(msg, "แขนขวายกตรง 176° — ค้างไว้อีก 0.3 วินาทีเพื่อผ่านแบบฝึกหัด", size=11,
-             color="#6EE7B7")
+             color="#A6F4C5")
 
     gauges = doc.card(f, 848, 464, 560, 184, t, name="gauges-card")
     doc.card_header(gauges, 560, t, "straighten", "องศาข้อต่อ (Joint Angle Gauges)")
     doc.gauge(gauges, 20, 56, 520, "การยกแขนขวา (Shoulder Elevation)", "176° / 180°", 98,
               t["accent"], t)
     doc.gauge(gauges, 20, 96, 520, "ความเหยียดศอก (Elbow Straightness)", "172° / 180°", 95,
-              "#34D399", t)
-    doc.gauge(gauges, 20, 136, 520, "ลำตัวตั้งตรง (Torso Alignment)", "99%", 99, "#A855F7", t)
+              "#30D158", t)
+    doc.gauge(gauges, 20, 136, 520, "ลำตัวตั้งตรง (Torso Alignment)", "99%", 99, "#BF5AF2", t)
 
     drills = doc.card(f, 848, 664, 560, 204, t, name="drill-selector")
     doc.card_header(drills, 560, t, "menu_book", "แบบฝึกหัดสัญญาณ IFAB",
@@ -462,14 +465,14 @@ def build_drills(doc, f):
     ]
     for i, (label, status, tn, active) in enumerate(items):
         row = doc.hstack(drills, 20, 52 + i * 50, w=520, h=44, main="spaceBetween",
-                         pad=[0, 12, 0, 12], radius=10,
+                         pad=[0, 12, 0, 12], radius=12,
                          fill=t["accent_bg"] if active else t["surface2"],
-                         stroke=t["accent"] if active else t["border"])
+                         stroke=t["accent_border"] if active else t["border"])
         lg = doc.hstack(row, gap=10)
         doc.icon(lg, "my_location" if active else "play_arrow", 18,
                  t["accent"] if active else t["text3"])
         doc.text(lg, f"{i + 1}. {label}", size=12, weight="SemiBold" if active else "Medium",
-                 color=t["text"] if active else "#CBD5E1")
+                 color=t["text"] if active else t["text2"])
         doc.badge(row, status, tone(t, tn))
 
 
@@ -489,8 +492,8 @@ def build_exam(doc, f):
     doc.card_header(sc, 792, t, "quiz", "โจทย์สถานการณ์ (Instructional Scenario)",
                     right=[("คลิปที่ 1 · นาทีที่ 73", tone(t, "neutral"))])
 
-    pitch = doc.frame(sc, 20, 56, 752, 320, name="scenario-video", fill="#0B3D1E",
-                      cornerRadius=12, clip=True)
+    pitch = doc.frame(sc, 20, 56, 752, 320, name="scenario-video", fill="#0B3318",
+                      cornerRadius=16, clip=True)
     ln = "#FFFFFF59"
     doc.rect(pitch, 24, 20, 704, 240, stroke=ln, strokeWeight=2)
     doc.line(pitch, 376, 20, 376, 260, ln)
@@ -498,13 +501,13 @@ def build_exam(doc, f):
     doc.rect(pitch, 24, 60, 140, 160, stroke=ln, strokeWeight=2)
     doc.rect(pitch, 24, 105, 50, 70, stroke=ln, strokeWeight=2)
     doc.ellipse(pitch, 112, 137, 6, 6, fill="#FFFFFF")
-    doc.ellipse(pitch, 126, 124, 18, 18, fill="#EF4444", stroke="#FFFFFF", strokeWeight=2)
-    doc.ellipse(pitch, 142, 132, 18, 18, fill="#3B82F6", stroke="#FFFFFF", strokeWeight=2)
-    doc.text(pitch, "#9", x=128, y=148, size=10, weight="Bold", color="#FCA5A5")
-    doc.text(pitch, "#4", x=148, y=154, size=10, weight="Bold", color="#93C5FD")
+    doc.ellipse(pitch, 126, 124, 18, 18, fill="#FF453A", stroke="#FFFFFF", strokeWeight=2)
+    doc.ellipse(pitch, 142, 132, 18, 18, fill="#0A84FF", stroke="#FFFFFF", strokeWeight=2)
+    doc.text(pitch, "#9", x=128, y=148, size=10, weight="Bold", color="#FFD6D4")
+    doc.text(pitch, "#4", x=148, y=154, size=10, weight="Bold", color="#B8DEFF")
     doc.badge(pitch, "ฟาวล์ขัดขาในเขตโทษ", tone(t, "error"), icon="warning", x=180, y=118)
     ctrl = doc.hstack(pitch, 0, 276, w=752, h=44, main="spaceBetween", pad=[0, 16, 0, 16],
-                      fill="#0F172AE6")
+                      fill="#1C1C1EE6")
     cl = doc.hstack(ctrl, gap=8)
     doc.icon(cl, "play_arrow", 20, t["text"])
     doc.text(cl, "00:03.42 / 00:08.00", size=12, weight="SemiBold", color=t["text"])
@@ -514,7 +517,7 @@ def build_exam(doc, f):
     doc.text(react, "เวลาตัดสินใจให้สัญญาณ (5s Reaction Window)", size=12, weight="SemiBold",
              color=t["text"])
     doc.badge(react, "เหลือ 2.4s", tone(t, "warning"), icon="timer")
-    doc.progress(sc, 20, 424, 752, 48, "#F59E0B", t["border"])
+    doc.progress(sc, 20, 424, 752, 48, "#FF9F0A", t["border"])
 
     doc.text(sc, "คำถาม: จากเหตุการณ์นี้ ในฐานะผู้ตัดสินท่านต้องให้สัญญาณใด?", x=20, y=448,
              size=14, weight="Bold", color=t["text"])
@@ -526,22 +529,22 @@ def build_exam(doc, f):
     ]
     for i, (key, title, sub, correct) in enumerate(options):
         ox, oy = 20 + (i % 2) * 384, 480 + (i // 2) * 112
-        opt = doc.hstack(sc, ox, oy, w=368, h=96, gap=12, pad=[0, 16, 0, 16], radius=12,
+        opt = doc.hstack(sc, ox, oy, w=368, h=96, gap=12, pad=[0, 16, 0, 16], radius=16,
                          fill=t["accent_bg"] if correct else t["surface2"],
                          stroke=t["accent"] if correct else t["border"])
-        k = doc.frame(opt, 0, 0, 32, 32, fill=t["accent"] if correct else t["border"],
+        k = doc.frame(opt, 0, 0, 32, 32, fill=t["accent"] if correct else t["elevated"],
                       cornerRadius=16, layout="horizontal", mainAlign="center",
                       crossAlign="center")
-        doc.text(k, key, size=13, weight="Bold", color="#090D16" if correct else t["text2"])
+        doc.text(k, key, size=13, weight="Bold", color="#FFFFFF" if correct else t["text2"])
         body = doc.vstack(opt, gap=4)
-        doc.text(body, title, size=13, weight="Bold", color=t["text"] if correct else "#CBD5E1")
+        doc.text(body, title, size=13, weight="Bold", color=t["text"] if correct else t["text2"])
         doc.text(body, sub, size=11, color=t["accent"] if correct else t["text3"])
 
     # ---- Right: trainee posture HUD -------------------------------------------
     hud = doc.card(f, 848, 160, 560, 332, t, name="posture-hud")
     doc.card_header(hud, 560, t, "how_to_reg", "ท่าทางผู้เรียนสด (Live Trainee Posture)")
-    cam = doc.frame(hud, 20, 56, 520, 256, name="trainee-camera", fill=t["surface2"],
-                    cornerRadius=12, clip=True)
+    cam = doc.frame(hud, 20, 56, 520, 256, name="trainee-camera", fill="#0A0A0D",
+                    cornerRadius=16, clip=True)
     top = doc.hstack(cam, 12, 12, w=496, h=24, main="spaceBetween")
     doc.badge(top, "LIVE", tone(t, "error"), dot=True)
     doc.badge(top, "Latency 1.18s", tone(t, "info"), icon="speed")
@@ -553,36 +556,36 @@ def build_exam(doc, f):
     tbones = [("head", "neck"), ("l_sh", "r_sh"), ("r_sh", "r_el"), ("r_el", "r_wr"),
               ("l_sh", "l_el"), ("l_el", "l_wr"), ("l_sh", "l_hip"), ("r_sh", "r_hip"),
               ("l_hip", "r_hip")]
-    doc.skeleton(cam, tj, tbones, "#10B981", "#34D399", "#065F46")
+    doc.skeleton(cam, tj, tbones, "#30D158", "#64D2FF", "#062614")
     doc.badge(cam, "ชี้ลง 44° · จุดโทษ", tone(t, "success"), icon="straighten", x=384, y=160)
     doc.badge(cam, "ตรวจพบ: PENALTY KICK · 97.2%", tone(t, "success"), icon="my_location",
               x=12, y=220)
 
     # ---- Right: result inspector ----------------------------------------------
-    res = doc.card(f, 848, 508, 560, 360, t, fill="#022C22", stroke="#065F46", name="result-card")
+    res = doc.card(f, 848, 508, 560, 360, t, fill="#082414", stroke="#30D15855", name="result-card")
     doc.card_header(res, 560, t, "check_circle", "ผลประเมินข้อนี้: ถูกต้องตาม IFAB (PASS)",
-                    icon_color="#34D399", title_color="#A7F3D0")
+                    icon_color="#30D158", title_color="#30D158")
     panel = doc.hstack(res, 20, 56, w=520, h=84, main="spaceBetween", pad=[0, 16, 0, 16],
-                       fill="#064E3B99", radius=10)
+                       fill="#0C381F", radius=14)
     pl = doc.vstack(panel, gap=2)
-    doc.text(pl, "คะแนนภาคปฏิบัติ", size=11, color="#6EE7B7")
-    doc.text(pl, "92 / 100", size=28, weight="Bold", color="#34D399")
+    doc.text(pl, "คะแนนภาคปฏิบัติ", size=11, color="#A6F4C5")
+    doc.text(pl, "92 / 100", size=28, weight="Bold", color="#30D158")
     pr = doc.vstack(panel, gap=4, cross="max")
-    doc.text(pr, "เวลาตอบสนอง 1.18 วินาที", size=11, weight="SemiBold", color="#FFFFFF")
-    doc.text(pr, "ค้างสัญญาณ 1.8 วินาที", size=11, color="#A7F3D0")
-    doc.text(pr, "เกรด A+ (ยอดเยี่ยม)", size=11, weight="Bold", color="#FCD34D")
+    doc.text(pr, "เวลาตอบสนอง 1.18 วินาที", size=11, weight="SemiBold", color="#F5F5F7")
+    doc.text(pr, "ค้างสัญญาณ 1.8 วินาที", size=11, color="#A6F4C5")
+    doc.text(pr, "เกรด A+ (ยอดเยี่ยม)", size=11, weight="Bold", color="#FF9F0A")
     checks = doc.vstack(res, 20, 156, gap=10)
     for item in ("คำตัดสินถูกต้องตาม IFAB Law 12 & 14",
                  "ชี้แขนลง 44° ตรงไปยังจุดโทษ",
                  "ค้างสัญญาณนิ่งเกิน 1.5 วินาที",
                  "ความเสถียรข้อต่อแขน 95.4%"):
         r = doc.hstack(checks, gap=8)
-        doc.icon(r, "check_circle", 16, "#34D399")
-        doc.text(r, item, size=12, color="#D1FAE5")
+        doc.icon(r, "check_circle", 16, "#30D158")
+        doc.text(r, item, size=12, color="#E5F9EC")
     btns = doc.hstack(res, 20, 296, w=520, h=44, gap=16)
-    doc.button(btns, "ดู Replay", "#064E3B", "#A7F3D0", w=252, h=44, icon="refresh",
-               border="#059669")
-    doc.button(btns, "ข้อถัดไป (2/5)", "#10B981", "#022C22", w=252, h=44, icon="play_arrow")
+    doc.button(btns, "ดู Replay", "#1C1C1E", "#F5F5F7", w=252, h=44, icon="refresh",
+               border="#38383A")
+    doc.button(btns, "ข้อถัดไป (2/5)", "#30D158", "#000000", w=252, h=44, icon="play_arrow")
 
 
 # ==============================================================================
@@ -612,21 +615,22 @@ def build_handbook(doc, f):
                         "คู่มือมาตรฐาน International Football Association Board · Laws of the Game 2025/26")
     doc.badge(actions, "อัปเดต 2025/26", tone(t, "info"), icon="menu_book")
 
-    search = doc.hstack(f, 32, 160, w=904, h=44, gap=10, pad=[0, 14, 0, 14], radius=8,
-                        fill=t["surface"], stroke="#D0D5DD", name="search")
+    search = doc.hstack(f, 32, 160, w=904, h=44, gap=10, pad=[0, 14, 0, 14], radius=12,
+                        fill=t["surface"], stroke=t["border"], name="search")
     doc.icon(search, "search", 20, t["text3"])
     doc.text(search, "ค้นหาท่าสัญญาณ กติกา หรือคำสำคัญ (เช่น ฟรีคิก, ล้ำหน้า, จุดโทษ)",
              size=13, color=t["text3"])
 
-    tabs = doc.hstack(f, 32, 220, h=32, gap=8, name="category-tabs")
+    tabs = doc.hstack(f, 32, 220, h=36, gap=4, pad=[3, 3, 3, 3], radius=12,
+                      fill=t["surface2"], stroke=t["border"], name="category-tabs")
     for i, label in enumerate(("ทั้งหมด (20)", "ลูกตั้งเตะ (6)", "การทำฟาวล์ (5)",
                                "การควบคุมเกม (5)", "การล้ำหน้า (4)")):
         active = i == 0
-        pill = doc.hstack(tabs, h=32, pad=[0, 14, 0, 14], radius=16,
-                          fill=t["accent_bg"] if active else t["surface"],
-                          stroke=t["accent"] if active else "#D0D5DD")
+        pill = doc.hstack(tabs, h=30, pad=[0, 14, 0, 14], radius=9,
+                          fill=t["surface"] if active else "none",
+                          stroke=t["border"] if active else None)
         doc.text(pill, label, size=12, weight="SemiBold" if active else "Medium",
-                 color=t["accent"] if active else "#344054")
+                 color=t["accent"] if active else t["text2"])
 
     cards = [
         ("Law 13", "ฟรีคิกทางตรง", "Direct Free Kick", "horizontal", "แขน 90°", "Hold 1.2s"),
@@ -640,42 +644,43 @@ def build_handbook(doc, f):
         active = i == 1
         x, y = 32 + (i % 3) * 309, 268 + (i // 3) * 312
         c = doc.card(f, x, y, 286, 288, t, stroke=t["accent"] if active else t["border"],
-                     radius=12, name=f"signal-card/{en}")
+                     radius=20, name=f"signal-card/{en}")
         doc.badge(c, law, tone(t, "info"), icon="menu_book", x=16, y=16)
-        thumb = doc.frame(c, 16, 48, 254, 100, fill=t["surface2"], stroke="#E2E8F0",
-                          strokeWeight=1, cornerRadius=8, clip=True)
+        thumb = doc.frame(c, 16, 48, 254, 100, fill=t["surface2"], stroke=t["border"],
+                          strokeWeight=1, cornerRadius=12, clip=True)
         signal_figure(doc, thumb, 127, 54, arm, t["accent"])
         doc.text(c, th, x=16, y=160, size=14, weight="Bold", color=t["text"])
-        doc.text(c, en, x=16, y=182, size=11, color="#667085")
+        doc.text(c, en, x=16, y=182, size=11, color=t["text2"])
         metrics = doc.hstack(c, 16, 206, gap=14)
         for ic, label in (("straighten", m1), ("schedule", m2)):
             m = doc.hstack(metrics, gap=4)
             doc.icon(m, ic, 14, t["accent"])
-            doc.text(m, label, size=11, color="#344054")
+            doc.text(m, label, size=11, color=t["text2"])
         if active:
             doc.button(c, "เริ่มฝึกซ้อมท่านี้", t["accent"], "#FFFFFF", x=16, y=240, w=254,
                        h=32, icon="videocam", size=12)
         else:
-            doc.button(c, "เริ่มฝึกซ้อมท่านี้", "#F2F4F7", "#344054", x=16, y=240, w=254,
+            doc.button(c, "เริ่มฝึกซ้อมท่านี้", t["surface2"], t["text"], x=16, y=240, w=254,
                        h=32, icon="videocam", size=12)
 
     # ---- Deep-dive drawer (x=960 w=448) -----------------------------------------
     d = doc.card(f, 960, 160, 448, 708, t, name="deep-dive-drawer")
+    doc.rect(d, 206, 10, 36, 4, fill=t["border"], cornerRadius=2)
     doc.badge(d, "IFAB LAW 13 · DEEP DIVE", tone(t, "info"), icon="menu_book", x=24, y=24)
     doc.text(d, "ท่าที่ 2: ฟรีคิกทางอ้อม (Indirect Free Kick)", x=24, y=58, size=16,
              weight="Bold", color=t["text"])
     doc.text(d, "Official Instructional Guideline for Referees", x=24, y=84, size=12,
              color=t["text2"])
 
-    dia = doc.frame(d, 24, 112, 400, 176, fill=t["surface2"], stroke="#E2E8F0",
-                    strokeWeight=1, cornerRadius=12, clip=True, name="anatomy-diagram")
+    dia = doc.frame(d, 24, 112, 400, 176, fill=t["surface2"], stroke=t["border"],
+                    strokeWeight=1, cornerRadius=16, clip=True, name="anatomy-diagram")
     tol = doc.hstack(dia, 12, 12, w=376, h=24, main="max")
     doc.badge(tol, "ช่วงที่ยอมรับ 170° – 180°", tone(t, "success"), icon="straighten")
-    doc.line(dia, 200, 80, 200, 24, "#0E749080", weight=2, dashes=[5, 4])
-    doc.line(dia, 200, 70, 200, 150, "#334155", weight=4)
+    doc.line(dia, 200, 80, 200, 24, "#007AFF80", weight=2, dashes=[5, 4])
+    doc.line(dia, 200, 70, 200, 150, "#3A3A3C", weight=4)
     doc.ellipse(dia, 190, 44, 20, 20, fill=t["accent"])
-    doc.line(dia, 200, 80, 206, 26, "#0891B2", weight=4)
-    doc.ellipse(dia, 202, 22, 8, 8, fill="#10B981")
+    doc.line(dia, 200, 80, 206, 26, "#007AFF", weight=4)
+    doc.ellipse(dia, 202, 22, 8, 8, fill="#34C759")
 
     crit = doc.vstack(d, 24, 308, w=400, gap=12, name="criteria")
     doc.text(crit, "เกณฑ์มาตรฐานตามกติกา (IFAB Criteria)", size=13, weight="Bold",
@@ -685,16 +690,16 @@ def build_handbook(doc, f):
                        ("แขนที่ใช้ (Active Arm)", "ข้างใดข้างหนึ่ง (แนะนำข้างถนัด)"),
                        ("ระยะเวลาค้าง (Hold Duration)", "จนกว่าบอลจะถูกเล่นหรือบอลตาย")):
         item = doc.vstack(crit, gap=2)
-        doc.text(item, title, size=12, weight="SemiBold", color="#344054")
+        doc.text(item, title, size=12, weight="SemiBold", color=t["text"])
         doc.text(item, val, size=12, color=t["accent"])
 
     e_bg, e_fg, e_bd = tone(t, "error")
     box = doc.hstack(d, 24, 552, w=400, h=72, gap=12, pad=[0, 16, 0, 16], cross="center",
-                     fill=e_bg, radius=10, stroke=e_bd, name="common-mistakes")
-    doc.icon(box, "warning", 20, "#D92D20")
+                     fill=e_bg, radius=14, stroke=e_bd, name="common-mistakes")
+    doc.icon(box, "warning", 20, e_fg)
     bt = doc.vstack(box, gap=4)
     doc.text(bt, "ข้อผิดพลาดที่พบบ่อย (Common Mistakes)", size=12, weight="Bold", color=e_fg)
-    doc.text(bt, "ลดแขนก่อนบอลถูกเล่น · งอศอกทำให้สัญญาณไม่ชัดเจน", size=11, color="#912018")
+    doc.text(bt, "ลดแขนก่อนบอลถูกเล่น · งอศอกทำให้สัญญาณไม่ชัดเจน", size=11, color=e_fg)
 
     doc.button(d, "เริ่มฝึกท่านี้ใน Live Studio", t["accent"], "#FFFFFF", x=24, y=636,
                w=400, h=48, icon="videocam", size=14)
@@ -708,84 +713,84 @@ def build_gradebook(doc, f):
     header(doc, f, t, 3, "อัศวิน พิทักษ์ธรรม · REF-2026-092")
     actions = title_bar(doc, f, t, "สมุดบันทึกผลการประเมินผู้เรียน (Trainee Gradebook)",
                         "สถิติการฝึกภาคปฏิบัติและผลสอบสถานการณ์จำลองตามเกณฑ์ IFAB · หลักสูตร Class 3")
-    doc.button(actions, "ดาวน์โหลด PDF", "#FFFFFF", "#344054", h=40, icon="download",
-               border="#D0D5DD")
+    doc.button(actions, "ดาวน์โหลด PDF", t["surface"], t["text"], h=40, icon="download",
+               border=t["border"])
     doc.button(actions, "ดูใบรับรองผล", t["accent"], "#FFFFFF", h=40, icon="school")
 
     stats = [
-        ("monitoring", "#0E7490", "#F0FDFA", "ความแม่นยำรวม (Overall Accuracy)", "88.4%",
-         "+4.2% จากสัปดาห์ก่อน", "#027A48"),
-        ("quiz", "#059669", "#ECFDF3", "ชุดข้อสอบที่ผ่าน (Passed)", "24 / 28",
-         "อัตราผ่าน 85.7%", "#475467"),
-        ("speed", "#2563EB", "#EFF8FF", "เวลาตอบสนองเฉลี่ย (Reaction)", "1.35s",
-         "เร็วกว่าเกณฑ์ 0.65s", "#027A48"),
-        ("school", "#7C3AED", "#F4F3FF", "ระดับสมรรถนะ (Competency)", "Class 3",
-         "พร้อมสอบภาคสนามจริง", "#475467"),
+        ("monitoring", "#007AFF", "#EAF5FF", "ความแม่นยำรวม (Overall Accuracy)", "88.4%",
+         "+4.2% จากสัปดาห์ก่อน", "#1E8E3E"),
+        ("quiz", "#34C759", "#EAFBF0", "ชุดข้อสอบที่ผ่าน (Passed)", "24 / 28",
+         "อัตราผ่าน 85.7%", "#6E6E73"),
+        ("speed", "#5856D6", "#EFEFFE", "เวลาตอบสนองเฉลี่ย (Reaction)", "1.35s",
+         "เร็วกว่าเกณฑ์ 0.65s", "#1E8E3E"),
+        ("school", "#AF52DE", "#F7ECFD", "ระดับสมรรถนะ (Competency)", "Class 3",
+         "พร้อมสอบภาคสนามจริง", "#6E6E73"),
     ]
     for i, (ic, col, tint, title, value, sub, sub_col) in enumerate(stats):
-        c = doc.card(f, 32 + i * 350, 160, 326, 112, t, radius=12, name=f"stat/{value}")
-        tile = doc.frame(c, 20, 20, 40, 40, fill=tint, cornerRadius=10, layout="horizontal",
+        c = doc.card(f, 32 + i * 350, 160, 326, 112, t, radius=20, name=f"stat/{value}")
+        tile = doc.frame(c, 20, 20, 40, 40, fill=tint, cornerRadius=12, layout="horizontal",
                          mainAlign="center", crossAlign="center")
         doc.icon(tile, ic, 22, col)
-        doc.text(c, title, x=72, y=20, size=11, weight="Medium", color="#667085")
+        doc.text(c, title, x=72, y=20, size=11, weight="Medium", color=t["text2"])
         doc.text(c, value, x=72, y=36, size=24, weight="Bold", color=t["text"])
         doc.text(c, sub, x=20, y=80, size=11, weight="Medium", color=sub_col)
 
     # ---- Radar card -----------------------------------------------------------
-    rc = doc.card(f, 32, 296, 676, 276, t, radius=12, name="radar-card")
+    rc = doc.card(f, 32, 296, 676, 276, t, radius=20, name="radar-card")
     doc.card_header(rc, 676, t, "monitoring", "สมรรถนะ 4 มิติ (Competency Radar)",
                     right=[("เกณฑ์ IFAB 80%", tone(t, "warning"))])
     cx, cy, r = 160, 164, 76
     for step in (0.25, 0.5, 0.75, 1.0):
         rr = r * step
         doc.path(rc, f"M {cx} {cy - rr} L {cx + rr} {cy} L {cx} {cy + rr} L {cx - rr} {cy} Z",
-                 stroke="#E2E8F0", weight=1)
+                 stroke=t["border"], weight=1)
     tr = r * 0.8
     doc.path(rc, f"M {cx} {cy - tr} L {cx + tr} {cy} L {cx} {cy + tr} L {cx - tr} {cy} Z",
-             stroke="#F79009", weight=1.5, dashes=[4, 3], name="ifab-target")
-    doc.line(rc, cx, cy - r, cx, cy + r, "#E2E8F0", weight=1)
-    doc.line(rc, cx - r, cy, cx + r, cy, "#E2E8F0", weight=1)
+             stroke="#FF9500", weight=1.5, dashes=[4, 3], name="ifab-target")
+    doc.line(rc, cx, cy - r, cx, cy + r, t["border"], weight=1)
+    doc.line(rc, cx - r, cy, cx + r, cy, t["border"], weight=1)
     vals = [92, 84, 76, 90]  # top, right, bottom, left
     vt, vr, vb, vl = [v / 100 * r for v in vals]
     doc.path(rc, f"M {cx} {cy - vt} L {cx + vr} {cy} L {cx} {cy + vb} L {cx - vl} {cy} Z",
-             fill="#0E749033", stroke=t["accent"], weight=2, name="trainee-polygon")
+             fill="#007AFF29", stroke=t["accent"], weight=2, name="trainee-polygon")
     for px, py in ((cx, cy - vt), (cx + vr, cy), (cx, cy + vb), (cx - vl, cy)):
         doc.ellipse(rc, px - 4, py - 4, 8, 8, fill=t["accent"], stroke="#FFFFFF", strokeWeight=1.5)
     doc.text(rc, "ลูกตั้งเตะ", x=cx - 50, y=cy - r - 20, width=100, align="center", size=11,
-             weight="SemiBold", color="#344054")
+             weight="SemiBold", color=t["text"])
     doc.text(rc, "ควบคุมเกม", x=cx - 50, y=cy + r + 6, width=100, align="center", size=11,
-             weight="SemiBold", color="#344054")
+             weight="SemiBold", color=t["text"])
     doc.text(rc, "ล้ำหน้า", x=8, y=cy - 8, width=68, align="right", size=11,
-             weight="SemiBold", color="#344054")
-    doc.text(rc, "ฟาวล์", x=cx + r + 8, y=cy - 8, size=11, weight="SemiBold", color="#344054")
+             weight="SemiBold", color=t["text"])
+    doc.text(rc, "ฟาวล์", x=cx + r + 8, y=cy - 8, size=11, weight="SemiBold", color=t["text"])
 
-    legend = [("ลูกตั้งเตะ (Restarts)", 92, "#0E7490"),
-              ("การทำฟาวล์ (Fouls)", 84, "#059669"),
-              ("การควบคุมเกม (Game Control)", 76, "#D97706"),
-              ("การล้ำหน้า (Offside)", 90, "#2563EB")]
+    legend = [("ลูกตั้งเตะ (Restarts)", 92, "#007AFF"),
+              ("การทำฟาวล์ (Fouls)", 84, "#34C759"),
+              ("การควบคุมเกม (Game Control)", 76, "#FF9500"),
+              ("การล้ำหน้า (Offside)", 90, "#5856D6")]
     for i, (label, pct, col) in enumerate(legend):
         ly = 64 + i * 48
         row = doc.hstack(rc, 328, ly, w=328, h=16, main="spaceBetween")
         lg = doc.hstack(row, gap=8)
         doc.ellipse(lg, 0, 0, 8, 8, fill=col)
-        doc.text(lg, label, size=12, weight="SemiBold", color="#344054")
+        doc.text(lg, label, size=12, weight="SemiBold", color=t["text"])
         doc.text(row, f"{pct}%", size=12, weight="Bold", color=col)
-        doc.progress(rc, 328, ly + 24, 328, pct, col, "#F2F4F7", h=6)
+        doc.progress(rc, 328, ly + 24, 328, pct, col, t["surface2"], h=6)
 
     # ---- Diagnostics card -----------------------------------------------------
-    dc = doc.card(f, 732, 296, 676, 276, t, radius=12, name="diagnostics-card")
+    dc = doc.card(f, 732, 296, 676, 276, t, radius=20, name="diagnostics-card")
     doc.card_header(dc, 676, t, "lightbulb", "วินิจฉัยจุดอ่อนรายบุคคล (AI Action Plan)",
-                    icon_color="#D97706")
+                    icon_color="#FF9500")
     alerts = [
-        ("error", "warning", "#D92D20", "สัญญาณได้เปรียบ: กางแขนแคบเกินไป (32° จากเกณฑ์ 45°)",
+        ("error", "warning", "#FF3B30", "สัญญาณได้เปรียบ: กางแขนแคบเกินไป (32° จากเกณฑ์ 45°)",
          "ผู้เล่นอาจมองไม่เห็นสัญญาณในจังหวะเกมสวนกลับเร็ว"),
-        ("warning", "schedule", "#D97706", "ฟรีคิกทางอ้อม: ค้างสัญญาณสั้นกว่าเกณฑ์ (0.8s จาก 1.5s)",
+        ("warning", "schedule", "#FF9500", "ฟรีคิกทางอ้อม: ค้างสัญญาณสั้นกว่าเกณฑ์ (0.8s จาก 1.5s)",
          "ชูแขนค้างไว้จนกว่าบอลจะถูกเล่น อย่าลดแขนทันทีหลังเป่านกหวีด"),
     ]
     for i, (tn, ic, icol, title, desc) in enumerate(alerts):
         bg, fg, bd = tone(t, tn)
         a = doc.hstack(dc, 20, 56 + i * 76, w=636, h=64, gap=12, pad=[0, 16, 0, 16],
-                       fill=bg, radius=10, stroke=bd)
+                       fill=bg, radius=14, stroke=bd)
         doc.icon(a, ic, 20, icol)
         body = doc.vstack(a, gap=4)
         doc.text(body, title, size=12, weight="Bold", color=fg)
@@ -794,14 +799,14 @@ def build_gradebook(doc, f):
                x=20, y=212, w=636, h=44, icon="videocam")
 
     # ---- History table --------------------------------------------------------
-    tc = doc.card(f, 32, 596, 1376, 272, t, radius=12, name="history-table")
+    tc = doc.card(f, 32, 596, 1376, 272, t, radius=20, name="history-table")
     doc.card_header(tc, 1376, t, "quiz", "ประวัติผลการประเมินล่าสุด (Recent Assessment Sessions)",
                     right=[("5 รายการล่าสุด", tone(t, "neutral"))])
     cols = [16, 176, 336, 776, 896, 1036, 1228]
-    thead = doc.frame(tc, 20, 52, 1336, 32, fill="#F9FAFB", cornerRadius=6)
+    thead = doc.frame(tc, 20, 52, 1336, 32, fill=t["surface2"], cornerRadius=8)
     for cx_, label in zip(cols, ("รหัสเซสชัน", "วันที่ - เวลา", "ชุดแบบฝึก / ข้อสอบ",
                                  "คะแนน", "เวลาตอบสนอง", "ผลประเมิน", "การกระทำ")):
-        doc.text(thead, label, x=cx_, y=9, size=11, weight="SemiBold", color="#475467")
+        doc.text(thead, label, x=cx_, y=9, size=11, weight="SemiBold", color=t["text2"])
     rows = [
         ("EXAM-2026-104", "15 พ.ย. 2026 · 11:20", "ชุดข้อสอบ Law 12: ฟาวล์ในเขตโทษ", "92", "1.18s", "ผ่าน (A+)", "success"),
         ("DRILL-2026-098", "14 พ.ย. 2026 · 16:45", "ฝึกซ้อมสด: ฟรีคิกทางอ้อม (Law 13)", "94", "1.05s", "ผ่าน (A+)", "success"),
@@ -811,16 +816,16 @@ def build_gradebook(doc, f):
     ]
     for i, (sid, date, module, sc, lat, status, tn) in enumerate(rows):
         row = doc.frame(tc, 20, 88 + i * 34, 1336, 34,
-                        fill="#F9FAFB" if i % 2 else "none", cornerRadius=6)
+                        fill=t["surface2"] if i % 2 else "none", cornerRadius=8)
         doc.text(row, sid, x=cols[0], y=9, size=12, weight="Medium", color=t["text"])
-        doc.text(row, date, x=cols[1], y=9, size=12, color="#667085")
+        doc.text(row, date, x=cols[1], y=9, size=12, color=t["text2"])
         doc.text(row, module, x=cols[2], y=9, size=12, weight="Medium", color=t["text"])
         doc.text(row, f"{sc} / 100", x=cols[3], y=9, size=12, weight="Bold", color=t["accent"])
-        doc.text(row, lat, x=cols[4], y=9, size=12, color="#475467")
+        doc.text(row, lat, x=cols[4], y=9, size=12, color=t["text2"])
         doc.badge(row, status, tone(t, tn), icon="check_circle" if tn == "success" else "warning",
                   x=cols[5], y=6)
-        doc.button(row, "ดูผลตรวจ", "#FFFFFF", t["accent"], x=cols[6], y=5, w=92, h=24,
-                   border="#D0D5DD", size=11, radius=6)
+        doc.button(row, "ดูผลตรวจ", t["surface"], t["accent"], x=cols[6], y=5, w=92, h=24,
+                   border=t["border"], size=11, radius=8)
 
 
 # ==============================================================================
@@ -833,7 +838,7 @@ def build_icon_library(doc, f):
     logo = doc.hstack(head, gap=10)
     doc.icon(logo, "sports_soccer", 26, t["accent"])
     doc.text(logo, "Referee Academy AI · Design Tokens", size=17, weight="Bold", color=t["text"])
-    doc.badge(head, "Google Material Symbols · 24px SVG", tone(t, "accent"))
+    doc.badge(head, "Apple HIG · Google Material SVG", tone(t, "accent"))
     doc.rect(f, 0, 63, 1440, 1, fill=t["border"])
     title_bar(doc, f, t, "คลังไอคอน Google Material Symbols (SVG)",
               "ชุดเดียวกับ Front_End/src/UI_Components/Common/Google_Icon.tsx · viewBox 24×24")
@@ -846,13 +851,13 @@ def build_icon_library(doc, f):
         ("Actions & Helpers", ["search", "download", "emoji_events", "lightbulb"]),
     ]
     for gi, (gname, names) in enumerate(groups):
-        c = doc.card(f, 32, 160 + gi * 144, 1376, 132, t, radius=12, name=f"group/{gname}")
+        c = doc.card(f, 32, 160 + gi * 144, 1376, 132, t, radius=20, name=f"group/{gname}")
         doc.text(c, f"{gname} · {len(names)} icons", x=20, y=16, size=13, weight="Bold",
-                 color="#38BDF8")
+                 color="#64D2FF")
         tiles = doc.hstack(c, 20, 48, gap=12)
         for name in names:
-            tile = doc.hstack(tiles, w=200, h=64, gap=12, pad=[0, 14, 0, 14], radius=8,
-                              fill=t["surface2"], stroke="#334155")
+            tile = doc.hstack(tiles, w=200, h=64, gap=12, pad=[0, 14, 0, 14], radius=12,
+                              fill=t["surface2"], stroke=t["border"])
             doc.icon(tile, name, 28, t["accent"])
             lab = doc.vstack(tile, gap=2)
             doc.text(lab, name, size=12, weight="Bold", color=t["text"])
