@@ -67,21 +67,21 @@ git commit -m "feat(frontend): scaffold Next.js app with microservices types and
 
 ### Task 2: 60 FPS HTML5 Canvas Skeleton & Ghost Target Guide Engine
 **Files:**
-- Create: `frontend/src/components/canvas/SkeletonCanvas.tsx`
-- Create: `frontend/src/components/canvas/CanvasUtils.ts`
+- Create: `frontend/src/components/canvas/Skeleton_Canvas.tsx`
+- Create: `frontend/src/components/canvas/Canvas_Utils.ts`
 
 **Interfaces:**
 - Consumes: `Keypoint[]`, `GestureRule`, `angles`
 - Produces: 
-  - `<SkeletonCanvas keypoints={keypoints} targetRule={selectedRule} angles={angles} width={w} height={h} />`
+  - `<Skeleton_Canvas keypoints={keypoints} targetRule={selectedRule} angles={angles} width={w} height={h} />`
 
-- [ ] **Step 1: Implement Canvas Utilities (`frontend/src/components/canvas/CanvasUtils.ts`)**
+- [ ] **Step 1: Implement Canvas Utilities (`frontend/src/components/canvas/Canvas_Utils.ts`)**
 
 - นิยามคู่กระดูก COCO-17 connections: ไหล่ไปศอก, ศอกไปมือ, ไหล่ไปสะโพก, สะโพกไปเข่า, เข่าไปข้อเท้า
 - ฟังก์ชันวาดเส้น Gradient ตามความมั่นใจ (เขียว $>0.8$, เหลือง $0.5-0.8$, แดง $<0.5$)
 - ฟังก์ชันวาดวงกลมมุมข้อต่อ (Angle Arc) และแสดงตัวเลของศาบน Canvas
 
-- [ ] **Step 2: Implement `SkeletonCanvas.tsx` with Ghost Guideline**
+- [ ] **Step 2: Implement `Skeleton_Canvas.tsx` with Ghost Guideline**
 
 - รับ Prop `keypoints` (ตำแหน่งปัจจุบันของผู้ใช้) และ Prop `targetRule` (เป้าหมายของท่าฝึก)
 - วาด **Ghost Skeleton** (โครงร่างสีฟ้าโปร่งแสง Cyan Opacity 35%) ซ้อนทับ เพื่อเป็นไกด์นำทางให้ผู้ตัดสินรู้ว่าต้องยกแขนไปที่ตำแหน่งไหน
@@ -103,26 +103,26 @@ git commit -m "feat(frontend): implement 60 FPS HTML5 skeleton canvas with ghost
 
 ### Task 3: Live Practice Drill & Real-Time Coaching HUD (`/drills`)
 **Files:**
-- Create: `frontend/src/components/drill/LiveDrillFeed.tsx`
-- Create: `frontend/src/components/drill/CoachingHUD.tsx`
-- Create: `frontend/src/components/drill/DrillSelector.tsx`
+- Create: `frontend/src/components/drill/Live_Drill_Feed.tsx`
+- Create: `frontend/src/components/drill/Coaching_HUD.tsx`
+- Create: `frontend/src/components/drill/Drill_Selector.tsx`
 - Create: `frontend/src/app/drills/page.tsx`
 
 **Interfaces:**
-- Consumes: `useRefereeGatewaySocket`, `SkeletonCanvas`, `MOCK_IFAB_RULES`
+- Consumes: `useRefereeGatewaySocket`, `Skeleton_Canvas`, `MOCK_IFAB_RULES`
 - Produces: Complete Interactive Drill Page at route `/drills`
 
-- [ ] **Step 1: Implement Drill Selector & Settings (`DrillSelector.tsx`)**
+- [ ] **Step 1: Implement Drill Selector & Settings (`Drill_Selector.tsx`)**
 
 การ์ดเลือกท่าฝึกซ้อม แบ่งตามหมวดหมู่ พร้อมแสดงระดับความยาก และระยะเวลา Hold เป้าหมาย.
 
-- [ ] **Step 2: Implement Real-Time Coaching HUD (`CoachingHUD.tsx`)**
+- [ ] **Step 2: Implement Real-Time Coaching HUD (`Coaching_HUD.tsx`)**
 
 - แสดงวงล้อ Circular Countdown Timer เมื่อเข้าสู่สถานะ `HOLDING`
 - เกจวัดมุมข้อต่อแบบไดนามิก: องศาการยกแขน (Arm Elevation) และความเหยียดตรงของข้อศอก (Elbow Straightness)
 - ป้ายข้อความคำแนะนำแบบสด (Live Toast Banner) เช่น *"ยกแขนขวาขึ้นอีก 15°"*, *"ยอดเยี่ยม ค้างท่าไว้..."*
 
-- [ ] **Step 3: Implement Live Video/Webcam Stream (`LiveDrillFeed.tsx`)**
+- [ ] **Step 3: Implement Live Video/Webcam Stream (`Live_Drill_Feed.tsx`)**
 
 จัดการการเชื่อมต่อ Webcam ด้วย `navigator.mediaDevices.getUserMedia` พร้อมปุ่มสลับกล้องหน้า/หลัง, ปุ่ม Mirror View, และปุ่มเปิด/ปิด Ghost Guide Overlay.
 
@@ -142,10 +142,10 @@ git commit -m "feat(frontend): build live practice drill page with real-time coa
 
 ### Task 4: Match Video Review & Assessment Dashboard (`/assessment`)
 **Files:**
-- Create: `frontend/src/components/assessment/VideoScrubber.tsx`
-- Create: `frontend/src/components/assessment/DecisionTimeline.tsx`
-- Create: `frontend/src/components/assessment/CallDetailInspector.tsx`
-- Create: `frontend/src/components/assessment/ScorecardRadar.tsx`
+- Create: `frontend/src/components/assessment/Video_Scrubber.tsx`
+- Create: `frontend/src/components/assessment/Decision_Timeline.tsx`
+- Create: `frontend/src/components/assessment/Call_Detail_Inspector.tsx`
+- Create: `frontend/src/components/assessment/Scorecard_Radar.tsx`
 - Create: `frontend/src/app/assessment/page.tsx`
 
 **Interfaces:**
@@ -157,11 +157,11 @@ git commit -m "feat(frontend): build live practice drill page with real-time coa
 - ไทม์ไลน์แสดงแถบเวลาของแมตช์ 90 นาที พร้อมหมุดเหตุการณ์ (Event Pins) ตามเวลาที่ผู้ตัดสินให้สัญญาณ
 - คลิกที่หมุดเพื่อกระโดดข้ามไปยังวิดีโอเฟรมนั้นทันที (Jump to Timestamp)
 
-- [ ] **Step 2: Implement Call Detail Inspector (`CallDetailInspector.tsx`)**
+- [ ] **Step 2: Implement Call Detail Inspector (`Call_Detail_Inspector.tsx`)**
 
 แสดงภาพ Freeze Frame จังหวะตัดสิน, โครงร่างกระดูก Skeleton, คะแนนความถูกต้อง (0-100), ตารางมุมข้อต่อ, และกติกา IFAB ที่เกี่ยวข้อง.
 
-- [ ] **Step 3: Implement Assessment Scorecard (`ScorecardRadar.tsx`)**
+- [ ] **Step 3: Implement Assessment Scorecard (`Scorecard_Radar.tsx`)**
 
 สรุปผลคะแนนรวมของผู้ตัดสินในแมตช์: เรดาร์ชาร์ตความแม่นยำรายหมวดสัญญาณ, สถิติคะแนนเฉลี่ย, จุดผิดพลาดที่พบบ่อย 3 อันดับแรก, และปุ่ม Export สรุปรายงานการประเมิน.
 
@@ -181,17 +181,17 @@ git commit -m "feat(frontend): build match review timeline and assessment scorec
 
 ### Task 5: IFAB Digital Rulebook & Interactive Signals Catalog (`/rules`)
 **Files:**
-- Create: `frontend/src/data/ifab_signals.json`
-- Create: `frontend/src/components/rules/RuleCard.tsx`
-- Create: `frontend/src/components/rules/RuleFilter.tsx`
-- Create: `frontend/src/components/rules/RuleModal.tsx`
+- Create: `frontend/src/data/Ifab_Signals.json`
+- Create: `frontend/src/components/rules/Rule_Card.tsx`
+- Create: `frontend/src/components/rules/Rule_Filter.tsx`
+- Create: `frontend/src/components/rules/Rule_Modal.tsx`
 - Create: `frontend/src/app/rules/page.tsx`
 
 **Interfaces:**
-- Consumes: `ifab_signals.json`
+- Consumes: `Ifab_Signals.json`
 - Produces: Interactive Rulebook Catalog at route `/rules`
 
-- [ ] **Step 1: Compile Complete 20 IFAB Signals Knowledge Base (`ifab_signals.json`)**
+- [ ] **Step 1: Compile Complete 20 IFAB Signals Knowledge Base (`Ifab_Signals.json`)**
 
 รวบรวมข้อมูลสัญญาณผู้ตัดสิน 20 ท่าทาง พร้อมข้อความอธิบายกติกาภาษาไทยและอังกฤษ, กฎข้อที่เกี่ยวข้อง (Law 5, 12, 13), องศามาตรฐาน, รูปแบบการยกแขน, และข้อควรระวังในการตัดสิน.
 
@@ -216,10 +216,10 @@ git commit -m "feat(frontend): create IFAB digital rulebook catalog with 20 refe
 
 ### Task 6: API Gateway Client, System Health Modal & Navigation Layout
 **Files:**
-- Create: `frontend/src/hooks/useRefereeGatewaySocket.ts`
-- Create: `frontend/src/lib/gatewayClient.ts`
-- Create: `frontend/src/components/layout/Navbar.tsx`
-- Create: `frontend/src/components/layout/SystemHealthModal.tsx`
+- Create: `frontend/src/hooks/Use_Referee_Gateway_Socket.ts`
+- Create: `frontend/src/lib/Gateway_Client.ts`
+- Create: `frontend/src/components/layout/Nav_Bar.tsx`
+- Create: `frontend/src/components/layout/System_Health_Modal.tsx`
 - Create: `frontend/src/app/layout.tsx`
 - Create: `frontend/src/app/page.tsx`
 
@@ -227,15 +227,15 @@ git commit -m "feat(frontend): create IFAB digital rulebook catalog with 20 refe
 - Consumes: Tasks 1-5
 - Produces: Complete runnable Web Application with responsive Navigation, Home Dashboard, and Microservices Health Modal
 
-- [ ] **Step 1: Implement `useRefereeGatewaySocket.ts` with Auto-Fallback**
+- [ ] **Step 1: Implement `Use_Referee_Gateway_Socket.ts` with Auto-Fallback**
 
-เชื่อมต่อ WebSocket ไปยัง API Gateway `/ws/training-stream` หากต่อไม่ติดให้ Fallback เป็น `MicroservicesMockAdapter` อัตโนมัติ.
+เชื่อมต่อ WebSocket ไปยัง API Gateway `/ws/training-stream` หากต่อไม่ติดให้ Fallback เป็น `Microservices_Mock` อัตโนมัติ.
 
-- [ ] **Step 2: Implement Gateway HTTP Client (`src/lib/gatewayClient.ts`)**
+- [ ] **Step 2: Implement Gateway HTTP Client (`src/lib/Gateway_Client.ts`)**
 
 ไคลเอนต์เรียก API Gateway REST endpoints (`/api/v1/rules`, `/api/v1/drills`, `/api/v1/assessment/*`) พร้อมจัดการ Timeout และ Fallback Data.
 
-- [ ] **Step 3: Implement Global Navbar & System Health Modal (`Navbar.tsx`, `SystemHealthModal.tsx`)**
+- [ ] **Step 3: Implement Global Navbar & System Health Modal (`Nav_Bar.tsx`, `System_Health_Modal.tsx`)**
 
 - เมนูหลัก 3 หน้า: ฝึกซ้อมสด (`/drills`), ตรวจประเมินแมตช์ (`/assessment`), คลังกติกา IFAB (`/rules`)
 - ป้ายแสดงสถานะการเชื่อมต่อ: 🟢 Microservices Online / 🟡 Simulation Mode พร้อมปุ่มคลิกเปิดดูสถานะรายบริการ (API Gateway, Vision Service, Coaching Engine, Rules Service)
