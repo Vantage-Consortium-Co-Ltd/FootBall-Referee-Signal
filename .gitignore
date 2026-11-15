@@ -9,9 +9,10 @@ Train/mlruns/
 mlruns/
 runs/
 .venv/
-# docs (allow superpowers plans)
+# docs (allow superpowers plans and figcraft designs)
 docs/*
 !docs/superpowers/
+!docs/figcraft/
 *.log
 *.db
 *.joblib
