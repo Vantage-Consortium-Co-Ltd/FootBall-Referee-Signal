@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { GestureCategory, GestureRule } from "../../Data_Types/Referee_Types";
 import { MOCK_IFAB_RULES } from "../../Core_Lib/Microservices_Mock";
-import { Search, Filter, ShieldAlert, Award, Clock } from "lucide-react";
+import { Google_Icon } from "../Common/Google_Icon";
 
 export interface DrillSelectorProps {
   selectedRuleId: number;
@@ -39,7 +39,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-          <Award className="w-4 h-4 text-cyan-400" />
+          <Google_Icon name="emoji_events" size={16} className="text-cyan-400" />
           เลือกแบบฝึกหัดสัญญาณผู้ตัดสิน (IFAB Drills)
         </h2>
         <span className="text-xs text-slate-500 font-mono">
@@ -49,7 +49,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
 
       {/* Search Input */}
       <div className="relative mb-3">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+        <Google_Icon name="search" size={16} className="text-slate-400 absolute left-3 top-2.5" />
         <input
           type="text"
           value={searchQuery}
@@ -106,7 +106,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
 
               <div className="flex items-center gap-3 text-[10px] text-slate-500 pt-1 border-t border-slate-800/60">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-cyan-400" />
+                  <Google_Icon name="schedule" size={13} className="text-cyan-400" />
                   Hold: {rule.minHoldSeconds}s
                 </span>
                 <span>•</span>

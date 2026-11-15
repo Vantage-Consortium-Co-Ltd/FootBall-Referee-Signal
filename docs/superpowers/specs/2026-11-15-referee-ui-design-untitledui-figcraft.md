@@ -32,6 +32,16 @@
   - Text sm: `14px` / Line height `20px` (Medium/Regular) - เนื้อหาคำแนะนำการฝึกสอน
   - Text xs: `12px` / Line height `18px` (Medium/Mono) - องศาข้อต่อ, ค่า Latency, และป้าย Tag
 
+### 1.3 Iconography Asset System: Google Font Icons (Material Symbols Outlined)
+ระบบใช้ **Google Font Icons (Material Symbols Outlined)** เป็นมาตรฐานไอคอนเดี่ยวของทั้งแพลตฟอร์ม:
+- **CDN:** `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200`
+- **React Component:** `<Google_Icon name="..." size={...} filled={...} />` ใน `Front_End/src/UI_Components/Common/Google_Icon.tsx`
+- **Key Glyphs Mapping:**
+  - วิดีโอกล้อง: `videocam`, `videocam_off`
+  - การเล็งเป้าหมาย Tagging: `my_location`, `crop_free`, `how_to_reg`, `group`
+  - สถิติและการประเมิน: `monitoring`, `bolt`, `emoji_events`, `check_circle`, `warning`
+  - เมนูและการเรียนรู้: `search`, `menu_book`, `quiz`, `schedule`, `layers`, `flip`, `refresh`
+
 ---
 
 ## 2. Core Screens & Component Architecture in Figcraft

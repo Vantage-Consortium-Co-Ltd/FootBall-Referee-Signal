@@ -11,18 +11,7 @@ import {
   evaluateMockPosture,
   generateMockPersons,
 } from "../../Core_Lib/Microservices_Mock";
-import {
-  Camera,
-  CameraOff,
-  Crosshair,
-  FlipHorizontal,
-  RefreshCw,
-  Scan,
-  Sparkles,
-  UserCheck,
-  Users,
-  Video,
-} from "lucide-react";
+import { Google_Icon } from "../Common/Google_Icon";
 
 export interface LiveDrillFeedProps {
   targetRule: GestureRule;
@@ -148,7 +137,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       {/* Top Viewport Header */}
       <div className="px-5 py-3 bg-slate-900/90 border-b border-slate-800 flex justify-between items-center text-xs">
         <div className="flex items-center gap-2">
-          <Video className="w-4 h-4 text-cyan-400" />
+          <Google_Icon name="videocam" size={16} className="text-cyan-400" />
           <span className="font-semibold text-slate-200">
             {cameraActive ? "Live Camera AI Tagging" : "Camera AI Tagging Simulation"}
           </span>
@@ -168,11 +157,11 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           >
             {cameraActive ? (
               <>
-                <CameraOff className="w-3.5 h-3.5" /> ปิดกล้อง
+                <Google_Icon name="videocam_off" size={14} /> ปิดกล้อง
               </>
             ) : (
               <>
-                <Camera className="w-3.5 h-3.5" /> เปิดกล้อง
+                <Google_Icon name="videocam" size={14} /> เปิดกล้อง
               </>
             )}
           </button>
@@ -183,7 +172,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       <div className="px-4 py-2 bg-slate-950/70 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
           <span className="text-slate-400 font-medium flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-cyan-400" /> ตรวจพบบุคคล ({detectedPersons.length}):
+            <Google_Icon name="group" size={14} className="text-cyan-400" /> ตรวจพบบุคคล ({detectedPersons.length}):
           </span>
 
           {/* Quick Tagging Buttons for each person */}
@@ -199,7 +188,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
                     : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
                 }`}
               >
-                <Crosshair className={`w-3 h-3 ${isSelected ? "text-cyan-400" : "text-slate-500"}`} />
+                <Google_Icon name="my_location" size={12} className={isSelected ? "text-cyan-400" : "text-slate-500"} />
                 <span>{person.labelTh}</span>
                 <span className="font-mono text-[9px] text-slate-500">
                   {Math.round(person.confidence * 100)}%
@@ -221,7 +210,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
                 : "bg-slate-900 border-slate-800 text-slate-400"
             }`}
           >
-            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <Google_Icon name="how_to_reg" size={14} className="text-emerald-400" />
             Auto-Tag ผู้ตัดสิน: {autoTagReferee ? "เปิด" : "ปิด"}
           </button>
         </div>
@@ -278,7 +267,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
           {/* Click to Tag Hint */}
           <div className="bg-slate-950/80 backdrop-blur border border-cyan-500/30 rounded-lg px-2.5 py-1 text-[11px] text-cyan-300 flex items-center gap-1.5">
-            <Scan className="w-3.5 h-3.5 text-cyan-400" />
+            <Google_Icon name="crop_free" size={14} className="text-cyan-400" />
             <span>คลิกที่กรอบตัวบุคคลบนจอเพื่อสลับเป้าหมาย Tagging</span>
           </div>
 
@@ -307,7 +296,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
                 : "bg-slate-900 border-slate-800 text-slate-400"
             }`}
           >
-            <Scan className="w-3.5 h-3.5" />
+            <Google_Icon name="crop_free" size={14} />
             กรอบ Tagging: {showBBoxes ? "แสดง" : "ซ่อน"}
           </button>
           <button
@@ -318,7 +307,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
                 : "bg-slate-900 border-slate-800 text-slate-400"
             }`}
           >
-            <FlipHorizontal className="w-3.5 h-3.5" />
+            <Google_Icon name="flip" size={14} />
             Mirror View: {mirror ? "ON" : "OFF"}
           </button>
           <button
@@ -350,7 +339,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           }}
           className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 transition"
         >
-          <RefreshCw className="w-3 h-3" /> รีเซ็ตตัวนับ Hold
+          <Google_Icon name="refresh" size={13} /> รีเซ็ตตัวนับ Hold
         </button>
       </div>
     </div>

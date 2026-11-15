@@ -5,15 +5,7 @@ import {
   FrameFeedbackPayload,
   GestureRule,
 } from "../../Data_Types/Referee_Types";
-import {
-  Activity,
-  AlertCircle,
-  Award,
-  CheckCircle2,
-  Clock,
-  Compass,
-  Zap,
-} from "lucide-react";
+import { Google_Icon } from "../Common/Google_Icon";
 
 export interface CoachingHUDProps {
   feedback: FrameFeedbackPayload;
@@ -106,7 +98,7 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
           </svg>
           <div className="absolute flex flex-col items-center justify-center">
             {isCompleted ? (
-              <CheckCircle2 className="w-6 h-6 text-emerald-400 animate-bounce" />
+              <Google_Icon name="check_circle" size={24} className="text-emerald-400 animate-bounce" filled />
             ) : (
               <>
                 <span className="text-xs font-mono font-bold text-slate-100">
@@ -126,11 +118,11 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
         className={`px-4 py-3 rounded-xl border flex items-center gap-3 transition-all ${statusColor}`}
       >
         {isCompleted ? (
-          <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-400" />
+          <Google_Icon name="check_circle" size={20} className="text-emerald-400" filled />
         ) : isLost ? (
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-400" />
+          <Google_Icon name="warning" size={20} className="text-amber-400" filled />
         ) : (
-          <Activity className="w-5 h-5 flex-shrink-0 text-cyan-400" />
+          <Google_Icon name="monitoring" size={20} className="text-cyan-400" />
         )}
         <div className="text-xs font-medium leading-relaxed">
           {feedbackTip}
@@ -140,7 +132,7 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
       {/* Joint Angle Telemetry Gauges */}
       <div className="space-y-3">
         <div className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <Compass className="w-3.5 h-3.5 text-cyan-400" />
+          <Google_Icon name="explore" size={16} className="text-cyan-400" />
           การวัดองศาข้อต่อตามกติกา IFAB
         </div>
 
@@ -201,7 +193,7 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
       {/* Practice Streak & Stats Footer */}
       <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
         <div className="flex items-center gap-1.5">
-          <Zap className="w-4 h-4 text-amber-400" />
+          <Google_Icon name="bolt" size={16} className="text-amber-400" filled />
           <span>ต่อเนื่อง: <b className="text-slate-200">{streakCount} ครั้ง</b></span>
         </div>
         <div>

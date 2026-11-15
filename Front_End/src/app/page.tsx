@@ -7,18 +7,7 @@ import {
   generateMockKeypoints,
   getMockSystemHealth,
 } from "../Core_Lib/Microservices_Mock";
-import {
-  Activity,
-  Award,
-  BookOpen,
-  Camera,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Play,
-  RotateCcw,
-  Sparkles,
-} from "lucide-react";
+import { Google_Icon } from "../UI_Components/Common/Google_Icon";
 
 export default function Home() {
   const [selectedRuleId, setSelectedRuleId] = useState<number>(1); // Default: Indirect Free Kick
@@ -79,7 +68,7 @@ export default function Home() {
           {/* Viewport Header */}
           <div className="px-5 py-3.5 bg-slate-900/90 border-b border-slate-800 flex justify-between items-center text-xs">
             <div className="flex items-center gap-2">
-              <Camera className="w-4 h-4 text-emerald-400" />
+              <Google_Icon name="videocam" size={16} className="text-emerald-400" />
               <span className="font-semibold text-slate-200">
                 Live Skeleton Engine Preview (Task 2 Engine)
               </span>
@@ -163,7 +152,7 @@ export default function Home() {
           {/* Signal Selector Card */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
             <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-3">
-              <Layers className="w-4 h-4 text-cyan-400" />
+              <Google_Icon name="layers" size={16} className="text-cyan-400" />
               เลือกทดสอบท่าสัญญาณ (20 IFAB Signals)
             </h2>
             <div className="grid grid-cols-2 gap-2 max-h-[190px] overflow-y-auto pr-1">
@@ -187,7 +176,7 @@ export default function Home() {
           {/* Joint Angle Telemetry Card */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex-1">
             <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-3">
-              <Activity className="w-4 h-4 text-emerald-400" />
+              <Google_Icon name="monitoring" size={16} className="text-emerald-400" />
               การวิเคราะห์มุมข้อต่อ (Joint Angle Telemetry)
             </h2>
 
@@ -231,7 +220,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
         <div className="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition rounded-2xl p-5">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
-            <Camera className="w-5 h-5" />
+            <Google_Icon name="videocam" size={20} />
           </div>
           <h3 className="text-base font-bold text-slate-100">Live Practice Drill</h3>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
@@ -241,19 +230,19 @@ export default function Home() {
 
         <div className="bg-slate-900/60 border border-slate-800 hover:border-cyan-500/40 transition rounded-2xl p-5">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
-            <Clock className="w-5 h-5" />
+            <Google_Icon name="quiz" size={20} />
           </div>
-          <h3 className="text-base font-bold text-slate-100">Match Review & Timeline</h3>
+          <h3 className="text-base font-bold text-slate-100">Scenario Examination Studio</h3>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-            ตรวจประเมินวิดีโอแมตช์การตัดสิน บันทึกไทม์ไลน์จุดเป่าฟาวล์ และสรุปคะแนนประเมินรายสัญญาณ
+            ห้องทดสอบภาคปฏิบัติผ่านสถานการณ์จำลอง (Scenario Clips) วัดผลการตัดสิน ความถูกต้องของสรีระ และเวลาตอบสนอง
           </p>
         </div>
 
         <div className="bg-slate-900/60 border border-slate-800 hover:border-purple-500/40 transition rounded-2xl p-5">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3">
-            <BookOpen className="w-5 h-5" />
+            <Google_Icon name="menu_book" size={20} />
           </div>
-          <h3 className="text-base font-bold text-slate-100">IFAB Digital Rulebook</h3>
+          <h3 className="text-base font-bold text-slate-100">IFAB Digital Handbook</h3>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
             คลังกติกา 20 ท่าทางสัญญาณผู้ตัดสินตามมาตรฐานสากล IFAB Laws of the Game พร้อมมุมองศาอ้างอิง
           </p>

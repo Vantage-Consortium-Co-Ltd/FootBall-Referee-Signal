@@ -15,15 +15,7 @@ import {
   Drill_Selector,
   Live_Drill_Feed,
 } from "../../UI_Components/Drill_Practice";
-import {
-  ArrowLeft,
-  Award,
-  BookOpen,
-  Camera,
-  RotateCcw,
-  Sparkles,
-  Trophy,
-} from "lucide-react";
+import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
 
 export default function DrillsPage() {
   const [selectedRule, setSelectedRule] = useState<GestureRule>(MOCK_IFAB_RULES[1]); // Default: Indirect Free Kick
@@ -49,9 +41,9 @@ export default function DrillsPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition"
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition inline-flex items-center justify-center"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <Google_Icon name="arrow_back" size={20} />
           </Link>
           <div>
             <div className="flex items-center gap-2">
@@ -69,7 +61,7 @@ export default function DrillsPage() {
         {/* Action Pills */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs font-semibold">
-            <Trophy className="w-4 h-4 text-amber-400" />
+            <Google_Icon name="emoji_events" size={16} className="text-amber-400" filled />
             <span>สำเร็จต่อเนื่อง: {streakCount} ครั้ง</span>
           </div>
 
@@ -96,7 +88,7 @@ export default function DrillsPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-cyan-400" />
+                <Google_Icon name="menu_book" size={16} className="text-cyan-400" />
                 คำอธิบายกติกา IFAB: {selectedRule.nameTh}
               </h3>
               <span className="text-xs font-mono text-cyan-400 font-semibold">
