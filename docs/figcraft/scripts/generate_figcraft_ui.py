@@ -1,38 +1,40 @@
 """
 generate_figcraft_ui.py
 =======================
-Generates high-fidelity FigCraft UI prototype commands for Football Referee Academy
-based on Untitled UI Design System & IFAB Rules specification.
-Features Google Font Icons (Material Symbols Outlined) as native vector icon assets.
+Generates the FigCraft UI prototype for the Football Referee Academy
+(educational & trainee-assessment platform) on a strict layout grid.
 
-Generates 5 frames side-by-side (1440x900 each, with 100px gap):
-  - Frame 2: Screen1_Live_Drills (x=0, y=0)
-  - Frame 3: Screen2_Scenario_Exam (x=1540, y=0)
-  - Frame 4: Screen3_IFAB_Handbook (x=3080, y=0)
-  - Frame 5: Screen4_Trainee_Gradebook (x=4620, y=0)
-  - Frame 6: Google_Font_Icons_Asset_Library (x=6160, y=0)
+Layout system (all screens 1440x900):
+  - Header bar          y=0    h=64   (logo | nav tabs | profile)  — auto layout
+  - Page title bar      y=88   h=48   (title + subtitle | actions)  — auto layout
+  - Content area        y=160  h=708  (bottom margin 32)
+  - Side margins 32, gutter 24, content width 1376
+  - Two-column screens: 792 | 24 | 560   (Drills, Examination)
+                        904 | 24 | 448   (Handbook)
+
+Why auto layout: badges, buttons and rows hug their real text width, so Thai
+copy never overflows a hard-coded box. Cards clip their children.
+
+Icons: Google Material Symbols (24x24 SVG paths). Each path gets two
+sub-pixel corner anchors so FigCraft scales the full 24px viewBox instead of
+stretching the glyph's own bounding box.
 """
 
-import os
-import sys
 import json
 import math
 import subprocess
+import sys
 from pathlib import Path
 
-# Paths
 SCRIPTS_DIR = Path(__file__).resolve().parent
 DOCS_FIGCRAFT = SCRIPTS_DIR.parent
-WORKSPACE_ROOT = DOCS_FIGCRAFT.parent.parent
 RENDERS_DIR = DOCS_FIGCRAFT / "renders"
 FIGCRAFT_CLI = r"C:\Program Files\ArtCraft\FigCraft\figcraft-cli.exe"
 
-COMMANDS = []
-
 # ==============================================================================
-# OFFICIAL GOOGLE FONT ICONS (MATERIAL SYMBOLS OUTLINED - 24x24 SVG PATHS)
+# GOOGLE MATERIAL SYMBOLS (24x24 viewBox SVG paths)
 # ==============================================================================
-GOOGLE_FONT_ICONS = {
+ICONS = {
     "sports_soccer": "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z",
     "videocam": "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",
     "videocam_off": "M21 6.5l-4 4V7c0-.55-.45-1-1-1H9.82L21 17.18V6.5zM3.27 2L2 3.27l4.73 4.73H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.55-.18L18.73 21 20 19.73 3.27 2zM5 16V9.82L11.18 16H5z",
@@ -45,6 +47,7 @@ GOOGLE_FONT_ICONS = {
     "bolt": "M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z",
     "schedule": "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",
     "timer": "M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z",
+    "speed": "M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.28-10.43zM10.59 15.41a2 2 0 1 0 2.83-2.83l-3.07-3.07-1.41 1.41 1.65 1.65z",
     "emoji_events": "M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1c1.8-.46 3.16-1.92 3.61-3.96C19.08 11.63 21 9.55 21 7V5c0-1.1-.9-2-2-2zm-14 3V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z",
     "search": "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
     "menu_book": "M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm-1 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z",
@@ -55,953 +58,867 @@ GOOGLE_FONT_ICONS = {
     "download": "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
     "refresh": "M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
     "flip": "M15 21h2v-2h-2v2zm4-12h2V7h-2v2zM3 5v14c0 1.1.9 2 2 2h4v-2H5V5h4V3H5c-1.1 0-2 .9-2 2zm16-2v2h2c0-1.1-.9-2-2-2zm-8 20h2V1h-2v22zm8-6h2v-2h-2v2zM15 5h2V3h-2v2zm4 8h2v-2h-2v2zm0 8c1.1 0 2-.9 2-2h-2v2z",
-    "straighten": "M7.41 18.59L8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z",
+    "straighten": "M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z",
     "lightbulb": "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6A5.002 5.002 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z",
-    "military_tech": "M17 11h-2V7h2v4zm-4-4h-2v4h2V7zm-4 0H7v4h2V7zm10-5H5c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 18H6V4h12v16z",
-    "speed": "M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.28-10.43zM10.59 15.41a2 2 0 1 0 2.83-2.83l-3.07-3.07-1.41 1.41 1.65 1.65z",
-    "circle": "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+    "play_arrow": "M8 5v14l11-7z",
+}
+# Sub-pixel anchors at (0,0) and (24,24): force the 24px viewBox as the bounds.
+VIEWBOX_ANCHORS = " M0 0h.01v.01H0z M23.99 23.99h.01v.01h-.01z"
+
+# ==============================================================================
+# DESIGN TOKENS (Untitled UI palette)
+# ==============================================================================
+DARK = {
+    "name": "dark", "bg": "#090D16", "surface": "#0F172A", "surface2": "#0B1220",
+    "border": "#1E293B", "text": "#F8FAFC", "text2": "#94A3B8", "text3": "#64748B",
+    "accent": "#22D3EE", "accent_bg": "#083344", "accent_border": "#155E75",
+}
+LIGHT = {
+    "name": "light", "bg": "#F9FAFB", "surface": "#FFFFFF", "surface2": "#F8FAFC",
+    "border": "#EAECF0", "text": "#101828", "text2": "#475467", "text3": "#98A2B3",
+    "accent": "#0E7490", "accent_bg": "#F0FDFA", "accent_border": "#99F6E4",
+}
+TONES = {
+    # name: (dark bg, dark fg, dark border, light bg, light fg, light border)
+    "success": ("#052E1C", "#34D399", "#065F46", "#ECFDF3", "#027A48", "#ABEFC6"),
+    "warning": ("#2A1A05", "#FBBF24", "#78350F", "#FFFAEB", "#B54708", "#FEDF89"),
+    "error":   ("#2A0A12", "#FB7185", "#881337", "#FEF3F2", "#B42318", "#FECDCA"),
+    "info":    ("#0C1E3A", "#60A5FA", "#1E3A8A", "#EFF8FF", "#175CD3", "#B2DDFF"),
+    "accent":  ("#083344", "#22D3EE", "#155E75", "#F0FDFA", "#0E7490", "#99F6E4"),
+    "neutral": ("#1E293B", "#CBD5E1", "#334155", "#F2F4F7", "#344054", "#EAECF0"),
 }
 
-def add_command(command, params):
-    COMMANDS.append({"command": command, "params": params})
 
-def add_frame(name, x, y, width=1440, height=900, fill="#090D16"):
-    add_command("frame.create", {
-        "name": name,
-        "x": x,
-        "y": y,
-        "width": width,
-        "height": height,
-        "props": {
-            "fill": fill
-        }
-    })
-
-def add_rect(parent, x, y, w, h, fill=None, stroke=None, stroke_width=None, corner_radius=None, name=None, opacity=None):
-    props = {}
-    if fill is not None:
-        props["fill"] = fill
-    if stroke is not None:
-        props["stroke"] = stroke
-        props["strokeWeight"] = stroke_width if stroke_width is not None else 1
-    if corner_radius is not None:
-        props["cornerRadius"] = corner_radius
-    if opacity is not None:
-        props["opacity"] = opacity
-    
-    params = {
-        "parent": parent,
-        "x": x,
-        "y": y,
-        "width": w,
-        "height": h,
-        "props": props
-    }
-    if name:
-        params["name"] = name
-    add_command("shape.rectangle", params)
-
-def add_ellipse(parent, x, y, w, h, fill=None, stroke=None, stroke_width=None, name=None, opacity=None):
-    props = {}
-    if fill is not None:
-        props["fill"] = fill
-    if stroke is not None:
-        props["stroke"] = stroke
-        props["strokeWeight"] = stroke_width if stroke_width is not None else 1
-    if opacity is not None:
-        props["opacity"] = opacity
-    
-    params = {
-        "parent": parent,
-        "x": x,
-        "y": y,
-        "width": w,
-        "height": h,
-        "props": props
-    }
-    if name:
-        params["name"] = name
-    add_command("shape.ellipse", params)
-
-def add_text(parent, x, y, text, font_size=14, font_style="Regular", fill="#FFFFFF", width=None, align="left", name=None):
-    props = {
-        "fontSize": font_size,
-        "fill": fill,
-        "textAlign": align
-    }
-    if font_style:
-        props["fontStyle"] = font_style
-    
-    params = {
-        "parent": parent,
-        "text": text,
-        "x": x,
-        "y": y,
-        "props": props
-    }
-    if width:
-        params["width"] = width
-    if name:
-        params["name"] = name
-    add_command("text.create", params)
-
-def add_path(parent, path_data, fill=None, stroke=None, stroke_width=None, name=None, opacity=None, x=None, y=None, width=None, height=None):
-    props = {}
-    if fill is not None:
-        props["fill"] = fill
-    if stroke is not None:
-        props["stroke"] = stroke
-        props["strokeWeight"] = stroke_width if stroke_width is not None else 1
-    if opacity is not None:
-        props["opacity"] = opacity
-    
-    params = {
-        "parent": parent,
-        "path": path_data,
-        "props": props
-    }
-    if x is not None:
-        params["x"] = x
-    if y is not None:
-        params["y"] = y
-    if width is not None:
-        params["width"] = width
-    if height is not None:
-        params["height"] = height
-    if name:
-        params["name"] = name
-    add_command("vector.create", params)
-
-def add_line(parent, x1, y1, x2, y2, stroke="#FFFFFF", stroke_width=1, name=None, opacity=None):
-    path_data = f"M {x1} {y1} L {x2} {y2}"
-    add_path(parent, path_data, stroke=stroke, stroke_width=stroke_width, name=name, opacity=opacity)
-
-def add_google_icon(parent, icon_name, x, y, size=20, fill="#22D3EE", name=None):
-    """Adds a native Google Material Symbols Outlined vector icon to FigCraft"""
-    path_data = GOOGLE_FONT_ICONS.get(icon_name)
-    if not path_data:
-        return
-    icon_layer_name = name if name else f"Google_Icon_{icon_name}"
-    add_path(parent, path_data, fill=fill, name=icon_layer_name, x=x, y=y, width=size, height=size)
-
-def add_badge(parent, x, y, text, bg_color, text_color, border_color=None, font_size=11, font_style="SemiBold", height=22, width=None, icon_name=None, icon_color=None):
-    icon_offset = 0
-    if icon_name:
-        icon_size = max(12, height - 8)
-        icon_offset = icon_size + 4
-        calc_width = width if width else (len(text) * 7 + icon_offset + 16)
-    else:
-        calc_width = width if width else (len(text) * 7 + 16)
-        
-    add_rect(parent, x, y, calc_width, height, fill=bg_color, stroke=border_color, stroke_width=1 if border_color else None, corner_radius=height // 2)
-    
-    if icon_name:
-        add_google_icon(parent, icon_name, x + 6, y + (height - icon_size) // 2, size=icon_size, fill=icon_color if icon_color else text_color)
-        
-    add_text(parent, x + 8 + icon_offset, y + 4, text, font_size=font_size, font_style=font_style, fill=text_color)
-    return calc_width
-
-def add_button(parent, x, y, w, h, text, bg_color, text_color, border_color=None, font_size=13, font_style="SemiBold", corner_radius=8, icon_name=None, icon_color=None):
-    add_rect(parent, x, y, w, h, fill=bg_color, stroke=border_color, stroke_width=1 if border_color else None, corner_radius=corner_radius)
-    if icon_name:
-        icon_size = 16
-        add_google_icon(parent, icon_name, x + 12, y + (h - icon_size) // 2, size=icon_size, fill=icon_color if icon_color else text_color)
-        add_text(parent, x + 34, y + (h // 2) - (font_size // 2) - 1, text, font_size=font_size, font_style=font_style, fill=text_color)
-    else:
-        add_text(parent, x + (w // 2), y + (h // 2) - (font_size // 2) - 1, text, font_size=font_size, font_style=font_style, fill=text_color, align="center")
-
-def add_progress_bar(parent, x, y, w, h, pct, bg_color, fill_color, corner_radius=4):
-    add_rect(parent, x, y, w, h, fill=bg_color, corner_radius=corner_radius)
-    fill_w = max(4, int(w * (pct / 100.0)))
-    add_rect(parent, x, y, fill_w, h, fill=fill_color, corner_radius=corner_radius)
-
-def add_radar_chart(parent, cx, cy, radius, values, labels, color="#0E7490"):
-    for step in [0.25, 0.5, 0.75, 1.0]:
-        r = radius * step
-        ring_path = f"M {cx} {cy - r} L {cx + r} {cy} L {cx} {cy + r} L {cx - r} {cy} Z"
-        add_path(parent, ring_path, stroke="#E2E8F0" if color=="#0E7490" else "#334155", stroke_width=1)
-    
-    add_line(parent, cx, cy - radius, cx, cy + radius, stroke="#CBD5E1", stroke_width=1)
-    add_line(parent, cx - radius, cy, cx + radius, cy, stroke="#CBD5E1", stroke_width=1)
-
-    v_top, v_right, v_bottom, v_left = [v / 100.0 * radius for v in values]
-    poly_path = f"M {cx} {cy - v_top} L {cx + v_right} {cy} L {cx} {cy + v_bottom} L {cx - v_left} {cy} Z"
-    add_path(parent, poly_path, fill="#0E749033", stroke=color, stroke_width=2, name="Radar Data Polygon")
-
-    pts = [
-        (cx, cy - v_top),
-        (cx + v_right, cy),
-        (cx, cy + v_bottom),
-        (cx - v_left, cy)
-    ]
-    for px, py in pts:
-        add_ellipse(parent, px - 4, py - 4, 8, 8, fill=color, stroke="#FFFFFF", stroke_width=1)
+def tone(theme, name):
+    t = TONES[name]
+    return (t[0], t[1], t[2]) if theme["name"] == "dark" else (t[3], t[4], t[5])
 
 
 # ==============================================================================
-# BUILD SCREEN 1: Live Practice Studio (/drills) - Frame ID: 2
+# FIGCRAFT COMMAND BUILDER
 # ==============================================================================
-def build_screen_1(frame_id):
-    p = frame_id
-    # Header Bar
-    add_rect(p, 0, 0, 1440, 64, fill="#0F172A", stroke="#1E293B", stroke_width=1)
-    # Brand with Google Icon
-    add_google_icon(p, "sports_soccer", 32, 21, size=22, fill="#22D3EE")
-    add_text(p, 62, 20, "Referee Academy AI", font_size=18, font_style="Bold", fill="#FFFFFF")
-    
-    # Breadcrumbs
-    add_rect(p, 275, 16, 375, 32, fill="#1E293B", corner_radius=16)
-    add_text(p, 290, 23, "หน้าหลัก   /   แบบฝึกหัดสด   /   ฟรีคิกทางอ้อม (IFAB Law 13)", font_size=12, font_style="Medium", fill="#94A3B8")
-    
-    # Status badges in header (with Google Font Icons)
-    add_badge(p, 665, 20, "Microservices Online (31.4 FPS)", bg_color="#064E3B", text_color="#34D399", border_color="#059669", icon_name="circle", icon_color="#34D399")
-    add_badge(p, 920, 20, "Latency: 14.2ms", bg_color="#1E293B", text_color="#38BDF8", icon_name="bolt", icon_color="#38BDF8")
-    add_badge(p, 1070, 20, "00:14:25 Session", bg_color="#1E293B", text_color="#CBD5E1", icon_name="schedule", icon_color="#CBD5E1")
-    
-    # Profile
-    add_rect(p, 1240, 16, 168, 32, fill="#1E293B", corner_radius=16)
-    add_ellipse(p, 1244, 20, 24, 24, fill="#0E7490")
-    add_text(p, 1249, 24, "IR", font_size=11, font_style="Bold", fill="#FFFFFF")
-    add_text(p, 1276, 23, "อัศวิน (Level 2)", font_size=12, font_style="Medium", fill="#E2E8F0")
+class FigCraftDoc:
+    """Accumulates commands and predicts node ids (FigCraft assigns them
+    sequentially from 2 in a fresh document; verified after the run)."""
 
-    # LEFT VIEWPORT: Video Feed Area
-    add_rect(p, 32, 88, 860, 530, fill="#0B132B", stroke="#1E293B", stroke_width=2, corner_radius=16)
-    
-    # Top feed meta banner
-    add_rect(p, 48, 104, 240, 26, fill="#0F172ACC", corner_radius=6)
-    add_google_icon(p, "videocam", 56, 109, size=16, fill="#F43F5E")
-    add_text(p, 78, 109, "LIVE WEBCAM FEED (1080p 60FPS)", font_size=11, font_style="Bold", fill="#F43F5E")
-    add_badge(p, 300, 104, "AI MODEL: YOLOv8x-Pose (ONNX TensorRT)", bg_color="#0F172ACC", text_color="#38BDF8")
+    def __init__(self):
+        self.commands = []
+        self.expected_ids = []
+        self._next_id = 2
 
-    # Secondary untagged person (Player #10)
-    add_rect(p, 670, 210, 160, 280, fill="#0F172A40", stroke="#475569", stroke_width=1, corner_radius=8)
-    add_badge(p, 670, 182, "Player #10 (คลิกเพื่อสลับ Tag)", bg_color="#1E293B", text_color="#94A3B8", icon_name="person", icon_color="#94A3B8")
+    def _create(self, command, params):
+        node_id = self._next_id
+        self._next_id += 1
+        self.commands.append({"command": command, "params": params})
+        self.expected_ids.append(node_id)
+        return node_id
 
-    # Tactical Reticle on Referee
-    ret_x, ret_y, ret_w, ret_h = 240, 140, 380, 430
-    add_rect(p, ret_x, ret_y, ret_w, ret_h, fill="#08334415", stroke="#22D3EE40", stroke_width=1, corner_radius=12)
-    bracket_len = 24
-    add_line(p, ret_x, ret_y + bracket_len, ret_x, ret_y, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x, ret_y, ret_x + bracket_len, ret_y, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x + ret_w - bracket_len, ret_y, ret_x + ret_w, ret_y, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x + ret_w, ret_y, ret_x + ret_w, ret_y + bracket_len, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x, ret_y + ret_h - bracket_len, ret_x, ret_y + ret_h, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x, ret_y + ret_h, ret_x + bracket_len, ret_y + ret_h, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x + ret_w - bracket_len, ret_y + ret_h, ret_x + ret_w, ret_y + ret_h, stroke="#22D3EE", stroke_width=3)
-    add_line(p, ret_x + ret_w, ret_y + ret_h - bracket_len, ret_x + ret_w, ret_y + ret_h, stroke="#22D3EE", stroke_width=3)
+    # ---- primitives ---------------------------------------------------------
+    def frame(self, parent, x, y, w, h, name=None, fill="none", **props):
+        props["fill"] = fill
+        params = {"x": x, "y": y, "width": w, "height": h, "props": props}
+        if parent is not None:
+            params["parent"] = parent
+        if name:
+            params["name"] = name
+        return self._create("frame.create", params)
 
-    # Floating Tag pill above reticle with Google Icon
-    add_badge(p, ret_x + 30, ret_y - 14, "TAGGED: REFEREE (98.4% Confidence)", bg_color="#083344", text_color="#22D3EE", border_color="#22D3EE", font_size=11, height=24, icon_name="my_location", icon_color="#22D3EE")
+    def rect(self, parent, x, y, w, h, fill="none", name=None, **props):
+        props["fill"] = fill
+        params = {"parent": parent, "x": x, "y": y, "width": w, "height": h, "props": props}
+        if name:
+            params["name"] = name
+        return self._create("shape.rectangle", params)
 
-    # Ghost guideline overlay
-    add_line(p, 470, 240, 470, 90, stroke="#38BDF860", stroke_width=2, name="Ghost Target Line")
-    add_ellipse(p, 464, 84, 12, 12, stroke="#38BDF880", stroke_width=2, fill="#0284C720", name="Ghost Wrist Target")
-    add_text(p, 485, 96, "เกณฑ์ IFAB 180° (เป้าหมาย)", font_size=10, font_style="Medium", fill="#38BDF8")
+    def ellipse(self, parent, x, y, w, h, fill="none", name=None, **props):
+        props["fill"] = fill
+        params = {"parent": parent, "x": x, "y": y, "width": w, "height": h, "props": props}
+        if name:
+            params["name"] = name
+        return self._create("shape.ellipse", params)
 
-    # Referee Skeleton (COCO 17 Keypoints)
-    head_x, head_y = 430, 190
-    l_sh_x, l_sh_y = 390, 240
-    r_sh_x, r_sh_y = 470, 240
-    l_elb_x, l_elb_y = 360, 310
-    l_wri_x, l_wri_y = 350, 375
-    r_elb_x, r_elb_y = 472, 165
-    r_wri_x, r_wri_y = 474, 95
-    l_hip_x, l_hip_y = 405, 370
-    r_hip_x, r_hip_y = 455, 370
-    l_kne_x, l_kne_y = 395, 460
-    r_kne_x, r_kne_y = 465, 460
-    l_ank_x, l_ank_y = 390, 540
-    r_ank_x, r_ank_y = 470, 540
+    def text(self, parent, s, x=0, y=0, size=12, weight="Regular", color="#FFFFFF",
+             width=None, align=None, name=None):
+        props = {"fontSize": size, "fontStyle": weight, "fill": color}
+        if align:
+            props["textAlign"] = align
+        params = {"parent": parent, "text": s, "x": x, "y": y, "props": props}
+        if width:
+            params["width"] = width
+            props["textAutoResize"] = "height"
+        if name:
+            params["name"] = name
+        return self._create("text.create", params)
 
-    bones = [
-        (head_x, head_y, (l_sh_x + r_sh_x)//2, l_sh_y),
-        (l_sh_x, l_sh_y, r_sh_x, r_sh_y),
-        (l_sh_x, l_sh_y, l_elb_x, l_elb_y),
-        (l_elb_x, l_elb_y, l_wri_x, l_wri_y),
-        (r_sh_x, r_sh_y, r_elb_x, r_elb_y),
-        (r_elb_x, r_elb_y, r_wri_x, r_wri_y),
-        (l_sh_x, l_sh_y, l_hip_x, l_hip_y),
-        (r_sh_x, r_sh_y, r_hip_x, r_hip_y),
-        (l_hip_x, l_hip_y, r_hip_x, r_hip_y),
-        (l_hip_x, l_hip_y, l_kne_x, l_kne_y),
-        (r_hip_x, r_hip_y, r_kne_x, r_kne_y),
-        (l_kne_x, l_kne_y, l_ank_x, l_ank_y),
-        (r_kne_x, r_kne_y, r_ank_x, r_ank_y),
-    ]
-    for x1, y1, x2, y2 in bones:
-        add_line(p, x1, y1, x2, y2, stroke="#22D3EE", stroke_width=4)
-        add_line(p, x1, y1, x2, y2, stroke="#0891B240", stroke_width=8)
+    def path(self, parent, d, fill="none", stroke=None, weight=None, name=None,
+             x=None, y=None, w=None, h=None, **props):
+        props["fill"] = fill
+        if stroke:
+            props["stroke"] = stroke
+            props["strokeWeight"] = weight or 1
+        params = {"parent": parent, "path": d, "props": props}
+        for key, val in (("x", x), ("y", y), ("width", w), ("height", h)):
+            if val is not None:
+                params[key] = val
+        if name:
+            params["name"] = name
+        return self._create("vector.create", params)
 
-    keypoints = [
-        (head_x, head_y), (l_sh_x, l_sh_y), (r_sh_x, r_sh_y),
-        (l_elb_x, l_elb_y), (l_wri_x, l_wri_y),
-        (r_elb_x, r_elb_y), (r_wri_x, r_wri_y),
-        (l_hip_x, l_hip_y), (r_hip_x, r_hip_y),
-        (l_kne_x, l_kne_y), (r_kne_x, r_kne_y),
-        (l_ank_x, l_ank_y), (r_ank_x, r_ank_y)
-    ]
-    for kx, ky in keypoints:
-        add_ellipse(p, kx - 5, ky - 5, 10, 10, fill="#34D399", stroke="#065F46", stroke_width=1.5)
+    def line(self, parent, x1, y1, x2, y2, color, weight=2, dashes=None, name=None):
+        extra = {"strokeCap": "round"}
+        if dashes:
+            extra["dashes"] = dashes
+        return self.path(parent, f"M {x1} {y1} L {x2} {y2}", stroke=color,
+                         weight=weight, name=name, **extra)
 
-    # Angle Badges
-    add_badge(p, r_elb_x + 15, r_elb_y - 10, "176° (มุมยกแขน)", bg_color="#083344E6", text_color="#22D3EE", border_color="#22D3EE", font_size=11, icon_name="straighten", icon_color="#22D3EE")
-    add_badge(p, r_wri_x + 15, r_wri_y - 10, "ศอกเหยียด 172° ผ่านเกณฑ์", bg_color="#064E3BE6", text_color="#34D399", border_color="#10B981", font_size=11, icon_name="check_circle", icon_color="#34D399")
-    add_badge(p, l_elb_x - 130, l_elb_y, "แขนซ้ายแนบลำตัว 24°", bg_color="#1E293BE6", text_color="#94A3B8", font_size=10)
+    def icon(self, parent, name, size=18, color="#22D3EE", x=None, y=None):
+        return self.path(parent, ICONS[name] + VIEWBOX_ANCHORS, fill=color,
+                         name=f"icon/{name}", x=x, y=y, w=size, h=size)
 
-    # Floating Action Bar at bottom of viewport
-    add_rect(p, 190, 555, 520, 46, fill="#0F172AE6", stroke="#334155", stroke_width=1, corner_radius=23)
-    add_button(p, 204, 563, 110, 30, "กล้อง ON", bg_color="#064E3B", text_color="#34D399", corner_radius=15, font_size=11, icon_name="videocam")
-    add_button(p, 322, 563, 100, 30, "Ghost ON", bg_color="#083344", text_color="#22D3EE", corner_radius=15, font_size=11)
-    add_button(p, 430, 563, 75, 30, "Mirror", bg_color="#1E293B", text_color="#94A3B8", corner_radius=15, font_size=11, icon_name="flip")
-    add_button(p, 513, 563, 75, 30, "Angles", bg_color="#1E293B", text_color="#94A3B8", corner_radius=15, font_size=11, icon_name="straighten")
-    add_button(p, 596, 563, 102, 30, "Auto-Tag", bg_color="#14B8A6", text_color="#FFFFFF", corner_radius=15, font_size=11, icon_name="how_to_reg")
+    # ---- auto-layout containers --------------------------------------------
+    def _stack(self, layout, parent, x, y, w, h, gap, main, cross, pad, fill,
+               radius, stroke, name, clip):
+        props = {"layout": layout, "gap": gap, "mainAlign": main, "crossAlign": cross,
+                 "padding": pad, "sizingH": "fixed" if w else "hug",
+                 "sizingV": "fixed" if h else "hug"}
+        if radius is not None:
+            props["cornerRadius"] = radius
+        if stroke:
+            props["stroke"] = stroke
+            props["strokeWeight"] = 1
+        if clip:
+            props["clip"] = True
+        return self.frame(parent, x, y, w or 10, h or 10, name=name, fill=fill, **props)
 
-    # Lower Left Telemetry Box
-    add_rect(p, 32, 630, 860, 238, fill="#0F172A", stroke="#1E293B", stroke_width=1, corner_radius=16)
-    add_google_icon(p, "monitoring", 52, 648, size=18, fill="#22D3EE")
-    add_text(p, 76, 646, "Real-time Telemetry Waveform (ความนิ่งของท่าทาง)", font_size=13, font_style="Bold", fill="#FFFFFF")
-    add_badge(p, 620, 644, "STABLE HOLD DETECTED (98.2%)", bg_color="#064E3B", text_color="#34D399", border_color="#059669", icon_name="check_circle", icon_color="#34D399")
-    
-    # 40-step stability waveform stream
-    wave_x, wave_y, wave_w, wave_h = 52, 680, 820, 75
-    add_rect(p, wave_x, wave_y, wave_w, wave_h, fill="#0B132B", corner_radius=8)
+    def hstack(self, parent, x=0, y=0, w=None, h=None, gap=8, main="min", cross="center",
+               pad=0, fill="none", radius=None, stroke=None, name=None, clip=False):
+        return self._stack("horizontal", parent, x, y, w, h, gap, main, cross, pad,
+                           fill, radius, stroke, name, clip)
+
+    def vstack(self, parent, x=0, y=0, w=None, h=None, gap=8, main="min", cross="min",
+               pad=0, fill="none", radius=None, stroke=None, name=None, clip=False):
+        return self._stack("vertical", parent, x, y, w, h, gap, main, cross, pad,
+                           fill, radius, stroke, name, clip)
+
+    # ---- components -----------------------------------------------------------
+    def badge(self, parent, label, colors, icon=None, dot=False, x=0, y=0, size=11):
+        bg, fg, border = colors
+        left_pad = 6 if (icon or dot) else 8
+        b = self.hstack(parent, x, y, gap=4, pad=[3, 8, 3, left_pad], fill=bg,
+                        radius=12, stroke=border, name=f"badge/{label[:24]}")
+        if dot:
+            self.ellipse(b, 0, 0, 6, 6, fill=fg)
+        if icon:
+            self.icon(b, icon, size + 3, fg)
+        self.text(b, label, size=size, weight="SemiBold", color=fg)
+        return b
+
+    def button(self, parent, label, bg, fg, x=0, y=0, w=None, h=36, icon=None,
+               border=None, size=13, radius=8, weight="SemiBold"):
+        props = {"layout": "horizontal", "gap": 6, "mainAlign": "center",
+                 "crossAlign": "center", "cornerRadius": radius,
+                 "sizingH": "fixed" if w else "hug", "sizingV": "fixed"}
+        if not w:
+            props["padding"] = [0, 14, 0, 12 if icon else 14]
+        if border:
+            props["stroke"] = border
+            props["strokeWeight"] = 1
+        b = self.frame(parent, x, y, w or 10, h, name=f"button/{label[:24] or icon}",
+                       fill=bg, **props)
+        if icon:
+            self.icon(b, icon, size + 3, fg)
+        if label:
+            self.text(b, label, size=size, weight=weight, color=fg)
+        return b
+
+    def card(self, parent, x, y, w, h, theme, fill=None, stroke=None, radius=16, name=None):
+        return self.frame(parent, x, y, w, h, name=name, fill=fill or theme["surface"],
+                          stroke=stroke or theme["border"], strokeWeight=1,
+                          cornerRadius=radius, clip=True)
+
+    def card_header(self, card, w, theme, icon, title, right=None, icon_color=None,
+                    title_color=None, pad=20):
+        row = self.hstack(card, pad, 16, w=w - 2 * pad, h=24, main="spaceBetween",
+                          name="card-header")
+        left = self.hstack(row, gap=8)
+        self.icon(left, icon, 18, icon_color or theme["accent"])
+        self.text(left, title, size=14, weight="Bold", color=title_color or theme["text"])
+        if right:
+            group = self.hstack(row, gap=8)
+            for spec in right:
+                self.badge(group, *spec)
+        return row
+
+    def progress(self, parent, x, y, w, pct, color, track, h=8):
+        self.rect(parent, x, y, w, h, fill=track, cornerRadius=h / 2)
+        self.rect(parent, x, y, max(h, round(w * pct / 100)), h, fill=color, cornerRadius=h / 2)
+
+    def gauge(self, parent, x, y, w, label, value, pct, color, theme):
+        row = self.hstack(parent, x, y, w=w, h=16, main="spaceBetween")
+        self.text(row, label, size=11, color=theme["text2"])
+        self.text(row, value, size=11, weight="Bold", color=color)
+        self.progress(parent, x, y + 22, w, pct, color, theme["border"])
+
+    def avatar(self, parent, initials, bg, size=24):
+        a = self.frame(parent, 0, 0, size, size, fill=bg, cornerRadius=size / 2,
+                       layout="horizontal", mainAlign="center", crossAlign="center")
+        self.text(a, initials, size=10, weight="Bold", color="#FFFFFF")
+        return a
+
+    def skeleton(self, parent, joints, bones, bone_color, joint_color, ring_color,
+                 weight=4, glow=None):
+        for a, b in bones:
+            (x1, y1), (x2, y2) = joints[a], joints[b]
+            if glow:
+                self.line(parent, x1, y1, x2, y2, glow, weight=weight + 6)
+            self.line(parent, x1, y1, x2, y2, bone_color, weight=weight)
+        for jx, jy in joints.values():
+            self.ellipse(parent, jx - 5, jy - 5, 10, 10, fill=joint_color,
+                         stroke=ring_color, strokeWeight=1.5)
+
+
+BODY_BONES = [
+    ("head", "neck"), ("l_sh", "r_sh"), ("l_sh", "l_el"), ("l_el", "l_wr"),
+    ("r_sh", "r_el"), ("r_el", "r_wr"), ("l_sh", "l_hip"), ("r_sh", "r_hip"),
+    ("l_hip", "r_hip"), ("l_hip", "l_kn"), ("r_hip", "r_kn"), ("l_kn", "l_an"),
+    ("r_kn", "r_an"),
+]
+
+NAV_TABS = [
+    ("videocam", "ห้องฝึกซ้อมสด"),
+    ("quiz", "ห้องสอบสถานการณ์"),
+    ("menu_book", "คู่มือ IFAB 20 ท่า"),
+    ("monitoring", "สมุดผลการประเมิน"),
+]
+
+
+# ==============================================================================
+# SHARED SCREEN CHROME
+# ==============================================================================
+def header(doc, frame, theme, active, profile):
+    row = doc.hstack(frame, 0, 0, w=1440, h=64, main="spaceBetween", pad=[0, 32, 0, 32],
+                     fill=theme["surface"], name="header")
+    logo = doc.hstack(row, gap=10)
+    doc.icon(logo, "sports_soccer", 26, theme["accent"])
+    doc.text(logo, "Referee Academy AI", size=17, weight="Bold", color=theme["text"])
+
+    nav = doc.hstack(row, gap=4, name="nav")
+    for idx, (ic, label) in enumerate(NAV_TABS):
+        is_active = idx == active
+        color = theme["accent"] if is_active else theme["text2"]
+        tab = doc.hstack(nav, gap=6, pad=[8, 14, 8, 12], radius=8,
+                         fill=theme["accent_bg"] if is_active else "none",
+                         stroke=theme["accent_border"] if is_active else None)
+        doc.icon(tab, ic, 16, color)
+        doc.text(tab, label, size=13, weight="SemiBold" if is_active else "Medium", color=color)
+
+    chip = doc.hstack(row, gap=8, pad=[4, 14, 4, 4], radius=16, fill=theme["surface2"],
+                      stroke=theme["border"], name="profile")
+    doc.avatar(chip, "IR", theme["accent"] if theme["name"] == "light" else "#0E7490")
+    doc.text(chip, profile, size=12, weight="Medium", color=theme["text"])
+    doc.rect(frame, 0, 63, 1440, 1, fill=theme["border"])
+
+
+def title_bar(doc, frame, theme, title, subtitle):
+    """Returns the right-hand action group so screens can add badges/buttons."""
+    row = doc.hstack(frame, 32, 88, w=1376, h=48, main="spaceBetween", name="title-bar")
+    left = doc.vstack(row, gap=4)
+    doc.text(left, title, size=20, weight="Bold", color=theme["text"])
+    doc.text(left, subtitle, size=12, color=theme["text2"])
+    return doc.hstack(row, gap=8)
+
+
+# ==============================================================================
+# SCREEN 1 — Live Practice Studio (/drills)
+# ==============================================================================
+def build_drills(doc, f):
+    t = DARK
+    header(doc, f, t, 0, "อัศวิน · Level 2")
+    actions = title_bar(doc, f, t, "ห้องฝึกซ้อมสัญญาณสด (Live Practice Studio)",
+                        "หน้าหลัก / แบบฝึกหัดสด / ฟรีคิกทางอ้อม · IFAB Law 13")
+    doc.badge(actions, "Microservices Online · 31.4 FPS", tone(t, "success"), dot=True)
+    doc.badge(actions, "Latency 14.2 ms", tone(t, "info"), icon="bolt")
+    doc.badge(actions, "Session 00:14:25", tone(t, "neutral"), icon="schedule")
+
+    # ---- Left column: viewport card (x=32 w=792) ----------------------------
+    vp = doc.card(f, 32, 160, 792, 496, t, name="viewport-card")
+    doc.card_header(vp, 792, t, "videocam", "กล้องตรวจจับท่าทาง (Live Camera Feed)",
+                    right=[("YOLOv8x-Pose · ONNX", tone(t, "neutral"))])
+
+    video = doc.frame(vp, 20, 56, 752, 368, name="video", fill="#0B132B",
+                      cornerRadius=12, clip=True)
+    for gx in range(0, 752, 47):  # subtle pitch grid
+        doc.line(video, gx, 0, gx, 368, "#1E293B66", weight=1)
+    doc.badge(video, "LIVE · 1080p 60FPS", tone(t, "error"), dot=True, x=12, y=12)
+
+    # Tactical reticle on the referee
+    rx, ry, rw, rh = 248, 44, 214, 312
+    doc.rect(video, rx, ry, rw, rh, fill="#22D3EE0D", stroke="#22D3EE40",
+             strokeWeight=1, cornerRadius=10)
+    bl = 22
+    for cx, cy, dx, dy in ((rx, ry, 1, 1), (rx + rw, ry, -1, 1),
+                           (rx, ry + rh, 1, -1), (rx + rw, ry + rh, -1, -1)):
+        doc.line(video, cx, cy, cx + dx * bl, cy, t["accent"], weight=3)
+        doc.line(video, cx, cy, cx, cy + dy * bl, t["accent"], weight=3)
+    doc.badge(video, "TAGGED: REFEREE · 98.4%", tone(t, "accent"), icon="my_location",
+              x=rx, y=12)
+
+    joints = {
+        "head": (356, 106), "neck": (356, 138), "l_sh": (321, 138), "r_sh": (391, 138),
+        "l_el": (304, 196), "l_wr": (296, 246), "r_el": (393, 96), "r_wr": (395, 54),
+        "l_hip": (336, 236), "r_hip": (376, 236), "l_kn": (332, 290), "r_kn": (380, 290),
+        "l_an": (328, 340), "r_an": (384, 340),
+    }
+    # Ghost target guide (IFAB 180°) drawn under the live skeleton
+    doc.line(video, 391, 138, 391, 50, "#38BDF8AA", weight=2, dashes=[6, 5])
+    doc.ellipse(video, 384, 42, 14, 14, stroke="#38BDF8", strokeWeight=2, dashes=[3, 3])
+    doc.skeleton(video, joints, BODY_BONES, t["accent"], "#34D399", "#065F46",
+                 glow="#0891B240")
+    doc.badge(video, "เป้าหมาย IFAB 180°", tone(t, "info"), x=470, y=42)
+    doc.badge(video, "176° มุมยกแขน", tone(t, "accent"), icon="straighten", x=470, y=76)
+    doc.badge(video, "ศอกเหยียด 172°", tone(t, "success"), icon="check_circle", x=470, y=110)
+    doc.badge(video, "แขนซ้าย 24°", tone(t, "neutral"), x=138, y=204)
+
+    # Untagged second person
+    doc.rect(video, 616, 104, 114, 236, fill="#0F172A66", stroke="#475569",
+             strokeWeight=1, dashes=[6, 4], cornerRadius=8)
+    doc.badge(video, "Player #10 · แตะเพื่อ Tag", tone(t, "neutral"), icon="person", x=594, y=72)
+
+    # Toolbar under the video
+    bar = doc.hstack(vp, 20, 436, w=752, h=40, main="spaceBetween", name="toolbar")
+    left = doc.hstack(bar, gap=8)
+    s_bg, s_fg, s_bd = tone(t, "success")
+    a_bg, a_fg, a_bd = tone(t, "accent")
+    n_bg, n_fg, n_bd = tone(t, "neutral")
+    doc.button(left, "กล้อง: เปิด", s_bg, s_fg, h=32, icon="videocam", border=s_bd, size=12)
+    doc.button(left, "Ghost Guide", a_bg, a_fg, h=32, icon="my_location", border=a_bd, size=12)
+    doc.button(left, "Mirror", n_bg, n_fg, h=32, icon="flip", border=n_bd, size=12)
+    doc.button(left, "Angles", n_bg, n_fg, h=32, icon="straighten", border=n_bd, size=12)
+    right = doc.hstack(bar, gap=8)
+    doc.button(right, "Auto-Tag ผู้ตัดสิน", "#14B8A6", "#042F2E", h=32, icon="how_to_reg", size=12)
+    doc.button(right, "", n_bg, n_fg, w=32, h=32, icon="refresh", border=n_bd, size=12)
+
+    # ---- Left column: telemetry card ----------------------------------------
+    tel = doc.card(f, 32, 680, 792, 188, t, name="telemetry-card")
+    doc.card_header(tel, 792, t, "monitoring", "ความนิ่งของท่าทาง (Telemetry Waveform)",
+                    right=[("STABLE HOLD · 98.2%", tone(t, "success"), "check_circle")])
+    wave = doc.frame(tel, 20, 52, 752, 76, name="waveform", fill=t["surface2"],
+                     cornerRadius=8, clip=True)
     for i in range(40):
-        bar_x = wave_x + 12 + i * 20
-        h_val = int(25 + 35 * math.sin(i * 0.3) * math.cos(i * 0.1) + (35 if i > 25 else 10))
-        h_val = max(8, min(65, h_val))
-        bar_y = wave_y + wave_h - h_val - 5
-        color = "#34D399" if i > 25 else "#22D3EE"
-        add_rect(p, bar_x, bar_y, 10, h_val, fill=color, corner_radius=3)
-    
-    add_badge(p, 52, 770, "ตรวจพบสัญญาณ: ฟรีคิกทางอ้อม (INDIRECT_FREE_KICK)", bg_color="#083344", text_color="#22D3EE", border_color="#22D3EE", font_size=12, height=26, icon_name="my_location", icon_color="#22D3EE")
-    add_text(p, 52, 808, "ความเชื่อมั่นท่าทาง (Pose Confidence): 98.4% | ผู้ตัดสินต้องชูแขนตรงเหนือศีรษะจนกว่าจะมีการเล่นลูกบอล", font_size=11, fill="#94A3B8")
+        hv = 22 + 30 * math.sin(i * 0.3) * math.cos(i * 0.1) + (30 if i > 25 else 8)
+        hv = int(max(8, min(60, hv)))
+        doc.rect(wave, 14 + i * 18.2, 76 - 8 - hv, 10, hv,
+                 fill="#34D399" if i > 25 else t["accent"], cornerRadius=3)
+    foot = doc.hstack(tel, 20, 140, w=752, h=28, main="spaceBetween")
+    doc.badge(foot, "ตรวจพบ: ฟรีคิกทางอ้อม (INDIRECT_FREE_KICK)", tone(t, "accent"),
+              icon="my_location")
+    doc.text(foot, "Pose Confidence 98.4%", size=11, color=t["text2"])
 
-    # RIGHT SIDEBAR: Coaching HUD (x=916, width=492)
-    add_rect(p, 916, 88, 492, 780, fill="#0F172A", stroke="#1E293B", stroke_width=1, corner_radius=16)
+    # ---- Right column (x=848 w=560) ------------------------------------------
+    hold = doc.card(f, 848, 160, 560, 196, t, name="hold-card")
+    doc.card_header(hold, 560, t, "schedule", "ระยะเวลาค้างสัญญาณ (Hold Countdown)")
+    cx, cy, r = 24 + 56, 56 + 56, 50
+    doc.ellipse(hold, cx - r, cy - r, 2 * r, 2 * r, stroke=t["border"], strokeWeight=10)
+    ang = math.radians(360 * 0.8)  # 1.2s / 1.5s
+    ex, ey = cx + r * math.sin(ang), cy - r * math.cos(ang)
+    doc.path(hold, f"M {cx} {cy - r} A {r} {r} 0 1 1 {ex:.2f} {ey:.2f}", stroke="#10B981",
+             weight=10, strokeCap="round", name="hold-arc")
+    center = doc.vstack(hold, 24, 56, w=112, h=112, gap=0, main="center", cross="center")
+    doc.text(center, "1.2s", size=22, weight="Bold", color="#34D399")
+    doc.text(center, "/ 1.5s", size=11, color=t["text3"])
 
-    # Metric Card 1: Circular Hold Timer
-    add_rect(p, 936, 104, 452, 175, fill="#0B132B", stroke="#1E293B", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "schedule", 952, 116, size=18, fill="#22D3EE")
-    add_text(p, 976, 115, "Posture Hold Countdown (ระยะเวลาค้างสัญญาณ)", font_size=13, font_style="Bold", fill="#FFFFFF")
+    score = doc.vstack(hold, 172, 60, gap=6)
+    doc.text(score, "คะแนนความถูกต้อง (Posture Score)", size=12, color=t["text2"])
+    num = doc.hstack(score, gap=6, cross="baseline")
+    doc.text(num, "94", size=44, weight="Bold", color="#34D399")
+    doc.text(num, "/ 100", size=16, weight="Bold", color=t["text3"])
+    doc.badge(score, "EXCELLENT POSTURE FORM", tone(t, "success"), icon="check_circle")
 
-    # SVG Ring
-    add_ellipse(p, 960, 146, 110, 110, stroke="#1E293B", stroke_width=8)
-    circ_path = "M 1015 146 A 55 55 0 1 1 970 215"
-    add_path(p, circ_path, stroke="#10B981", stroke_width=8, name="Hold Timer Arc")
-    add_text(p, 995, 185, "1.2s", font_size=20, font_style="Bold", fill="#10B981", align="center")
-    add_text(p, 995, 210, "/ 1.5s", font_size=11, fill="#64748B", align="center")
+    s_bg, s_fg, s_bd = tone(t, "success")
+    toast = doc.hstack(f, 848, 372, w=560, h=76, gap=12, pad=[0, 20, 0, 20], fill=s_bg,
+                       radius=12, stroke=s_bd, name="coaching-toast")
+    doc.icon(toast, "check_circle", 24, s_fg)
+    msg = doc.vstack(toast, gap=4)
+    doc.text(msg, "ยอดเยี่ยม! สัญญาณถูกต้องตาม IFAB Law 13", size=13, weight="Bold",
+             color="#A7F3D0")
+    doc.text(msg, "แขนขวายกตรง 176° — ค้างไว้อีก 0.3 วินาทีเพื่อผ่านแบบฝึกหัด", size=11,
+             color="#6EE7B7")
 
-    # Score
-    add_text(p, 1140, 155, "คะแนนความถูกต้อง", font_size=12, fill="#94A3B8")
-    add_text(p, 1140, 175, "94", font_size=44, font_style="Bold", fill="#10B981")
-    add_text(p, 1205, 195, "/ 100", font_size=16, font_style="Bold", fill="#64748B")
-    add_badge(p, 1140, 225, "EXCELLENT POSTURE FORM", bg_color="#064E3B", text_color="#34D399", border_color="#059669", icon_name="check_circle", icon_color="#34D399")
+    gauges = doc.card(f, 848, 464, 560, 184, t, name="gauges-card")
+    doc.card_header(gauges, 560, t, "straighten", "องศาข้อต่อ (Joint Angle Gauges)")
+    doc.gauge(gauges, 20, 56, 520, "การยกแขนขวา (Shoulder Elevation)", "176° / 180°", 98,
+              t["accent"], t)
+    doc.gauge(gauges, 20, 96, 520, "ความเหยียดศอก (Elbow Straightness)", "172° / 180°", 95,
+              "#34D399", t)
+    doc.gauge(gauges, 20, 136, 520, "ลำตัวตั้งตรง (Torso Alignment)", "99%", 99, "#A855F7", t)
 
-    # Coaching Tip Toast
-    add_rect(p, 936, 295, 452, 68, fill="#064E3B40", stroke="#059669", stroke_width=1, corner_radius=10)
-    add_google_icon(p, "check_circle", 952, 310, size=22, fill="#34D399")
-    add_text(p, 982, 308, "ยอดเยี่ยมมาก! การให้สัญญาณถูกต้องตามกติกา IFAB Law 13", font_size=12, font_style="Bold", fill="#A7F3D0")
-    add_text(p, 982, 328, "แขนขวายกตรง 176° แนบลำตัวถูกต้อง ค้างท่าไว้อีก 0.3 วินาทีเพื่อสำเร็จแบบฝึกหัด", font_size=11, fill="#6EE7B7")
-
-    # Joint Angle Gauges
-    add_rect(p, 936, 380, 452, 160, fill="#0B132B", stroke="#1E293B", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "straighten", 952, 394, size=18, fill="#22D3EE")
-    add_text(p, 976, 393, "Joint Angle Gauges (การตรวจสอบองศาข้อต่อ)", font_size=13, font_style="Bold", fill="#FFFFFF")
-
-    # Gauge 1
-    add_text(p, 952, 420, "องศาการยกแขนขวา (Shoulder Elevation)", font_size=11, fill="#94A3B8")
-    add_text(p, 1340, 420, "176° / 180°", font_size=11, font_style="Bold", fill="#22D3EE")
-    add_progress_bar(p, 952, 438, 420, 8, 98, bg_color="#1E293B", fill_color="#22D3EE")
-
-    # Gauge 2
-    add_text(p, 952, 456, "ความเหยียดตรงของข้อศอก (Elbow Straightness)", font_size=11, fill="#94A3B8")
-    add_text(p, 1340, 456, "172° / 180°", font_size=11, font_style="Bold", fill="#34D399")
-    add_progress_bar(p, 952, 474, 420, 8, 95, bg_color="#1E293B", fill_color="#34D399")
-
-    # Gauge 3
-    add_text(p, 952, 492, "ความตั้งตรงของลำตัว (Torso Vertical Alignment)", font_size=11, fill="#94A3B8")
-    add_text(p, 1340, 492, "99%", font_size=11, font_style="Bold", fill="#A855F7")
-    add_progress_bar(p, 952, 510, 420, 8, 99, bg_color="#1E293B", fill_color="#A855F7")
-
-    # Drill Selector
-    add_rect(p, 936, 555, 452, 295, fill="#0B132B", stroke="#1E293B", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "menu_book", 952, 569, size=18, fill="#22D3EE")
-    add_text(p, 976, 568, "แบบฝึกหัดท่าสัญญาณ IFAB (20 ท่าทาง)", font_size=13, font_style="Bold", fill="#FFFFFF")
-    
-    drills = [
-        ("1. ฟรีคิกทางอ้อม (Indirect Free Kick)", "กำลังฝึกซ้อม", "#083344", "#22D3EE", True, "my_location"),
-        ("2. ฟรีคิกทางตรง (Direct Free Kick)", "พร้อมฝึก", "#1E293B", "#94A3B8", False, "videocam"),
-        ("3. การให้จุดโทษ (Penalty Kick)", "พร้อมฝึก", "#1E293B", "#94A3B8", False, "videocam"),
-        ("4. สัญญาณได้เปรียบ (Advantage Play-on)", "พร้อมฝึก", "#1E293B", "#94A3B8", False, "videocam"),
+    drills = doc.card(f, 848, 664, 560, 204, t, name="drill-selector")
+    doc.card_header(drills, 560, t, "menu_book", "แบบฝึกหัดสัญญาณ IFAB",
+                    right=[("20 ท่า", tone(t, "neutral"))])
+    items = [
+        ("ฟรีคิกทางอ้อม (Indirect Free Kick)", "กำลังฝึก", "accent", True),
+        ("ฟรีคิกทางตรง (Direct Free Kick)", "พร้อมฝึก", "neutral", False),
+        ("การให้จุดโทษ (Penalty Kick)", "พร้อมฝึก", "neutral", False),
     ]
-    for idx, (title, status, bg_col, text_col, is_active, ic_name) in enumerate(drills):
-        dy = 598 + idx * 56
-        border_col = "#22D3EE" if is_active else "#1E293B"
-        add_rect(p, 952, dy, 420, 48, fill="#0F172A" if not is_active else "#083344", stroke=border_col, stroke_width=1.5 if is_active else 1, corner_radius=8)
-        add_google_icon(p, ic_name, 964, dy + 15, size=18, fill=text_col)
-        add_text(p, 990, dy + 16, title, font_size=12, font_style="Bold" if is_active else "Medium", fill="#FFFFFF" if is_active else "#CBD5E1")
-        add_badge(p, 1270, dy + 13, status, bg_color=bg_col, text_color=text_col)
+    for i, (label, status, tn, active) in enumerate(items):
+        row = doc.hstack(drills, 20, 52 + i * 50, w=520, h=44, main="spaceBetween",
+                         pad=[0, 12, 0, 12], radius=10,
+                         fill=t["accent_bg"] if active else t["surface2"],
+                         stroke=t["accent"] if active else t["border"])
+        lg = doc.hstack(row, gap=10)
+        doc.icon(lg, "my_location" if active else "play_arrow", 18,
+                 t["accent"] if active else t["text3"])
+        doc.text(lg, f"{i + 1}. {label}", size=12, weight="SemiBold" if active else "Medium",
+                 color=t["text"] if active else "#CBD5E1")
+        doc.badge(row, status, tone(t, tn))
 
 
 # ==============================================================================
-# BUILD SCREEN 2: Scenario Examination Studio (/examination) - Frame ID: 3
+# SCREEN 2 — Scenario Examination Studio (/examination)
 # ==============================================================================
-def build_screen_2(frame_id):
-    p = frame_id
-    # Header Bar
-    add_rect(p, 0, 0, 1440, 64, fill="#0F172A", stroke="#1E293B", stroke_width=1)
-    add_google_icon(p, "sports_soccer", 32, 21, size=22, fill="#22D3EE")
-    add_text(p, 62, 20, "Referee Academy AI", font_size=18, font_style="Bold", fill="#FFFFFF")
-    
-    # Breadcrumbs
-    add_rect(p, 275, 16, 420, 32, fill="#1E293B", corner_radius=16)
-    add_text(p, 290, 23, "ชุดข้อสอบ: IFAB Law 12 - การทำฟาวล์และการประพฤติผิด", font_size=12, font_style="Medium", fill="#38BDF8")
-    
-    # Exam Progress Pill
-    add_badge(p, 720, 20, "คำถามข้อที่ 1 / 5 (ความคืบหน้า 20%)", bg_color="#1E293B", text_color="#38BDF8", icon_name="quiz", icon_color="#38BDF8")
-    add_badge(p, 1020, 20, "เวลาสอบเหลือ: 04:32", bg_color="#0F172A", text_color="#F59E0B", border_color="#B45309", icon_name="timer", icon_color="#F59E0B")
-    
-    # Trainee
-    add_rect(p, 1240, 16, 168, 32, fill="#1E293B", corner_radius=16)
-    add_ellipse(p, 1244, 20, 24, 24, fill="#0E7490")
-    add_text(p, 1249, 24, "IR", font_size=11, font_style="Bold", fill="#FFFFFF")
-    add_text(p, 1276, 23, "อัศวิน (สอบสด)", font_size=12, font_style="Medium", fill="#E2E8F0")
+def build_exam(doc, f):
+    t = DARK
+    header(doc, f, t, 1, "อัศวิน · กำลังสอบ")
+    actions = title_bar(doc, f, t, "ห้องสอบสถานการณ์จำลอง (Scenario Examination)",
+                        "ชุดข้อสอบ IFAB Law 12 · การทำฟาวล์และการประพฤติผิด")
+    doc.badge(actions, "ข้อ 1 / 5 · 20%", tone(t, "info"), icon="quiz")
+    doc.badge(actions, "เวลาสอบเหลือ 04:32", tone(t, "warning"), icon="timer")
 
-    # LEFT COLUMN: Scenario Video Clip & Decision Window
-    add_rect(p, 32, 88, 800, 780, fill="#0F172A", stroke="#1E293B", stroke_width=1, corner_radius=16)
-    add_google_icon(p, "quiz", 52, 108, size=20, fill="#22D3EE")
-    add_text(p, 80, 107, "โจทย์สถานการณ์จำลอง (Instructional Incident Scenario)", font_size=14, font_style="Bold", fill="#FFFFFF")
-    add_badge(p, 580, 105, "คลิปเหตุการณ์ที่ 1: นาทีที่ 73 (เขตโทษ)", bg_color="#1E293B", text_color="#38BDF8")
+    # ---- Left: scenario card --------------------------------------------------
+    sc = doc.card(f, 32, 160, 792, 708, t, name="scenario-card")
+    doc.card_header(sc, 792, t, "quiz", "โจทย์สถานการณ์ (Instructional Scenario)",
+                    right=[("คลิปที่ 1 · นาทีที่ 73", tone(t, "neutral"))])
 
-    # Video Player Preview Box (x=52, y=140, w=760, h=390)
-    pitch_x, pitch_y, pitch_w, pitch_h = 52, 140, 760, 390
-    add_rect(p, pitch_x, pitch_y, pitch_w, pitch_h, fill="#052E16", corner_radius=12)
-    
-    # 2D Soccer Pitch Lines
-    add_line(p, pitch_x + 30, pitch_y + 30, pitch_x + pitch_w - 30, pitch_y + 30, stroke="#FFFFFF40", stroke_width=2)
-    add_line(p, pitch_x + 30, pitch_y + pitch_h - 30, pitch_x + pitch_w - 30, pitch_y + pitch_h - 30, stroke="#FFFFFF40", stroke_width=2)
-    add_line(p, pitch_x + pitch_w // 2, pitch_y + 30, pitch_x + pitch_w // 2, pitch_y + pitch_h - 30, stroke="#FFFFFF40", stroke_width=2)
-    add_ellipse(p, pitch_x + pitch_w // 2 - 45, pitch_y + pitch_h // 2 - 45, 90, 90, stroke="#FFFFFF40", stroke_width=2)
-    
-    # Penalty Box
-    pen_w, pen_h = 240, 180
-    add_rect(p, pitch_x + 30, pitch_y + (pitch_h - pen_h)//2, pen_w, pen_h, stroke="#FFFFFF50", stroke_width=2)
-    add_ellipse(p, pitch_x + 190, pitch_y + pitch_h//2 - 3, 6, 6, fill="#FFFFFF")
+    pitch = doc.frame(sc, 20, 56, 752, 320, name="scenario-video", fill="#0B3D1E",
+                      cornerRadius=12, clip=True)
+    ln = "#FFFFFF59"
+    doc.rect(pitch, 24, 20, 704, 240, stroke=ln, strokeWeight=2)
+    doc.line(pitch, 376, 20, 376, 260, ln)
+    doc.ellipse(pitch, 326, 90, 100, 100, stroke=ln, strokeWeight=2)
+    doc.rect(pitch, 24, 60, 140, 160, stroke=ln, strokeWeight=2)
+    doc.rect(pitch, 24, 105, 50, 70, stroke=ln, strokeWeight=2)
+    doc.ellipse(pitch, 112, 137, 6, 6, fill="#FFFFFF")
+    doc.ellipse(pitch, 126, 124, 18, 18, fill="#EF4444", stroke="#FFFFFF", strokeWeight=2)
+    doc.ellipse(pitch, 142, 132, 18, 18, fill="#3B82F6", stroke="#FFFFFF", strokeWeight=2)
+    doc.text(pitch, "#9", x=128, y=148, size=10, weight="Bold", color="#FCA5A5")
+    doc.text(pitch, "#4", x=148, y=154, size=10, weight="Bold", color="#93C5FD")
+    doc.badge(pitch, "ฟาวล์ขัดขาในเขตโทษ", tone(t, "error"), icon="warning", x=180, y=118)
+    ctrl = doc.hstack(pitch, 0, 276, w=752, h=44, main="spaceBetween", pad=[0, 16, 0, 16],
+                      fill="#0F172AE6")
+    cl = doc.hstack(ctrl, gap=8)
+    doc.icon(cl, "play_arrow", 20, t["text"])
+    doc.text(cl, "00:03.42 / 00:08.00", size=12, weight="SemiBold", color=t["text"])
+    doc.badge(ctrl, "SLOW MOTION 0.5x", tone(t, "neutral"))
 
-    # Simulation Players
-    add_ellipse(p, pitch_x + 160, pitch_y + 190, 22, 22, fill="#EF4444", stroke="#FFFFFF", stroke_width=2)
-    add_text(p, pitch_x + 140, pitch_y + 170, "กองหน้า #9", font_size=10, font_style="Bold", fill="#FCA5A5")
-    
-    add_ellipse(p, pitch_x + 180, pitch_y + 195, 22, 22, fill="#3B82F6", stroke="#FFFFFF", stroke_width=2)
-    add_text(p, pitch_x + 175, pitch_y + 225, "กองหลัง #4 (สกัดฟาวล์)", font_size=10, font_style="Bold", fill="#93C5FD")
-    
-    add_line(p, pitch_x + 165, pitch_y + 195, pitch_x + 185, pitch_y + 200, stroke="#F59E0B", stroke_width=3)
-    add_badge(p, pitch_x + 130, pitch_y + 140, "TRIPPING FOUL IN THE BOX", bg_color="#7F1D1D", text_color="#FCA5A5", icon_name="warning", icon_color="#FCA5A5")
+    react = doc.hstack(sc, 20, 392, w=752, h=24, main="spaceBetween")
+    doc.text(react, "เวลาตัดสินใจให้สัญญาณ (5s Reaction Window)", size=12, weight="SemiBold",
+             color=t["text"])
+    doc.badge(react, "เหลือ 2.4s", tone(t, "warning"), icon="timer")
+    doc.progress(sc, 20, 424, 752, 48, "#F59E0B", t["border"])
 
-    # Video Controls Overlay
-    add_rect(p, pitch_x, pitch_y + pitch_h - 48, pitch_w, 48, fill="#0F172ACC", corner_radius=0)
-    add_badge(p, pitch_x + 20, pitch_y + pitch_h - 36, "00:03.42 / 00:08.00 [FOUL DETECTED]", bg_color="#0F172ACC", text_color="#F43F5E", icon_name="videocam", icon_color="#F43F5E")
-    add_badge(p, pitch_x + 340, pitch_y + pitch_h - 36, "SLOW MOTION 0.5x", bg_color="#1E293B", text_color="#94A3B8")
-
-    # 5-Second Reaction Countdown Window
-    add_text(p, 52, 550, "เวลาตัดสินใจให้สัญญาณ (5s Reaction Window):", font_size=12, font_style="Bold", fill="#E2E8F0")
-    add_badge(p, 700, 546, "COUNTDOWN 2.4s", bg_color="#B45309", text_color="#FEF3C7", icon_name="timer", icon_color="#FEF3C7")
-    add_progress_bar(p, 52, 574, 760, 10, 48, bg_color="#1E293B", fill_color="#F59E0B")
-
-    # Multiple Choice Decision Panel (4 Options)
-    add_text(p, 52, 604, "คำถาม: จากเหตุการณ์ดังกล่าว ในฐานะผู้ตัดสินท่านต้องให้สัญญาณใด?", font_size=13, font_style="Bold", fill="#FFFFFF")
-    
+    doc.text(sc, "คำถาม: จากเหตุการณ์นี้ ในฐานะผู้ตัดสินท่านต้องให้สัญญาณใด?", x=20, y=448,
+             size=14, weight="Bold", color=t["text"])
     options = [
-        ("A", "ฟรีคิกทางตรง (Direct Free Kick)", "ผิด - จุดเกิดเหตุอยู่ในเขตโทษของฝ่ายรับ", False),
-        ("B", "ฟรีคิกทางอ้อม (Indirect Free Kick)", "ผิด - การเข้าสกัดฟาวล์ผู้เล่นเป็นความผิดโทษโดยตรง", False),
-        ("C", "การให้จุดโทษ (Penalty Kick)", "ถูกต้อง - ฟาวล์ในเขตโทษตาม IFAB Law 12/14", True),
-        ("D", "ให้สัญญาณได้เปรียบ (Advantage)", "ผิด - ฝ่ายรุกเสียการครอบครองบอลทันที", False),
+        ("A", "ฟรีคิกทางตรง (Direct Free Kick)", "จุดเกิดเหตุอยู่ในเขตโทษฝ่ายรับ", False),
+        ("B", "ฟรีคิกทางอ้อม (Indirect Free Kick)", "การขัดขาเป็นความผิดโทษโดยตรง", False),
+        ("C", "การให้จุดโทษ (Penalty Kick)", "ถูกต้อง — ฟาวล์ในเขตโทษ IFAB Law 12/14", True),
+        ("D", "ให้ได้เปรียบ (Advantage)", "ฝ่ายรุกเสียการครอบครองบอลทันที", False),
     ]
-    for idx, (opt_char, opt_title, opt_sub, is_correct) in enumerate(options):
-        col = idx % 2
-        row = idx // 2
-        bx = 52 + col * 390
-        by = 635 + row * 82
-        border_col = "#22D3EE" if is_correct else "#1E293B"
-        bg_col = "#083344" if is_correct else "#0B132B"
-        add_rect(p, bx, by, 370, 72, fill=bg_col, stroke=border_col, stroke_width=2 if is_correct else 1, corner_radius=10)
-        
-        btn_bg = "#22D3EE" if is_correct else "#1E293B"
-        btn_tx = "#090D16" if is_correct else "#94A3B8"
-        add_rect(p, bx + 12, by + 16, 28, 28, fill=btn_bg, corner_radius=14)
-        add_text(p, bx + 22, by + 22, opt_char, font_size=12, font_style="Bold", fill=btn_tx)
-        
-        add_text(p, bx + 50, by + 16, opt_title, font_size=12, font_style="Bold", fill="#FFFFFF" if is_correct else "#CBD5E1")
-        add_text(p, bx + 50, by + 38, opt_sub, font_size=10, fill="#22D3EE" if is_correct else "#64748B")
+    for i, (key, title, sub, correct) in enumerate(options):
+        ox, oy = 20 + (i % 2) * 384, 480 + (i // 2) * 112
+        opt = doc.hstack(sc, ox, oy, w=368, h=96, gap=12, pad=[0, 16, 0, 16], radius=12,
+                         fill=t["accent_bg"] if correct else t["surface2"],
+                         stroke=t["accent"] if correct else t["border"])
+        k = doc.frame(opt, 0, 0, 32, 32, fill=t["accent"] if correct else t["border"],
+                      cornerRadius=16, layout="horizontal", mainAlign="center",
+                      crossAlign="center")
+        doc.text(k, key, size=13, weight="Bold", color="#090D16" if correct else t["text2"])
+        body = doc.vstack(opt, gap=4)
+        doc.text(body, title, size=13, weight="Bold", color=t["text"] if correct else "#CBD5E1")
+        doc.text(body, sub, size=11, color=t["accent"] if correct else t["text3"])
 
-    # RIGHT COLUMN: Live Trainee Camera Posture HUD & Instant Evaluation
-    add_rect(p, 856, 88, 552, 780, fill="#0F172A", stroke="#1E293B", stroke_width=1, corner_radius=16)
-    add_google_icon(p, "how_to_reg", 876, 108, size=20, fill="#22D3EE")
-    add_text(p, 904, 107, "การตรวจวัดท่าทางผู้เรียนสด (Live Trainee Posture HUD)", font_size=14, font_style="Bold", fill="#FFFFFF")
-    
-    # Camera Viewport for Trainee (x=876, y=140, w=512, h=330)
-    cam_x, cam_y, cam_w, cam_h = 876, 140, 512, 330
-    add_rect(p, cam_x, cam_y, cam_w, cam_h, fill="#0B132B", stroke="#1E293B", stroke_width=2, corner_radius=12)
-    
-    # Trainee Referee Skeleton giving Penalty Kick Signal (Arm pointing down at 44° to penalty spot)
-    t_head_x, t_head_y = cam_x + 256, cam_y + 80
-    t_sh_r_x, t_sh_r_y = cam_x + 290, cam_y + 120
-    t_sh_l_x, t_sh_l_y = cam_x + 222, cam_y + 120
-    t_elb_r_x, t_elb_r_y = cam_x + 345, cam_y + 175
-    t_wri_r_x, t_wri_r_y = cam_x + 400, cam_y + 230
-    
-    t_bones = [
-        (t_head_x, t_head_y, (t_sh_r_x + t_sh_l_x)//2, t_sh_r_y),
-        (t_sh_l_x, t_sh_l_y, t_sh_r_x, t_sh_r_y),
-        (t_sh_r_x, t_sh_r_y, t_elb_r_x, t_elb_r_y),
-        (t_elb_r_x, t_elb_r_y, t_wri_r_x, t_wri_r_y),
-        (t_sh_l_x, t_sh_l_y, cam_x + 200, cam_y + 180),
-        (cam_x + 200, cam_y + 180, cam_x + 190, cam_y + 240),
-        (t_sh_l_x, t_sh_l_y, cam_x + 230, cam_y + 230),
-        (t_sh_r_x, t_sh_r_y, cam_x + 280, cam_y + 230),
-    ]
-    for x1, y1, x2, y2 in t_bones:
-        add_line(p, x1, y1, x2, y2, stroke="#10B981", stroke_width=4)
-    
-    for kx, ky in [(t_head_x, t_head_y), (t_sh_r_x, t_sh_r_y), (t_sh_l_x, t_sh_l_y), (t_elb_r_x, t_elb_r_y), (t_wri_r_x, t_wri_r_y)]:
-        add_ellipse(p, kx - 5, ky - 5, 10, 10, fill="#34D399", stroke="#065F46", stroke_width=1.5)
+    # ---- Right: trainee posture HUD -------------------------------------------
+    hud = doc.card(f, 848, 160, 560, 332, t, name="posture-hud")
+    doc.card_header(hud, 560, t, "how_to_reg", "ท่าทางผู้เรียนสด (Live Trainee Posture)")
+    cam = doc.frame(hud, 20, 56, 520, 256, name="trainee-camera", fill=t["surface2"],
+                    cornerRadius=12, clip=True)
+    top = doc.hstack(cam, 12, 12, w=496, h=24, main="spaceBetween")
+    doc.badge(top, "LIVE", tone(t, "error"), dot=True)
+    doc.badge(top, "Latency 1.18s", tone(t, "info"), icon="speed")
+    tj = {
+        "head": (250, 62), "neck": (250, 96), "l_sh": (215, 96), "r_sh": (285, 96),
+        "r_el": (330, 134), "r_wr": (372, 172), "l_el": (205, 148), "l_wr": (200, 196),
+        "l_hip": (228, 196), "r_hip": (272, 196),
+    }
+    tbones = [("head", "neck"), ("l_sh", "r_sh"), ("r_sh", "r_el"), ("r_el", "r_wr"),
+              ("l_sh", "l_el"), ("l_el", "l_wr"), ("l_sh", "l_hip"), ("r_sh", "r_hip"),
+              ("l_hip", "r_hip")]
+    doc.skeleton(cam, tj, tbones, "#10B981", "#34D399", "#065F46")
+    doc.badge(cam, "ชี้ลง 44° · จุดโทษ", tone(t, "success"), icon="straighten", x=384, y=160)
+    doc.badge(cam, "ตรวจพบ: PENALTY KICK · 97.2%", tone(t, "success"), icon="my_location",
+              x=12, y=220)
 
-    add_badge(p, t_wri_r_x - 30, t_wri_r_y + 15, "องศาชี้ 44° (จุดโทษ)", bg_color="#064E3BE6", text_color="#34D399", border_color="#10B981", icon_name="straighten", icon_color="#34D399")
-    add_badge(p, cam_x + 12, cam_y + cam_h - 32, "ตรวจพบสัญญาณ: จุดโทษ (PENALTY KICK) [ความเชื่อมั่น 97.2%]", bg_color="#064E3B", text_color="#34D399", border_color="#059669", icon_name="my_location", icon_color="#34D399")
-    add_badge(p, cam_x + 360, cam_y + 12, "Latency: 1.18s", bg_color="#1E293B", text_color="#38BDF8", icon_name="speed", icon_color="#38BDF8")
-
-    # Freeze Frame Result Inspector Modal
-    add_rect(p, 876, 490, 512, 355, fill="#022C22", stroke="#059669", stroke_width=1.5, corner_radius=12)
-    add_google_icon(p, "check_circle", 896, 508, size=24, fill="#34D399")
-    add_text(p, 928, 507, "ผลการประเมินประจำข้อ: ถูกต้องตามกติกา IFAB (PASS)", font_size=14, font_style="Bold", fill="#A7F3D0")
-    
-    # Score Summary
-    add_rect(p, 896, 545, 472, 80, fill="#064E3B80", corner_radius=8)
-    add_text(p, 916, 555, "คะแนนภาคปฏิบัติ (Practical Score)", font_size=11, fill="#6EE7B7")
-    add_text(p, 916, 575, "92 / 100", font_size=28, font_style="Bold", fill="#34D399")
-    add_text(p, 1100, 560, "เวลาตอบสนอง: 1.18 วินาที", font_size=11, font_style="Bold", fill="#FFFFFF")
-    add_text(p, 1100, 580, "ระยะเวลา Hold: 1.8 วินาที (ผ่านเกณฑ์)", font_size=11, fill="#A7F3D0")
-    add_text(p, 1100, 600, "เกรดประเมิน: A+ (ระดับยอดเยี่ยม)", font_size=11, font_style="Bold", fill="#FCD34D")
-
-    # Evaluation Checklist Breakdown
-    crit_items = [
-        ("คำตัดสินทางวินัยถูกต้องตาม IFAB Law 12 & 14", True),
-        ("ชี้แขนไปข้างหน้ามุมก้ม 44° ตรงไปยังจุดโทษ", True),
-        ("ค้างสัญญาณนิ่งเกิน 1.5 วินาทีโดยไม่แกว่ง", True),
-        ("ความเสถียรของข้อต่อแขน (Stability Index 95.4%)", True),
-    ]
-    for c_idx, (crit_text, is_ok) in enumerate(crit_items):
-        cy = 640 + c_idx * 26
-        add_google_icon(p, "check_circle", 896, cy + 2, size=16, fill="#34D399")
-        add_text(p, 920, cy + 2, crit_text, font_size=11, fill="#D1FAE5")
-
-    # Action Buttons
-    add_button(p, 896, 755, 225, 42, "ดู Replay ย้อนหลัง", bg_color="#064E3B", text_color="#A7F3D0", border_color="#059669", font_size=12, icon_name="refresh")
-    add_button(p, 1140, 755, 228, 42, "ไปข้อถัดไป (ข้อ 2/5)", bg_color="#10B981", text_color="#022C22", font_size=12, icon_name="quiz")
+    # ---- Right: result inspector ----------------------------------------------
+    res = doc.card(f, 848, 508, 560, 360, t, fill="#022C22", stroke="#065F46", name="result-card")
+    doc.card_header(res, 560, t, "check_circle", "ผลประเมินข้อนี้: ถูกต้องตาม IFAB (PASS)",
+                    icon_color="#34D399", title_color="#A7F3D0")
+    panel = doc.hstack(res, 20, 56, w=520, h=84, main="spaceBetween", pad=[0, 16, 0, 16],
+                       fill="#064E3B99", radius=10)
+    pl = doc.vstack(panel, gap=2)
+    doc.text(pl, "คะแนนภาคปฏิบัติ", size=11, color="#6EE7B7")
+    doc.text(pl, "92 / 100", size=28, weight="Bold", color="#34D399")
+    pr = doc.vstack(panel, gap=4, cross="max")
+    doc.text(pr, "เวลาตอบสนอง 1.18 วินาที", size=11, weight="SemiBold", color="#FFFFFF")
+    doc.text(pr, "ค้างสัญญาณ 1.8 วินาที", size=11, color="#A7F3D0")
+    doc.text(pr, "เกรด A+ (ยอดเยี่ยม)", size=11, weight="Bold", color="#FCD34D")
+    checks = doc.vstack(res, 20, 156, gap=10)
+    for item in ("คำตัดสินถูกต้องตาม IFAB Law 12 & 14",
+                 "ชี้แขนลง 44° ตรงไปยังจุดโทษ",
+                 "ค้างสัญญาณนิ่งเกิน 1.5 วินาที",
+                 "ความเสถียรข้อต่อแขน 95.4%"):
+        r = doc.hstack(checks, gap=8)
+        doc.icon(r, "check_circle", 16, "#34D399")
+        doc.text(r, item, size=12, color="#D1FAE5")
+    btns = doc.hstack(res, 20, 296, w=520, h=44, gap=16)
+    doc.button(btns, "ดู Replay", "#064E3B", "#A7F3D0", w=252, h=44, icon="refresh",
+               border="#059669")
+    doc.button(btns, "ข้อถัดไป (2/5)", "#10B981", "#022C22", w=252, h=44, icon="play_arrow")
 
 
 # ==============================================================================
-# BUILD SCREEN 3: IFAB Digital Learning Handbook (/handbook) - Frame ID: 4
+# SCREEN 3 — IFAB Digital Learning Handbook (/handbook)
 # ==============================================================================
-def build_screen_3(frame_id):
-    p = frame_id
-    # Header Bar (Light Mode)
-    add_rect(p, 0, 0, 1440, 72, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1)
-    add_google_icon(p, "sports_soccer", 32, 25, size=22, fill="#0E7490")
-    add_text(p, 62, 24, "Referee Academy AI", font_size=18, font_style="Bold", fill="#101828")
-    
-    # Navigation Links with active tab
-    navs = [
-        ("ห้องฝึกซ้อมสด (/drills)", False, "videocam"),
-        ("ห้องสอบสถานการณ์ (/examination)", False, "quiz"),
-        ("คู่มือสื่อการสอน 20 ท่า (/handbook)", True, "menu_book"),
-        ("สมุดผลการประเมิน (/gradebook)", False, "monitoring")
+def signal_figure(doc, parent, cx, cy, arm, color):
+    """Stick-figure thumbnail: body, head and the signalling arm(s)."""
+    doc.line(doc_parent := parent, cx, cy - 8, cx, cy + 36, "#334155", weight=3)
+    doc.ellipse(doc_parent, cx - 8, cy - 26, 16, 16, fill=color)
+    sx, sy = cx, cy - 2
+    ends = {
+        "horizontal": [(cx + 38, sy)],
+        "vertical": [(cx + 4, sy - 40)],
+        "down45": [(cx + 30, sy + 28)],
+        "both45": [(cx + 32, sy + 16), (cx - 32, sy + 16)],
+        "up45": [(cx + 30, sy - 26)],
+        "tv": [(cx + 24, sy - 10), (cx - 24, sy - 10)],
+    }[arm]
+    for ex, ey in ends:
+        doc.line(parent, sx, sy, ex, ey, "#0891B2", weight=3)
+
+
+def build_handbook(doc, f):
+    t = LIGHT
+    header(doc, f, t, 2, "อัศวิน · Level 2")
+    actions = title_bar(doc, f, t, "คลังสื่อการสอนสัญญาณผู้ตัดสิน 20 ท่า (IFAB Curriculum)",
+                        "คู่มือมาตรฐาน International Football Association Board · Laws of the Game 2025/26")
+    doc.badge(actions, "อัปเดต 2025/26", tone(t, "info"), icon="menu_book")
+
+    search = doc.hstack(f, 32, 160, w=904, h=44, gap=10, pad=[0, 14, 0, 14], radius=8,
+                        fill=t["surface"], stroke="#D0D5DD", name="search")
+    doc.icon(search, "search", 20, t["text3"])
+    doc.text(search, "ค้นหาท่าสัญญาณ กติกา หรือคำสำคัญ (เช่น ฟรีคิก, ล้ำหน้า, จุดโทษ)",
+             size=13, color=t["text3"])
+
+    tabs = doc.hstack(f, 32, 220, h=32, gap=8, name="category-tabs")
+    for i, label in enumerate(("ทั้งหมด (20)", "ลูกตั้งเตะ (6)", "การทำฟาวล์ (5)",
+                               "การควบคุมเกม (5)", "การล้ำหน้า (4)")):
+        active = i == 0
+        pill = doc.hstack(tabs, h=32, pad=[0, 14, 0, 14], radius=16,
+                          fill=t["accent_bg"] if active else t["surface"],
+                          stroke=t["accent"] if active else "#D0D5DD")
+        doc.text(pill, label, size=12, weight="SemiBold" if active else "Medium",
+                 color=t["accent"] if active else "#344054")
+
+    cards = [
+        ("Law 13", "ฟรีคิกทางตรง", "Direct Free Kick", "horizontal", "แขน 90°", "Hold 1.2s"),
+        ("Law 13", "ฟรีคิกทางอ้อม", "Indirect Free Kick", "vertical", "แขน 180°", "จนบอลถูกเล่น"),
+        ("Law 14", "การให้จุดโทษ", "Penalty Kick", "down45", "ชี้ลง 45°", "Hold 1.5s"),
+        ("Law 5", "สัญญาณได้เปรียบ", "Advantage", "both45", "2 แขน 45°", "กวาดไปข้างหน้า"),
+        ("Law 17", "การเตะมุม", "Corner Kick", "up45", "ชี้ธงมุม 45°", "Hold 1.2s"),
+        ("Law 5", "สัญญาณตรวจ VAR", "VAR Review Signal", "tv", "วาดกรอบ TV", "2 รอบ"),
     ]
-    for n_idx, (nav_title, is_nav_active, nav_icon) in enumerate(navs):
-        nx = 270 + n_idx * 210
-        tx_col = "#0E7490" if is_nav_active else "#475467"
-        add_google_icon(p, nav_icon, nx, 27, size=16, fill=tx_col)
-        add_text(p, nx + 22, 26, nav_title, font_size=12, font_style="Bold" if is_nav_active else "Medium", fill=tx_col)
-        if is_nav_active:
-            add_line(p, nx, 70, nx + 190, 70, stroke="#0E7490", stroke_width=3)
-
-    # Page Title & Search Bar (Left: 960px)
-    add_text(p, 32, 100, "คลังสื่อการสอนกติกาสัญญาณผู้ตัดสิน 20 ท่าทาง (IFAB Curriculum)", font_size=20, font_style="Bold", fill="#101828")
-    add_text(p, 32, 126, "คู่มือมาตรฐานสากลจาก International Football Association Board (IFAB Laws of the Game 2025/2026)", font_size=12, fill="#475467")
-
-    # Search Input Box with Google Font Icon
-    add_rect(p, 32, 150, 920, 44, fill="#FFFFFF", stroke="#D0D5DD", stroke_width=1, corner_radius=8)
-    add_google_icon(p, "search", 48, 163, size=18, fill="#98A2B3")
-    add_text(p, 74, 163, "ค้นหาท่าสัญญาณ, กติกา, หรือคำสำคัญ (เช่น ฟรีคิก, ล้ำหน้า, VAR, จุดโทษ)...", font_size=12, fill="#98A2B3")
-
-    # Category Filter Tabs
-    cats = [
-        ("ทั้งหมด (20)", True),
-        ("ลูกตั้งเตะ (6)", False),
-        ("การทำฟาวล์ (5)", False),
-        ("การควบคุมเกม (5)", False),
-        ("การล้ำหน้า & VAR (4)", False)
-    ]
-    for c_idx, (cat_label, is_cat_active) in enumerate(cats):
-        cx = 32 + c_idx * 160
-        add_rect(p, cx, 208, 145, 36, fill="#F0FDFA" if is_cat_active else "#FFFFFF", stroke="#0E7490" if is_cat_active else "#D0D5DD", stroke_width=1.5 if is_cat_active else 1, corner_radius=18)
-        add_text(p, cx + 72, 218, cat_label, font_size=12, font_style="Bold" if is_cat_active else "Medium", fill="#0E7490" if is_cat_active else "#344054", align="center")
-
-    # 3-Column Signals Grid (6 Sample Cards)
-    cards_data = [
-        {"id": 1, "law": "Law 13", "name_th": "ฟรีคิกทางตรง (Direct Free Kick)", "name_en": "Direct Free Kick", "arm": "แขน 90°", "hold": "Hold 1.2s", "body": "แขนข้างใดข้างหนึ่ง", "active": False},
-        {"id": 2, "law": "Law 13", "name_th": "ฟรีคิกทางอ้อม (Indirect Free Kick)", "name_en": "Indirect Free Kick", "arm": "แขน 180°", "hold": "Hold จนสัมผัสบอล", "body": "แขนขวาตรง", "active": True},
-        {"id": 3, "law": "Law 14", "name_th": "การให้จุดโทษ (Penalty Kick)", "name_en": "Penalty Kick", "arm": "แขน 45° ชี้ลง", "hold": "Hold 1.5s", "body": "แขนข้างใดข้างหนึ่ง", "active": False},
-        {"id": 4, "law": "Law 5", "name_th": "สัญญาณได้เปรียบ (Advantage Play-on)", "name_en": "Advantage (One/Two Arms)", "arm": "2 แขน 45°", "hold": "กวาดแขนไปข้างหน้า", "body": "2 แขนพร้อมกัน", "active": False},
-        {"id": 5, "law": "Law 17", "name_th": "การเตะมุม (Corner Kick)", "name_en": "Corner Kick", "arm": "ชี้มุมธง 45°", "hold": "Hold 1.2s", "body": "แขนข้างใดข้างหนึ่ง", "active": False},
-        {"id": 6, "law": "Law 5", "name_th": "สัญญาณตรวจ VAR (TV Signal)", "name_en": "VAR Review Signal", "arm": "รูปสี่เหลี่ยม TV", "hold": "วาด 2 รอบ", "body": "2 นิ้วชี้ทั้งสองมือ", "active": False},
-    ]
-
-    for idx, c in enumerate(cards_data):
-        col = idx % 3
-        row = idx // 3
-        card_x = 32 + col * 300
-        card_y = 260 + row * 290
-        
-        border_col = "#0E7490" if c["active"] else "#EAECF0"
-        shadow_fill = "#FFFFFF"
-        add_rect(p, card_x, card_y, 285, 275, fill=shadow_fill, stroke=border_col, stroke_width=2 if c["active"] else 1, corner_radius=12)
-        
-        # Law Badge with Google Icon
-        add_badge(p, card_x + 16, card_y + 16, c["law"], bg_color="#EFF8FF", text_color="#175CD3", border_color="#B2DDFF", font_size=10, height=20, icon_name="menu_book", icon_color="#175CD3")
-        
-        # Signal Posture Thumbnail Box
-        add_rect(p, card_x + 16, card_y + 44, 253, 110, fill="#F8FAFC", stroke="#E2E8F0", stroke_width=1, corner_radius=8)
-        
-        # Vector schematic
-        center_x = card_x + 142
-        center_y = card_y + 99
-        add_line(p, center_x, center_y - 20, center_x, center_y + 35, stroke="#334155", stroke_width=3)
-        add_ellipse(p, center_x - 7, center_y - 34, 14, 14, fill="#0E7490")
-        
-        if c["id"] == 1:
-            add_line(p, center_x, center_y - 10, center_x + 35, center_y - 10, stroke="#0891B2", stroke_width=3)
-        elif c["id"] == 2:
-            add_line(p, center_x, center_y - 10, center_x + 10, center_y - 45, stroke="#0891B2", stroke_width=3)
-        elif c["id"] == 3:
-            add_line(p, center_x, center_y - 10, center_x + 30, center_y + 20, stroke="#0891B2", stroke_width=3)
-        elif c["id"] == 4:
-            add_line(p, center_x, center_y - 10, center_x + 30, center_y + 5, stroke="#0891B2", stroke_width=3)
-            add_line(p, center_x, center_y - 10, center_x - 30, center_y + 5, stroke="#0891B2", stroke_width=3)
+    for i, (law, th, en, arm, m1, m2) in enumerate(cards):
+        active = i == 1
+        x, y = 32 + (i % 3) * 309, 268 + (i // 3) * 312
+        c = doc.card(f, x, y, 286, 288, t, stroke=t["accent"] if active else t["border"],
+                     radius=12, name=f"signal-card/{en}")
+        doc.badge(c, law, tone(t, "info"), icon="menu_book", x=16, y=16)
+        thumb = doc.frame(c, 16, 48, 254, 100, fill=t["surface2"], stroke="#E2E8F0",
+                          strokeWeight=1, cornerRadius=8, clip=True)
+        signal_figure(doc, thumb, 127, 54, arm, t["accent"])
+        doc.text(c, th, x=16, y=160, size=14, weight="Bold", color=t["text"])
+        doc.text(c, en, x=16, y=182, size=11, color="#667085")
+        metrics = doc.hstack(c, 16, 206, gap=14)
+        for ic, label in (("straighten", m1), ("schedule", m2)):
+            m = doc.hstack(metrics, gap=4)
+            doc.icon(m, ic, 14, t["accent"])
+            doc.text(m, label, size=11, color="#344054")
+        if active:
+            doc.button(c, "เริ่มฝึกซ้อมท่านี้", t["accent"], "#FFFFFF", x=16, y=240, w=254,
+                       h=32, icon="videocam", size=12)
         else:
-            add_line(p, center_x, center_y - 10, center_x + 30, center_y - 25, stroke="#0891B2", stroke_width=3)
+            doc.button(c, "เริ่มฝึกซ้อมท่านี้", "#F2F4F7", "#344054", x=16, y=240, w=254,
+                       h=32, icon="videocam", size=12)
 
-        # Card Title
-        add_text(p, card_x + 16, card_y + 165, c["name_th"], font_size=12, font_style="Bold", fill="#101828", width=250)
-        add_text(p, card_x + 16, card_y + 185, c["name_en"], font_size=10, font_style="Regular", fill="#667085")
+    # ---- Deep-dive drawer (x=960 w=448) -----------------------------------------
+    d = doc.card(f, 960, 160, 448, 708, t, name="deep-dive-drawer")
+    doc.badge(d, "IFAB LAW 13 · DEEP DIVE", tone(t, "info"), icon="menu_book", x=24, y=24)
+    doc.text(d, "ท่าที่ 2: ฟรีคิกทางอ้อม (Indirect Free Kick)", x=24, y=58, size=16,
+             weight="Bold", color=t["text"])
+    doc.text(d, "Official Instructional Guideline for Referees", x=24, y=84, size=12,
+             color=t["text2"])
 
-        # Metric Pills with Google Icons
-        add_google_icon(p, "straighten", card_x + 16, card_y + 208, size=14, fill="#0E7490")
-        add_text(p, card_x + 34, card_y + 208, c["arm"], font_size=10, fill="#344054")
-        
-        add_google_icon(p, "schedule", card_x + 110, card_y + 208, size=14, fill="#0E7490")
-        add_text(p, card_x + 128, card_y + 208, c["hold"], font_size=10, fill="#344054")
+    dia = doc.frame(d, 24, 112, 400, 176, fill=t["surface2"], stroke="#E2E8F0",
+                    strokeWeight=1, cornerRadius=12, clip=True, name="anatomy-diagram")
+    tol = doc.hstack(dia, 12, 12, w=376, h=24, main="max")
+    doc.badge(tol, "ช่วงที่ยอมรับ 170° – 180°", tone(t, "success"), icon="straighten")
+    doc.line(dia, 200, 80, 200, 24, "#0E749080", weight=2, dashes=[5, 4])
+    doc.line(dia, 200, 70, 200, 150, "#334155", weight=4)
+    doc.ellipse(dia, 190, 44, 20, 20, fill=t["accent"])
+    doc.line(dia, 200, 80, 206, 26, "#0891B2", weight=4)
+    doc.ellipse(dia, 202, 22, 8, 8, fill="#10B981")
 
-        # Practice CTA Button
-        add_button(p, card_x + 16, card_y + 235, 253, 30, "เริ่มฝึกซ้อมท่านี้", bg_color="#0E7490" if c["active"] else "#F2F4F7", text_color="#FFFFFF" if c["active"] else "#344054", corner_radius=6, font_size=11, icon_name="videocam")
+    crit = doc.vstack(d, 24, 308, w=400, gap=12, name="criteria")
+    doc.text(crit, "เกณฑ์มาตรฐานตามกติกา (IFAB Criteria)", size=13, weight="Bold",
+             color=t["text"])
+    for title, val in (("มุมยกแขน (Shoulder Elevation)", "180° ชูตรงขนานศีรษะ"),
+                       ("ความเหยียดศอก (Elbow Straightness)", "มากกว่า 165° ห้ามงอศอก"),
+                       ("แขนที่ใช้ (Active Arm)", "ข้างใดข้างหนึ่ง (แนะนำข้างถนัด)"),
+                       ("ระยะเวลาค้าง (Hold Duration)", "จนกว่าบอลจะถูกเล่นหรือบอลตาย")):
+        item = doc.vstack(crit, gap=2)
+        doc.text(item, title, size=12, weight="SemiBold", color="#344054")
+        doc.text(item, val, size=12, color=t["accent"])
 
-    # RIGHT AREA: Slide-over Deep Dive Rule Inspector Drawer (x=980, y=100, w=428, h=760)
-    add_rect(p, 980, 100, 428, 760, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1, corner_radius=16)
-    
-    # Drawer Header
-    add_badge(p, 1004, 120, "IFAB LAW 13 - DEEP DIVE", bg_color="#EFF8FF", text_color="#175CD3", border_color="#B2DDFF", icon_name="menu_book", icon_color="#175CD3")
-    add_text(p, 1004, 150, "ท่าที่ 2: ฟรีคิกทางอ้อม (Indirect Free Kick)", font_size=16, font_style="Bold", fill="#101828")
-    add_text(p, 1004, 175, "Official Instructional Guideline for Referees", font_size=11, fill="#475467")
+    e_bg, e_fg, e_bd = tone(t, "error")
+    box = doc.hstack(d, 24, 552, w=400, h=72, gap=12, pad=[0, 16, 0, 16], cross="center",
+                     fill=e_bg, radius=10, stroke=e_bd, name="common-mistakes")
+    doc.icon(box, "warning", 20, "#D92D20")
+    bt = doc.vstack(box, gap=4)
+    doc.text(bt, "ข้อผิดพลาดที่พบบ่อย (Common Mistakes)", size=12, weight="Bold", color=e_fg)
+    doc.text(bt, "ลดแขนก่อนบอลถูกเล่น · งอศอกทำให้สัญญาณไม่ชัดเจน", size=11, color="#912018")
 
-    # Anatomical Vector Skeleton Diagram
-    add_rect(p, 1004, 205, 380, 170, fill="#F8FAFC", stroke="#E2E8F0", stroke_width=1, corner_radius=12)
-    diag_cx = 1004 + 190
-    diag_cy = 205 + 100
-    add_line(p, diag_cx, diag_cy - 40, diag_cx, diag_cy + 55, stroke="#334155", stroke_width=3)
-    add_ellipse(p, diag_cx - 10, diag_cy - 60, 20, 20, fill="#0E7490")
-    add_line(p, diag_cx, diag_cy - 20, diag_cx + 25, diag_cy - 75, stroke="#0891B2", stroke_width=4)
-    add_ellipse(p, diag_cx + 25 - 4, diag_cy - 75 - 4, 8, 8, fill="#10B981")
-    
-    add_badge(p, diag_cx + 35, diag_cy - 85, "เป้าหมาย IFAB: 170° - 180°", bg_color="#ECFDF5", text_color="#027A48", border_color="#A6F4C5", icon_name="straighten", icon_color="#027A48")
-
-    # Rule Specs Breakdown
-    add_text(p, 1004, 395, "เกณฑ์มาตรฐานตามกฎการแข่งขัน (IFAB Criteria):", font_size=12, font_style="Bold", fill="#101828")
-    
-    criteria = [
-        ("มุมยกแขน (Shoulder Elevation)", "180° (ชูตรงขึ้นฟ้าขนานกับศีรษะ)"),
-        ("ความเหยียดตรงของข้อศอก (Elbow Straightness)", "> 165° (ห้ามงอข้อศอกขณะให้สัญญาณ)"),
-        ("แขนที่ใช้งาน (Active Arm)", "แขนข้างใดข้างหนึ่ง (แนะนำแขนข้างที่ถนัด)"),
-        ("ระยะเวลาค้างสัญญาณ (Hold Duration)", "ค้างไว้จนกว่าจะมีการเล่นลูกบอลหรือบอลตาย"),
-    ]
-    for cr_idx, (cr_title, cr_val) in enumerate(criteria):
-        cry = 420 + cr_idx * 40
-        add_text(p, 1004, cry, cr_title, font_size=11, font_style="SemiBold", fill="#344054")
-        add_text(p, 1004, cry + 16, cr_val, font_size=11, fill="#0E7490")
-
-    # Common Mistakes Callout Box with Google Icon
-    add_rect(p, 1004, 590, 380, 85, fill="#FEF3F2", stroke="#FECDCA", stroke_width=1, corner_radius=8)
-    add_google_icon(p, "warning", 1020, 604, size=20, fill="#D92D20")
-    add_text(p, 1046, 604, "ข้อผิดพลาดที่พบบ่อย (Common Mistakes):", font_size=11, font_style="Bold", fill="#B42318")
-    add_text(p, 1046, 624, "• ลดแขนลงเร็วก่อนที่ลูกบอลจะถูกสัมผัสโดยผู้เล่นคนอื่น\n• งอข้อศอกทำให้สัญญาณดูไม่ชัดเจนและขาดความมั่นใจ", font_size=11, fill="#912018")
-
-    # CTA
-    add_button(p, 1004, 695, 380, 48, "เริ่มฝึกซ้อมท่านี้ใน Live Studio", bg_color="#0E7490", text_color="#FFFFFF", corner_radius=8, font_size=13, icon_name="videocam")
+    doc.button(d, "เริ่มฝึกท่านี้ใน Live Studio", t["accent"], "#FFFFFF", x=24, y=636,
+               w=400, h=48, icon="videocam", size=14)
 
 
 # ==============================================================================
-# BUILD SCREEN 4: Trainee Performance Gradebook (/gradebook) - Frame ID: 5
+# SCREEN 4 — Trainee Performance Gradebook (/gradebook)
 # ==============================================================================
-def build_screen_4(frame_id):
-    p = frame_id
-    # Header Bar (Light Mode)
-    add_rect(p, 0, 0, 1440, 72, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1)
-    add_google_icon(p, "sports_soccer", 32, 25, size=22, fill="#0E7490")
-    add_text(p, 62, 24, "Referee Academy AI", font_size=18, font_style="Bold", fill="#101828")
-    
-    # Trainee Profile Badge
-    add_rect(p, 275, 16, 320, 40, fill="#F8FAFC", stroke="#E2E8F0", stroke_width=1, corner_radius=20)
-    add_ellipse(p, 281, 22, 28, 28, fill="#0E7490")
-    add_text(p, 287, 28, "IR", font_size=12, font_style="Bold", fill="#FFFFFF")
-    add_text(p, 318, 23, "อัศวิน พิทักษ์ธรรม (REF-2026-092)", font_size=12, font_style="Bold", fill="#101828")
-    add_text(p, 318, 38, "หลักสูตรผู้ตัดสินระดับชาติขั้นต้น (Class 3)", font_size=10, fill="#667085")
+def build_gradebook(doc, f):
+    t = LIGHT
+    header(doc, f, t, 3, "อัศวิน พิทักษ์ธรรม · REF-2026-092")
+    actions = title_bar(doc, f, t, "สมุดบันทึกผลการประเมินผู้เรียน (Trainee Gradebook)",
+                        "สถิติการฝึกภาคปฏิบัติและผลสอบสถานการณ์จำลองตามเกณฑ์ IFAB · หลักสูตร Class 3")
+    doc.button(actions, "ดาวน์โหลด PDF", "#FFFFFF", "#344054", h=40, icon="download",
+               border="#D0D5DD")
+    doc.button(actions, "ดูใบรับรองผล", t["accent"], "#FFFFFF", h=40, icon="school")
 
-    # Export & Certificate Buttons with Google Font Icons
-    add_button(p, 1060, 18, 175, 36, "ดาวน์โหลดรายงาน PDF", bg_color="#FFFFFF", text_color="#344054", border_color="#D0D5DD", font_size=11, icon_name="download")
-    add_button(p, 1245, 18, 160, 36, "ดูใบรับรองผลการสอบ", bg_color="#0E7490", text_color="#FFFFFF", font_size=11, icon_name="school")
-
-    # Page Title
-    add_text(p, 32, 100, "สมุดบันทึกผลการประเมินและพัฒนาการผู้เรียน (Trainee Gradebook)", font_size=20, font_style="Bold", fill="#101828")
-    add_text(p, 32, 126, "ภาพรวมสถิติการฝึกซ้อมภาคปฏิบัติและผลการสอบสถานการณ์จำลองตามเกณฑ์ IFAB", font_size=12, fill="#475467")
-
-    # 4 Untitled UI Metric Stat Cards with Google Font Icons
-    stat_cards = [
-        {"title": "ความแม่นยำรวม (Overall Accuracy)", "value": "88.4%", "sub": "+4.2% จากสัปดาห์ก่อน", "trend": "up", "icon": "monitoring", "color": "#0E7490"},
-        {"title": "ชุดข้อสอบที่ผ่านเกณฑ์ (Passed)", "value": "24 / 28", "sub": "อัตราผ่าน 85.7%", "trend": "neutral", "icon": "quiz", "color": "#059669"},
-        {"title": "เวลาตอบสนองเฉลี่ย (Reaction Time)", "value": "1.35s", "sub": "เร็วกว่าเกณฑ์ 0.65s (ดีเยี่ยม)", "trend": "up", "icon": "speed", "color": "#2563EB"},
-        {"title": "ระดับสมรรถนะ (Competency Tier)", "value": "ระดับ 3", "sub": "พร้อมสอบภาคสนามจริง", "trend": "gold", "icon": "school", "color": "#7C3AED"},
+    stats = [
+        ("monitoring", "#0E7490", "#F0FDFA", "ความแม่นยำรวม (Overall Accuracy)", "88.4%",
+         "+4.2% จากสัปดาห์ก่อน", "#027A48"),
+        ("quiz", "#059669", "#ECFDF3", "ชุดข้อสอบที่ผ่าน (Passed)", "24 / 28",
+         "อัตราผ่าน 85.7%", "#475467"),
+        ("speed", "#2563EB", "#EFF8FF", "เวลาตอบสนองเฉลี่ย (Reaction)", "1.35s",
+         "เร็วกว่าเกณฑ์ 0.65s", "#027A48"),
+        ("school", "#7C3AED", "#F4F3FF", "ระดับสมรรถนะ (Competency)", "Class 3",
+         "พร้อมสอบภาคสนามจริง", "#475467"),
     ]
-    for idx, sc in enumerate(stat_cards):
-        sc_x = 32 + idx * 345
-        add_rect(p, sc_x, 150, 330, 105, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1, corner_radius=12)
-        add_google_icon(p, sc["icon"], sc_x + 20, 168, size=22, fill=sc["color"])
-        add_text(p, sc_x + 50, 166, sc["title"], font_size=11, font_style="Medium", fill="#667085")
-        add_text(p, sc_x + 20, 190, sc["value"], font_size=24, font_style="Bold", fill="#101828")
-        add_text(p, sc_x + 20, 222, sc["sub"], font_size=11, font_style="Medium", fill="#027A48" if sc["trend"]=="up" else "#475467")
+    for i, (ic, col, tint, title, value, sub, sub_col) in enumerate(stats):
+        c = doc.card(f, 32 + i * 350, 160, 326, 112, t, radius=12, name=f"stat/{value}")
+        tile = doc.frame(c, 20, 20, 40, 40, fill=tint, cornerRadius=10, layout="horizontal",
+                         mainAlign="center", crossAlign="center")
+        doc.icon(tile, ic, 22, col)
+        doc.text(c, title, x=72, y=20, size=11, weight="Medium", color="#667085")
+        doc.text(c, value, x=72, y=36, size=24, weight="Bold", color=t["text"])
+        doc.text(c, sub, x=20, y=80, size=11, weight="Medium", color=sub_col)
 
-    # Middle Row: Left (Radar Chart: 680px), Right (Weakness Diagnostics: 660px)
-    add_rect(p, 32, 275, 680, 270, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "monitoring", 52, 293, size=18, fill="#0E7490")
-    add_text(p, 76, 292, "เรดาร์ชาร์ตสมรรถนะ 4 มิติ (Competency Radar Chart)", font_size=13, font_style="Bold", fill="#101828")
-    add_text(p, 52, 314, "เปรียบเทียบคะแนนผู้เรียนกับเกณฑ์มาตรฐาน IFAB Standard (80%)", font_size=11, fill="#667085")
+    # ---- Radar card -----------------------------------------------------------
+    rc = doc.card(f, 32, 296, 676, 276, t, radius=12, name="radar-card")
+    doc.card_header(rc, 676, t, "monitoring", "สมรรถนะ 4 มิติ (Competency Radar)",
+                    right=[("เกณฑ์ IFAB 80%", tone(t, "warning"))])
+    cx, cy, r = 160, 164, 76
+    for step in (0.25, 0.5, 0.75, 1.0):
+        rr = r * step
+        doc.path(rc, f"M {cx} {cy - rr} L {cx + rr} {cy} L {cx} {cy + rr} L {cx - rr} {cy} Z",
+                 stroke="#E2E8F0", weight=1)
+    tr = r * 0.8
+    doc.path(rc, f"M {cx} {cy - tr} L {cx + tr} {cy} L {cx} {cy + tr} L {cx - tr} {cy} Z",
+             stroke="#F79009", weight=1.5, dashes=[4, 3], name="ifab-target")
+    doc.line(rc, cx, cy - r, cx, cy + r, "#E2E8F0", weight=1)
+    doc.line(rc, cx - r, cy, cx + r, cy, "#E2E8F0", weight=1)
+    vals = [92, 84, 76, 90]  # top, right, bottom, left
+    vt, vr, vb, vl = [v / 100 * r for v in vals]
+    doc.path(rc, f"M {cx} {cy - vt} L {cx + vr} {cy} L {cx} {cy + vb} L {cx - vl} {cy} Z",
+             fill="#0E749033", stroke=t["accent"], weight=2, name="trainee-polygon")
+    for px, py in ((cx, cy - vt), (cx + vr, cy), (cx, cy + vb), (cx - vl, cy)):
+        doc.ellipse(rc, px - 4, py - 4, 8, 8, fill=t["accent"], stroke="#FFFFFF", strokeWeight=1.5)
+    doc.text(rc, "ลูกตั้งเตะ", x=cx - 50, y=cy - r - 20, width=100, align="center", size=11,
+             weight="SemiBold", color="#344054")
+    doc.text(rc, "ควบคุมเกม", x=cx - 50, y=cy + r + 6, width=100, align="center", size=11,
+             weight="SemiBold", color="#344054")
+    doc.text(rc, "ล้ำหน้า", x=8, y=cy - 8, width=68, align="right", size=11,
+             weight="SemiBold", color="#344054")
+    doc.text(rc, "ฟาวล์", x=cx + r + 8, y=cy - 8, size=11, weight="SemiBold", color="#344054")
 
-    # Radar
-    radar_cx, radar_cy, radar_r = 190, 420, 85
-    add_radar_chart(p, radar_cx, radar_cy, radar_r, values=[92, 84, 76, 90], labels=["ลูกตั้งเตะ", "การทำฟาวล์", "การควบคุมเกม", "การล้ำหน้า"])
-    
-    # Legend
-    cats_breakdown = [
-        ("ลูกตั้งเตะ (Restarts)", "92%", "#0E7490"),
-        ("การทำฟาวล์ (Fouls & Misconduct)", "84%", "#059669"),
-        ("การควบคุมเกม (Game Control)", "76%", "#D97706"),
-        ("การล้ำหน้า (Offside & Boundary)", "90%", "#2563EB"),
+    legend = [("ลูกตั้งเตะ (Restarts)", 92, "#0E7490"),
+              ("การทำฟาวล์ (Fouls)", 84, "#059669"),
+              ("การควบคุมเกม (Game Control)", 76, "#D97706"),
+              ("การล้ำหน้า (Offside)", 90, "#2563EB")]
+    for i, (label, pct, col) in enumerate(legend):
+        ly = 64 + i * 48
+        row = doc.hstack(rc, 328, ly, w=328, h=16, main="spaceBetween")
+        lg = doc.hstack(row, gap=8)
+        doc.ellipse(lg, 0, 0, 8, 8, fill=col)
+        doc.text(lg, label, size=12, weight="SemiBold", color="#344054")
+        doc.text(row, f"{pct}%", size=12, weight="Bold", color=col)
+        doc.progress(rc, 328, ly + 24, 328, pct, col, "#F2F4F7", h=6)
+
+    # ---- Diagnostics card -----------------------------------------------------
+    dc = doc.card(f, 732, 296, 676, 276, t, radius=12, name="diagnostics-card")
+    doc.card_header(dc, 676, t, "lightbulb", "วินิจฉัยจุดอ่อนรายบุคคล (AI Action Plan)",
+                    icon_color="#D97706")
+    alerts = [
+        ("error", "warning", "#D92D20", "สัญญาณได้เปรียบ: กางแขนแคบเกินไป (32° จากเกณฑ์ 45°)",
+         "ผู้เล่นอาจมองไม่เห็นสัญญาณในจังหวะเกมสวนกลับเร็ว"),
+        ("warning", "schedule", "#D97706", "ฟรีคิกทางอ้อม: ค้างสัญญาณสั้นกว่าเกณฑ์ (0.8s จาก 1.5s)",
+         "ชูแขนค้างไว้จนกว่าบอลจะถูกเล่น อย่าลดแขนทันทีหลังเป่านกหวีด"),
     ]
-    for c_idx, (c_label, c_pct, c_col) in enumerate(cats_breakdown):
-        cy = 350 + c_idx * 42
-        add_ellipse(p, 380, cy + 4, 8, 8, fill=c_col)
-        add_text(p, 396, cy, c_label, font_size=11, font_style="SemiBold", fill="#344054")
-        add_text(p, 640, cy, c_pct, font_size=12, font_style="Bold", fill=c_col, align="right")
-        add_progress_bar(p, 396, cy + 18, 250, 6, int(c_pct.replace("%", "")), bg_color="#F2F4F7", fill_color=c_col)
+    for i, (tn, ic, icol, title, desc) in enumerate(alerts):
+        bg, fg, bd = tone(t, tn)
+        a = doc.hstack(dc, 20, 56 + i * 76, w=636, h=64, gap=12, pad=[0, 16, 0, 16],
+                       fill=bg, radius=10, stroke=bd)
+        doc.icon(a, ic, 20, icol)
+        body = doc.vstack(a, gap=4)
+        doc.text(body, title, size=12, weight="Bold", color=fg)
+        doc.text(body, desc, size=11, color=fg)
+    doc.button(dc, "เข้าห้องฝึกซ้อมเพื่อแก้ไขจุดอ่อน 2 ข้อนี้", t["accent"], "#FFFFFF",
+               x=20, y=212, w=636, h=44, icon="videocam")
 
-    # Right: Weakness Diagnostics Panel
-    add_rect(p, 730, 275, 678, 270, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "warning", 750, 293, size=18, fill="#D92D20")
-    add_text(p, 774, 292, "การวินิจฉัยจุดอ่อนรายบุคคล (AI Diagnostic & Action Plan)", font_size=13, font_style="Bold", fill="#101828")
-    
-    add_rect(p, 750, 325, 638, 62, fill="#FEF3F2", stroke="#FECDCA", stroke_width=1, corner_radius=8)
-    add_google_icon(p, "warning", 764, 338, size=20, fill="#D92D20")
-    add_text(p, 792, 336, "จุดที่ควรปรับปรุง: สัญญาณได้เปรียบ (Advantage) กางแขนแคบเกินไป (เฉลี่ย 32° จากเกณฑ์ 45°)", font_size=11, font_style="Bold", fill="#B42318")
-    add_text(p, 792, 356, "ผู้เรียนมักกางแขนไม่เต็มระยะ ทำให้ผู้เล่นในสนามอาจมองไม่เห็นสัญญาณในจังหวะสวนกลับเร็ว", font_size=10, fill="#912018")
-
-    add_rect(p, 750, 398, 638, 62, fill="#FFFBEB", stroke="#FEF08A", stroke_width=1, corner_radius=8)
-    add_google_icon(p, "schedule", 764, 411, size=20, fill="#D97706")
-    add_text(p, 792, 409, "ข้อสังเกต: การค้างสัญญาณในฟรีคิกทางอ้อมสั้นกว่าเกณฑ์ (เฉลี่ย 0.8s จากเกณฑ์ 1.5s)", font_size=11, font_style="Bold", fill="#92400E")
-    add_text(p, 792, 429, "ควรฝึกสมาธิในการชูแขนค้างไว้จนกว่าจะมีการสัมผัสบอล ไม่ลดแขนลงทันทีหลังเป่านกหวีด", font_size=10, fill="#78350F")
-
-    add_button(p, 750, 485, 638, 38, "เข้าห้องฝึกซ้อมเพื่อแก้ไขจุดอ่อน 2 ข้อนี้ทันที", bg_color="#0E7490", text_color="#FFFFFF", font_size=12, icon_name="videocam")
-
-    # Bottom Row: Recent Assessment Sessions History Data Table
-    add_rect(p, 32, 565, 1376, 295, fill="#FFFFFF", stroke="#EAECF0", stroke_width=1, corner_radius=12)
-    add_google_icon(p, "quiz", 52, 583, size=18, fill="#0E7490")
-    add_text(p, 76, 582, "ตารางประวัติผลการประเมินการฝึกและสอบล่าสุด (Recent Assessment Sessions)", font_size=13, font_style="Bold", fill="#101828")
-
-    # Table Header Row
-    add_rect(p, 52, 610, 1336, 32, fill="#F8FAFC", corner_radius=6)
-    headers = [
-        ("รหัสเซสชัน", 70),
-        ("วันที่ - เวลา", 220),
-        ("ชุดแบบฝึก / ข้อสอบ", 400),
-        ("คะแนนเฉลี่ย", 780),
-        ("เวลาตอบสนอง", 920),
-        ("สถานะผลประเมิน", 1080),
-        ("การกระทำ", 1250)
+    # ---- History table --------------------------------------------------------
+    tc = doc.card(f, 32, 596, 1376, 272, t, radius=12, name="history-table")
+    doc.card_header(tc, 1376, t, "quiz", "ประวัติผลการประเมินล่าสุด (Recent Assessment Sessions)",
+                    right=[("5 รายการล่าสุด", tone(t, "neutral"))])
+    cols = [16, 176, 336, 776, 896, 1036, 1228]
+    thead = doc.frame(tc, 20, 52, 1336, 32, fill="#F9FAFB", cornerRadius=6)
+    for cx_, label in zip(cols, ("รหัสเซสชัน", "วันที่ - เวลา", "ชุดแบบฝึก / ข้อสอบ",
+                                 "คะแนน", "เวลาตอบสนอง", "ผลประเมิน", "การกระทำ")):
+        doc.text(thead, label, x=cx_, y=9, size=11, weight="SemiBold", color="#475467")
+    rows = [
+        ("EXAM-2026-104", "15 พ.ย. 2026 · 11:20", "ชุดข้อสอบ Law 12: ฟาวล์ในเขตโทษ", "92", "1.18s", "ผ่าน (A+)", "success"),
+        ("DRILL-2026-098", "14 พ.ย. 2026 · 16:45", "ฝึกซ้อมสด: ฟรีคิกทางอ้อม (Law 13)", "94", "1.05s", "ผ่าน (A+)", "success"),
+        ("DRILL-2026-089", "14 พ.ย. 2026 · 10:15", "ฝึกซ้อมสด: สัญญาณได้เปรียบ", "74", "1.82s", "ปรับปรุง (C)", "warning"),
+        ("EXAM-2026-075", "12 พ.ย. 2026 · 14:30", "ชุดข้อสอบ Law 11: จังหวะล้ำหน้า", "88", "1.25s", "ผ่าน (A)", "success"),
+        ("DRILL-2026-064", "10 พ.ย. 2026 · 09:00", "ฝึกซ้อมสด: การให้จุดโทษ (Law 14)", "90", "1.20s", "ผ่าน (A)", "success"),
     ]
-    for h_title, hx in headers:
-        add_text(p, hx, 620, h_title, font_size=11, font_style="Bold", fill="#475467")
-
-    # 5 Sample Data Rows
-    table_rows = [
-        ("EXAM-2026-104", "15 พ.ย. 2026, 11:20", "ชุดข้อสอบ Law 12: การทำฟาวล์ในเขตโทษ", "92 / 100", "1.18 วินาที", "ผ่านเกณฑ์ (A+)", "#027A48", "#ECFDF5", "#A6F4C5"),
-        ("DRILL-2026-098", "14 พ.ย. 2026, 16:45", "ฝึกซ้อมสด: ฟรีคิกทางอ้อม (Law 13)", "94 / 100", "1.05 วินาที", "ผ่านเกณฑ์ (A+)", "#027A48", "#ECFDF5", "#A6F4C5"),
-        ("DRILL-2026-089", "14 พ.ย. 2026, 10:15", "ฝึกซ้อมสด: สัญญาณได้เปรียบ (Advantage)", "74 / 100", "1.82 วินาที", "ต้องปรับปรุง (C)", "#B54708", "#FFFAEB", "#FEDF89"),
-        ("EXAM-2026-075", "12 พ.ย. 2026, 14:30", "ชุดข้อสอบ Law 11: การตัดสินจังหวะล้ำหน้า", "88 / 100", "1.25 วินาที", "ผ่านเกณฑ์ (A)", "#027A48", "#ECFDF5", "#A6F4C5"),
-        ("DRILL-2026-064", "10 พ.ย. 2026, 09:00", "ฝึกซ้อมสด: การให้สัญญาณจุดโทษ (Law 14)", "90 / 100", "1.20 วินาที", "ผ่านเกณฑ์ (A)", "#027A48", "#ECFDF5", "#A6F4C5"),
-    ]
-    for r_idx, r in enumerate(table_rows):
-        ry = 650 + r_idx * 38
-        if r_idx % 2 == 1:
-            add_rect(p, 52, ry - 4, 1336, 36, fill="#F9FAFB")
-        
-        add_text(p, 70, ry + 6, r[0], font_size=11, font_style="Medium", fill="#101828")
-        add_text(p, 220, ry + 6, r[1], font_size=11, fill="#667085")
-        add_text(p, 400, ry + 6, r[2], font_size=11, font_style="Medium", fill="#101828")
-        add_text(p, 780, ry + 6, r[3], font_size=11, font_style="Bold", fill="#0E7490")
-        add_text(p, 920, ry + 6, r[4], font_size=11, fill="#475467")
-        add_badge(p, 1070, ry + 2, r[5], bg_color=r[7], text_color=r[6], border_color=r[8], font_size=10, height=22, icon_name="check_circle" if "ผ่าน" in r[5] else "warning", icon_color=r[6])
-        add_button(p, 1250, ry + 2, 85, 24, "ดูผลตรวจ", bg_color="#FFFFFF", text_color="#0E7490", border_color="#D0D5DD", font_size=10, corner_radius=4)
+    for i, (sid, date, module, sc, lat, status, tn) in enumerate(rows):
+        row = doc.frame(tc, 20, 88 + i * 34, 1336, 34,
+                        fill="#F9FAFB" if i % 2 else "none", cornerRadius=6)
+        doc.text(row, sid, x=cols[0], y=9, size=12, weight="Medium", color=t["text"])
+        doc.text(row, date, x=cols[1], y=9, size=12, color="#667085")
+        doc.text(row, module, x=cols[2], y=9, size=12, weight="Medium", color=t["text"])
+        doc.text(row, f"{sc} / 100", x=cols[3], y=9, size=12, weight="Bold", color=t["accent"])
+        doc.text(row, lat, x=cols[4], y=9, size=12, color="#475467")
+        doc.badge(row, status, tone(t, tn), icon="check_circle" if tn == "success" else "warning",
+                  x=cols[5], y=6)
+        doc.button(row, "ดูผลตรวจ", "#FFFFFF", t["accent"], x=cols[6], y=5, w=92, h=24,
+                   border="#D0D5DD", size=11, radius=6)
 
 
 # ==============================================================================
-# BUILD SCREEN 5: Google Font Icons Asset Library - Frame ID: 6
+# SCREEN 5 — Google Material Symbols asset library
 # ==============================================================================
-def build_screen_5(frame_id):
-    p = frame_id
-    # Header
-    add_rect(p, 0, 0, 1440, 72, fill="#0F172A", stroke="#1E293B", stroke_width=1)
-    add_google_icon(p, "sports_soccer", 32, 25, size=22, fill="#22D3EE")
-    add_text(p, 62, 24, "Referee Academy AI - Design Tokens", font_size=18, font_style="Bold", fill="#FFFFFF")
-    
-    add_badge(p, 500, 24, "GOOGLE MATERIAL SYMBOLS OUTLINED (NATIVE VECTOR ASSETS)", bg_color="#083344", text_color="#22D3EE", border_color="#22D3EE")
-    
-    # Title & Guidelines
-    add_text(p, 32, 100, "Google Font Icons (Material Symbols) Design Asset Library", font_size=20, font_style="Bold", fill="#FFFFFF")
-    add_text(p, 32, 126, "คลังไอคอนเวกเตอร์มาตรฐาน Google Material Symbols สำหรับระบบฝึกอบรมและประเมินผลผู้ตัดสิน (Front_End & FigCraft)", font_size=12, fill="#94A3B8")
+def build_icon_library(doc, f):
+    t = DARK
+    head = doc.hstack(f, 0, 0, w=1440, h=64, main="spaceBetween", pad=[0, 32, 0, 32],
+                      fill=t["surface"])
+    logo = doc.hstack(head, gap=10)
+    doc.icon(logo, "sports_soccer", 26, t["accent"])
+    doc.text(logo, "Referee Academy AI · Design Tokens", size=17, weight="Bold", color=t["text"])
+    doc.badge(head, "Google Material Symbols · 24px SVG", tone(t, "accent"))
+    doc.rect(f, 0, 63, 1440, 1, fill=t["border"])
+    title_bar(doc, f, t, "คลังไอคอน Google Material Symbols (SVG)",
+              "ชุดเดียวกับ Front_End/src/UI_Components/Common/Google_Icon.tsx · viewBox 24×24")
 
-    # Categories of icons
-    categories = [
+    groups = [
         ("Navigation & Portal", ["sports_soccer", "menu_book", "quiz", "monitoring", "school"]),
-        ("Video & Vision Engine", ["videocam", "videocam_off", "crop_free", "flip", "refresh"]),
+        ("Video & Vision Engine", ["videocam", "videocam_off", "crop_free", "flip", "refresh", "play_arrow"]),
         ("Tactical & Tagging", ["my_location", "person", "group", "how_to_reg", "straighten"]),
         ("Scores & Metrics", ["check_circle", "warning", "bolt", "schedule", "timer", "speed"]),
-        ("Actions & UI Helpers", ["search", "download", "emoji_events", "lightbulb", "circle"]),
+        ("Actions & Helpers", ["search", "download", "emoji_events", "lightbulb"]),
     ]
-
-    start_y = 160
-    for cat_idx, (cat_name, icon_list) in enumerate(categories):
-        cy = start_y + cat_idx * 138
-        
-        # Category Box
-        add_rect(p, 32, cy, 1376, 120, fill="#0F172A", stroke="#1E293B", stroke_width=1, corner_radius=12)
-        add_text(p, 52, cy + 16, f"Category: {cat_name} ({len(icon_list)} Icons)", font_size=13, font_style="Bold", fill="#38BDF8")
-        
-        # Render icon tiles in a row
-        for i_idx, icon_name in enumerate(icon_list):
-            tile_x = 52 + i_idx * 215
-            tile_y = cy + 42
-            
-            # Tile background
-            add_rect(p, tile_x, tile_y, 195, 62, fill="#0B132B", stroke="#334155", stroke_width=1, corner_radius=8)
-            
-            # Google Font Icon preview
-            add_google_icon(p, icon_name, tile_x + 14, tile_y + 16, size=28, fill="#22D3EE", name=f"lib_icon_{icon_name}")
-            
-            # Icon Glyph name
-            add_text(p, tile_x + 52, tile_y + 14, icon_name, font_size=11, font_style="Bold", fill="#FFFFFF")
-            add_text(p, tile_x + 52, tile_y + 34, "Material Symbol", font_size=9, fill="#64748B")
+    for gi, (gname, names) in enumerate(groups):
+        c = doc.card(f, 32, 160 + gi * 144, 1376, 132, t, radius=12, name=f"group/{gname}")
+        doc.text(c, f"{gname} · {len(names)} icons", x=20, y=16, size=13, weight="Bold",
+                 color="#38BDF8")
+        tiles = doc.hstack(c, 20, 48, gap=12)
+        for name in names:
+            tile = doc.hstack(tiles, w=200, h=64, gap=12, pad=[0, 14, 0, 14], radius=8,
+                              fill=t["surface2"], stroke="#334155")
+            doc.icon(tile, name, 28, t["accent"])
+            lab = doc.vstack(tile, gap=2)
+            doc.text(lab, name, size=12, weight="Bold", color=t["text"])
+            doc.text(lab, "Material Symbol", size=10, color=t["text3"])
 
 
 # ==============================================================================
-# MAIN EXECUTION ROUTINE
+# MAIN
 # ==============================================================================
+SCREENS = [
+    ("Screen1_Live_Drills", DARK, build_drills),
+    ("Screen2_Scenario_Exam", DARK, build_exam),
+    ("Screen3_IFAB_Handbook", LIGHT, build_handbook),
+    ("Screen4_Trainee_Gradebook", LIGHT, build_gradebook),
+    ("Google_Font_Icons_Asset_Library", DARK, build_icon_library),
+]
+
+
+def run(cmd):
+    res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    if res.returncode != 0:
+        print("ERROR:", " ".join(cmd), "\n", res.stderr or res.stdout)
+        sys.exit(1)
+    return res.stdout
+
+
+def verify_ids(stdout, expected):
+    """Fail loudly if FigCraft's ids drifted from the predicted ones —
+    every parent reference in the script depends on them."""
+    actual = []
+    for line in stdout.splitlines():
+        line = line.strip()
+        if line.startswith("{"):
+            data = json.loads(line)
+            if not data.get("ok"):
+                print("ERROR: step failed:", line)
+                sys.exit(1)
+            if isinstance(data.get("result"), dict) and "id" in data["result"]:
+                actual.append(data["result"]["id"])
+    if actual != expected:
+        first = next((i for i, (a, e) in enumerate(zip(actual, expected)) if a != e), None)
+        print(f"ERROR: node id drift at step {first} (expected {len(expected)} ids, got {len(actual)})")
+        sys.exit(1)
+
+
 def main():
-    print("=== Generating FigCraft Prototype with Google Font Icons ===")
-    
-    # 1. Create Top-Level Frames
-    print("Step 1: Creating 5 Top-Level Frames...")
-    add_frame("Screen1_Live_Drills", 0, 0, 1440, 900, fill="#090D16")
-    add_frame("Screen2_Scenario_Exam", 1540, 0, 1440, 900, fill="#090D16")
-    add_frame("Screen3_IFAB_Handbook", 3080, 0, 1440, 900, fill="#F9FAFB")
-    add_frame("Screen4_Trainee_Gradebook", 4620, 0, 1440, 900, fill="#F9FAFB")
-    add_frame("Google_Font_Icons_Asset_Library", 6160, 0, 1440, 900, fill="#090D16")
+    doc = FigCraftDoc()
+    frames = [doc.frame(None, i * 1540, 0, 1440, 900, name=name, fill=theme["bg"], clip=True)
+              for i, (name, theme, _) in enumerate(SCREENS)]
+    for frame_id, (name, _, builder) in zip(frames, SCREENS):
+        print(f"Building {name} (frame {frame_id})...")
+        builder(doc, frame_id)
 
-    # 2. Build Screen 1: Live Practice Studio
-    print("Step 2: Building Screen 1 (Live Practice Studio)...")
-    build_screen_1(frame_id=2)
+    script_path = SCRIPTS_DIR / "figcraft_commands.json"
+    script_path.write_text(json.dumps(doc.commands, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"Wrote {len(doc.commands)} commands -> {script_path.name}")
 
-    # 3. Build Screen 2: Scenario Examination Studio
-    print("Step 3: Building Screen 2 (Scenario Examination Studio)...")
-    build_screen_2(frame_id=3)
+    out = DOCS_FIGCRAFT / "Referee_Academy_UI.figcraft"
+    stdout = run([FIGCRAFT_CLI, "run", str(script_path), "--out", str(out)])
+    verify_ids(stdout, doc.expected_ids)
+    print("Node ids verified.")
 
-    # 4. Build Screen 3: IFAB Digital Learning Handbook
-    print("Step 4: Building Screen 3 (IFAB Digital Learning Handbook)...")
-    build_screen_3(frame_id=4)
+    RENDERS_DIR.mkdir(exist_ok=True)
+    print(run([FIGCRAFT_CLI, "export", "--out", str(RENDERS_DIR), str(out)]))
+    print(run([FIGCRAFT_CLI, "info", str(out)]))
 
-    # 5. Build Screen 4: Trainee Performance Gradebook
-    print("Step 5: Building Screen 4 (Trainee Performance Gradebook)...")
-    build_screen_4(frame_id=5)
-
-    # 6. Build Screen 5: Google Font Icons Asset Library
-    print("Step 6: Building Screen 5 (Google Font Icons Asset Library)...")
-    build_screen_5(frame_id=6)
-
-    # Write commands to UTF-8 JSON file
-    script_json_path = SCRIPTS_DIR / "figcraft_commands.json"
-    print(f"Step 7: Writing {len(COMMANDS)} commands to {script_json_path}...")
-    with open(script_json_path, "w", encoding="utf-8") as f:
-        json.dump(COMMANDS, f, ensure_ascii=False, indent=2)
-    print("JSON command script successfully written!")
-
-    # Run FigCraft CLI to generate .figcraft project
-    output_figcraft = DOCS_FIGCRAFT / "Referee_Academy_UI.figcraft"
-    print(f"Step 8: Running figcraft-cli to generate {output_figcraft}...")
-    run_cmd = [
-        FIGCRAFT_CLI,
-        "run",
-        str(script_json_path),
-        "--out",
-        str(output_figcraft)
-    ]
-    res_run = subprocess.run(run_cmd, capture_output=True, text=True)
-    if res_run.returncode != 0:
-        print("ERROR running figcraft-cli:", res_run.stderr)
-        sys.exit(1)
-    print("FigCraft project generated successfully!")
-
-    # Export Frames to PNG
-    print(f"Step 9: Exporting frames to PNG in {RENDERS_DIR}...")
-    export_cmd = [
-        FIGCRAFT_CLI,
-        "export",
-        "--out",
-        str(RENDERS_DIR),
-        str(output_figcraft)
-    ]
-    res_export = subprocess.run(export_cmd, capture_output=True, text=True)
-    print(res_export.stdout)
-    if res_export.returncode != 0:
-        print("ERROR exporting frames:", res_export.stderr)
-        sys.exit(1)
-
-    # Check info
-    print("Step 10: Inspecting FigCraft file info...")
-    info_cmd = [
-        FIGCRAFT_CLI,
-        "info",
-        str(output_figcraft)
-    ]
-    res_info = subprocess.run(info_cmd, capture_output=True, text=True)
-    print(res_info.stdout)
-
-    print("=== All FigCraft generation tasks completed successfully! ===")
 
 if __name__ == "__main__":
     main()
