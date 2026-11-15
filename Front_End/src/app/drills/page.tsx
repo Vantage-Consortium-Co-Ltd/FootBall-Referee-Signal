@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   FrameFeedbackPayload,
   GestureRule,
@@ -17,8 +18,27 @@ import {
 } from "../../UI_Components/Drill_Practice";
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
 
-export default function DrillsPage() {
-  const [selectedRule, setSelectedRule] = useState<GestureRule>(MOCK_IFAB_RULES[1]); // Default: Indirect Free Kick
+function DrillsStudioContent() {
+  const searchParams = useSearchParams();
+  const initialSignalIdParam = searchParams.get("signalId");
+
+  const [selectedRule, setSelectedRule] = useState<GestureRule>(() => {
+    if (initialSignalIdParam !== null) {
+      const parsed = Number(initialSignalIdParam);
+      const matched = MOCK_IFAB_RULES.find((r) => r.id === parsed);
+      if (matched) return matched;
+    }
+    return MOCK_IFAB_RULES[1];
+  });
+
+  useEffect(() => {
+    if (initialSignalIdParam !== null) {
+      const parsed = Number(initialSignalIdParam);
+      const matched = MOCK_IFAB_RULES.find((r) => r.id === parsed);
+      if (matched) setSelectedRule(matched);
+    }
+  }, [initialSignalIdParam]);
+
   const [streakCount, setStreakCount] = useState<number>(0);
   const [totalAttempts, setTotalAttempts] = useState<number>(0);
   const [feedback, setFeedback] = useState<FrameFeedbackPayload>(() =>
@@ -129,5 +149,19 @@ export default function DrillsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DrillsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center text-sm">
+          กำลังโหลดห้องฝึกซ้อมสัญญาณผู้ตัดสิน...
+        </div>
+      }
+    >
+      <DrillsStudioContent />
+    </Suspense>
   );
 }
