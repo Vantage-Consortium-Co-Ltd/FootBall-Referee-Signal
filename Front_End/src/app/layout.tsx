@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Nav_Bar } from "../UI_Components/App_Layout";
+import { Nav_Bar } from "../UI_Components/App_Layout/Nav_Bar";
 
 export const metadata: Metadata = {
   title: "IFAB Referee Academy AI | สื่อการเรียนการสอนและประเมินผู้ตัดสินฟุตบอล",
@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" className="dark">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+      <body className="min-h-screen bg-black text-[#F5F5F7] antialiased">
         <Nav_Bar />
         {children}
       </body>
