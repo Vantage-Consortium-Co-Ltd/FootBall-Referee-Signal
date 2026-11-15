@@ -99,26 +99,11 @@ git commit -m "feat(frontend): implement 60 FPS HTML5 skeleton canvas with ghost
 - Consumes: `useRefereeGatewaySocket`, `Skeleton_Canvas`, `MOCK_IFAB_RULES`
 - Produces: Complete Interactive Drill Page at route `/drills`
 
-- [ ] **Step 1: Implement Drill Selector & Settings (`Drill_Selector.tsx`)**
-
-การ์ดเลือกท่าฝึกซ้อม แบ่งตามหมวดหมู่ พร้อมแสดงระดับความยาก และระยะเวลา Hold เป้าหมาย.
-
-- [ ] **Step 2: Implement Real-Time Coaching HUD (`Coaching_HUD.tsx`)**
-
-- แสดงวงล้อ Circular Countdown Timer เมื่อเข้าสู่สถานะ `HOLDING`
-- เกจวัดมุมข้อต่อแบบไดนามิก: องศาการยกแขน (Arm Elevation) และความเหยียดตรงของข้อศอก (Elbow Straightness)
-- ป้ายข้อความคำแนะนำแบบสด (Live Toast Banner) เช่น *"ยกแขนขวาขึ้นอีก 15°"*, *"ยอดเยี่ยม ค้างท่าไว้..."*
-
-- [ ] **Step 3: Implement Live Video/Webcam Stream (`Live_Drill_Feed.tsx`)**
-
-จัดการการเชื่อมต่อ Webcam ด้วย `navigator.mediaDevices.getUserMedia` พร้อมปุ่มสลับกล้องหน้า/หลัง, ปุ่ม Mirror View, และปุ่มเปิด/ปิด Ghost Guide Overlay.
-
-- [ ] **Step 4: Build Drill Page (`src/app/drills/page.tsx`) & Verify Build**
-
-Run: `cd Front_End && npm run build`
-Expected: Build success with `/drills` generated.
-
-- [ ] **Step 5: Commit**
+- [x] **Step 1: Implement Drill Selector & Settings (`Drill_Selector.tsx`)**
+- [x] **Step 2: Implement Real-Time Coaching HUD (`Coaching_HUD.tsx`)**
+- [x] **Step 3: Implement Live Video/Webcam Stream (`Live_Drill_Feed.tsx`)**
+- [x] **Step 4: Build Drill Page (`src/app/drills/page.tsx`) & Verify Build**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Front_End/src/UI_Components/Drill_Practice/ Front_End/src/app/drills/
