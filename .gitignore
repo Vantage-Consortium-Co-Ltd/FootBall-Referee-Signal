@@ -9,7 +9,9 @@ Train/mlruns/
 mlruns/
 runs/
 .venv/
-docs
+# docs (allow superpowers plans)
+docs/*
+!docs/superpowers/
 *.log
 *.db
 *.joblib
