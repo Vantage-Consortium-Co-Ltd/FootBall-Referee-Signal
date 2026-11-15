@@ -1,13 +1,14 @@
-# Football Referee Training & Assessment Web App (Frontend) Implementation Plan
+# Football Referee Training & Assessment Web App (Frontend - Microservices Ready) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** พัฒนาระบบ Web Application ส่วน Frontend แบบครบวงจรสำหรับ "ผู้ช่วยอัจฉริยะในการฝึกอบรมและประเมินผู้ตัดสินฟุตบอล" (Referee Training & Officiating Assessment) ด้วย Next.js, React, Tailwind CSS และ TypeScript โดยรองรับ Live Camera พร้อม 60 FPS HTML5 Canvas Skeleton Overlay, Real-time Coaching HUD, Match Video Review Timeline, IFAB Digital Rulebook, และมี In-browser Mock Simulation Engine ให้ทดสอบและสาธิตได้ทันทีโดยไม่ต้องรอ Backend
+**Goal:** พัฒนาระบบ Web Application ส่วน Frontend แบบครบวงจรสำหรับ "ผู้ช่วยอัจฉริยะในการฝึกอบรมและประเมินผู้ตัดสินฟุตบอล" (Referee Training & Officiating Assessment) ที่ออกแบบตามสถาปัตยกรรม **Microservices Architecture** ด้วย Next.js, React, Tailwind CSS และ TypeScript โดยเชื่อมต่อผ่าน API Gateway (WebSocket & REST) พร้อมมี In-browser Microservices Mock Adapter, 60 FPS HTML5 Canvas Skeleton Overlay, Real-time Coaching HUD, Match Video Review Timeline, และ IFAB Digital Rulebook
 
 **Architecture:**
+- **Microservices-Aware Frontend:** สื่อสารกับระบบ Backend ผ่าน **API Gateway / BFF** (REST สำหรับ Rules/Assessment และ WebSocket `/ws/training-stream` สำหรับ Vision & Coaching Stream)
+- **Decoupled Architecture & Mock Adapter:** มี `src/lib/microservicesMock.ts` จำลองการทำงานของ Microservices ทั้ง 4 ตัว (Vision Service, Coaching Engine, Rules Service, Assessment Service) ทำให้สามารถรัน, พัฒนา, และทดสอบระบบได้ทั้งแบบ **Offline Standalone Mode** และ **Live Microservices Cluster Mode**
 - **App Layout & Router:** Next.js (App Router) ประกอบด้วย 3 หน้าหลัก: `/drills` (โหมดฝึกซ้อมสดผ่านกล้องพร้อมคำแนะนำแบบเรียลไทม์), `/assessment` (โหมดตรวจประเมินวิดีโอแมตช์การตัดสินพร้อม Interactive Timeline), และ `/rules` (คลังกติกาและท่าทางมาตรฐาน 20 สัญญาณ IFAB)
 - **Canvas Rendering Engine:** `SkeletonCanvas.tsx` วาดโครงกระดูก 17 จุดตามมาตรฐาน COCO ด้วยสีตามค่า Confidence พร้อมระบบ Ghost Guideline แสดงโครงร่างเป้าหมายที่ถูกต้อง และ Angle Arc แสดงองศาข้อต่อ
-- **Communication & Standalone Mocking:** `useRefereeSocket.ts` เชื่อมต่อ WebSocket กับ FastAPI `/ws/training-stream` โดยมีสวิตช์สลับเป็น `mockEngine.ts` (In-browser Pose Simulation) ทำให้ Frontend รันและเดโมเดี่ยวได้ทันทีอย่างสมบูรณ์แบบ
 
 **Tech Stack:** Next.js 14/15 (App Router), React 18/19, TypeScript, Tailwind CSS, Lucide React, HTML5 Canvas API, Recharts
 
@@ -16,8 +17,9 @@
 ---
 
 ## Global Constraints
-- โฟลเดอร์ของงาน Frontend ทั้งหมดต้องอยู่ภายใต้ไดเรกทอรี `frontend/` ของโปรเจกต์
-- ต้องรองรับการทำงานแบบ **Offline / Standalone Demo Mode** ผ่าน Mock Engine ในกรณีที่ยังไม่ได้รัน FastAPI Backend
+- โค้ด Frontend ทั้งหมดต้องอยู่ในโฟลเดอร์ `frontend/` ของ Workspace
+- ต้องรองรับการเชื่อมต่อแบบ Single-Entrypoint ผ่านตัวแปรสภาพแวดล้อม: `NEXT_PUBLIC_API_GATEWAY_URL` และ `NEXT_PUBLIC_WS_GATEWAY_URL`
+- ต้องรองรับการทำงานแบบ **Offline / Standalone Demo Mode** ผ่าน Microservices Mock Adapter ในกรณีที่คลัสเตอร์ Backend ยังไม่เปิดทำงาน
 - ต้องแสดงผลโครงร่าง Skeleton บน HTML5 Canvas ที่เฟรมเรต 60 FPS โดยไม่ทำให้หน้าเว็บกระตุก
 - UI ต้องรองรับการแสดงผลภาษาไทยสำหรับคำแนะนำการฝึกสอน (Coaching Feedback) และภาษาอังกฤษสำหรับชื่อทางการของสัญญาณ IFAB
 - ทุก Task ต้องคอมไพล์ผ่าน `npm run build` โดยไม่มี TypeScript หรือ ESLint Errors
@@ -25,29 +27,29 @@
 ---
 
 ## Review Focus
-- **Webcam Permission Denial & Fallback:** หากผู้ใช้ปฏิเสธการเข้าถึงกล้อง (Permission Denied) หรือเครื่องไม่มีกล้อง หน้าเว็บต้องไม่ค้างหรือเกิด White Screen of Death แต่ต้องมี UI แจ้งเตือนพร้อมปุ่ม "ใช้คลิปวิดีโอตัวอย่าง (Demo Video)" หรือ "เปิดโหมดจำลอง (Simulation Mode)"
-- **Canvas Resize & Aspect Ratio Distortion:** เมื่อหน้าต่างเบราว์เซอร์เปลี่ยนขนาดหรือเปิดบนมือถือ พิกัด Skeleton ต้อง Scale ตามขนาดจริงของวิดีโออย่างแม่นยำ ไม่เลื่อนหลุดตำแหน่งข้อต่อ
-- **WebSocket Disconnection & Auto-Reconnect:** หากสัญญาณเน็ตหลุดหรือ Backend รีสตาร์ท ระบบต้องมีสถานะแสดงบนแถบ Navigation (🟡 Reconnecting...) และพยายามเชื่อมต่อใหม่แบบ Exponential Backoff โดยไม่ทำให้ UI พัง
+- **Gateway Failover & Auto-Mock Fallback:** เมื่อเริ่มแอป หากต่อ API Gateway ไม่ติดภายใน 3 วินาที ระบบต้องสลับเข้าสู่โหมด Standalone Mock Simulation โดยอัตโนมัติ พร้อมแสดง Notification เตือนผู้ใช้แบบนุ่มนวล โดยไม่ทำให้ UI Crash
+- **Microservices Health Monitoring:** ใน Navbar ต้องมีตัวชี้วัดสถานะการเชื่อมต่อ (Microservices Health Modal) แสดงสถานะแยกรายบริการ (Gateway, Vision Engine, Coaching Engine, Rules Catalog)
+- **Webcam Permission Denial & Fallback:** หากผู้ใช้ปฏิเสธการเข้าถึงกล้อง (Permission Denied) หรือเครื่องไม่มีกล้อง หน้าเว็บต้องมี UI แจ้งเตือนพร้อมปุ่ม "ใช้คลิปวิดีโอตัวอย่าง (Demo Video)" หรือ "เปิดโหมดจำลอง (Simulation Mode)"
+- **Canvas Resize & Aspect Ratio Distortion:** เมื่อหน้าต่างเบราว์เซอร์เปลี่ยนขนาดหรือเปิดบนแท็บเล็ต พิกัด Skeleton ต้อง Scale ตามขนาดจริงของวิดีโออย่างแม่นยำ ไม่เลื่อนหลุดตำแหน่งข้อต่อ
 - **Hold Timer Reset on Jitter:** ในหน้า Drill เมื่อผู้ใช้ยกแขนไม่ถึงองศาที่กำหนดหรือสะบัดแขน วงล้อ Hold Timer ต้องรีเซ็ตกลับเป็นศูนย์อย่างถูกต้องและแสดงข้อความแนะนำทันที
-- **Responsive Mobile / Tablet Layout:** หน้าจอต้องรองรับการเปิดใช้งานบนแท็บเล็ตข้างสนามของผู้ฝึกสอน (Referee Assessor) ได้อย่างสะดวก
 
 ---
 
 ## Tasks
 
-### Task 1: Next.js Project Scaffolding & Standalone Mock Engine
+### Task 1: Next.js Project Scaffolding & Microservices Mock Adapter
 **Files:**
 - Create: `frontend/package.json`
 - Create: `frontend/tsconfig.json`
 - Create: `frontend/tailwind.config.ts`
 - Create: `frontend/src/types/referee.ts`
-- Create: `frontend/src/lib/mockEngine.ts`
+- Create: `frontend/src/lib/microservicesMock.ts`
 
 **Interfaces:**
 - Consumes: None (Root frontend configuration)
 - Produces: 
-  - `Keypoint`, `GestureRule`, `DrillStatus`, `AssessmentEvent`, `AssessmentReport` (TypeScript Interfaces)
-  - `generateMockFrame(targetGestureId: int, frameCount: int) -> FrameFeedbackPayload`
+  - `Keypoint`, `GestureRule`, `DrillStatus`, `AssessmentEvent`, `AssessmentReport`, `ServiceHealth` (TypeScript Interfaces)
+  - `MicroservicesMockAdapter`: จำลอง Vision Service, Coaching Engine, Rules Service, Assessment Service
   - `MOCK_IFAB_RULES: GestureRule[]`
 
 - [ ] **Step 1: Setup Next.js Project Structure in `frontend/`**
@@ -56,52 +58,11 @@
 
 - [ ] **Step 2: Define Core TypeScript Interfaces (`frontend/src/types/referee.ts`)**
 
-ประกาศ Types:
-```typescript
-export interface Keypoint {
-  x: number; // Normalized 0..1
-  y: number; // Normalized 0..1
-  confidence: number;
-  name?: string;
-}
+ประกาศ Types สำหรับ Keypoint, GestureRule, FrameFeedbackPayload, DrillState, AssessmentReport, และ ServiceHealth (`gateway`, `vision`, `coaching`, `rules`).
 
-export interface GestureRule {
-  id: number;
-  name: string;
-  nameTh: string;
-  ifabLaw: string;
-  category: 'restarts' | 'fouls' | 'match_control' | 'offside';
-  activeArm: 'right' | 'left' | 'either' | 'both';
-  targetElevationDeg: number;
-  minElevationDeg: number;
-  targetStraightnessDeg: number;
-  minStraightnessDeg: number;
-  minHoldSeconds: number;
-  descriptionTh: string;
-  coachingTips: string[];
-}
+- [ ] **Step 3: Implement Microservices Mock Adapter (`frontend/src/lib/microservicesMock.ts`)**
 
-export interface FrameFeedbackPayload {
-  detected: boolean;
-  keypoints: Keypoint[];
-  activeArm: 'right' | 'left' | 'both' | 'none';
-  angles: {
-    elbowAngle: number;
-    elevationAngle: number;
-    separationAngle?: number;
-  };
-  score: number; // 0..100
-  state: 'WAITING' | 'DETECTED' | 'HOLDING' | 'COMPLETED' | 'LOST_POSTURE';
-  holdProgress: number; // 0.0 .. 1.0
-  holdDuration: number;
-  feedbackTip: string;
-  gestureName: string;
-}
-```
-
-- [ ] **Step 3: Implement Standalone Mock Engine (`frontend/src/lib/mockEngine.ts`)**
-
-สร้าง Mock Data ครบ 20 สัญญาณ IFAB และฟังก์ชันจำลองการเคลื่อนไหวของข้อต่อ (Kinematic Sine wave) พร้อมคำนวณคะแนนและสเตตัสเสมือน เพื่อให้หน้าเว็บทำงานได้เต็มรูปแบบแม้ไม่มี Backend.
+สร้าง Mock Adapter ที่จำลองการตอบสนองของ Microservices แต่ละตัว (Vision: ส่ง Keypoints 17 จุด, Coaching: คำนวณองศาข้อต่อและคะแนน, Rules: รายการกติกา 20 สัญญาณ, Assessment: ประวัติและสถิติการตัดสิน) เพื่อให้หน้าเว็บทำงานได้สมบูรณ์แบบโดยไม่ต้องเปิด Backend.
 
 - [ ] **Step 4: Verify Scaffolding with `npm install` and Type Check**
 
@@ -112,12 +73,12 @@ Expected: SUCCESS with 0 type errors.
 
 ```bash
 git add frontend/
-git commit -m "feat(frontend): scaffold Next.js app with referee types and standalone mock engine"
+git commit -m "feat(frontend): scaffold Next.js app with microservices types and mock adapter"
 ```
 
 ---
 
-### Task 2: 60 FPS HTML5 Canvas Skeleton & Ghost Guide Engine
+### Task 2: 60 FPS HTML5 Canvas Skeleton & Ghost Target Guide Engine
 **Files:**
 - Create: `frontend/src/components/canvas/SkeletonCanvas.tsx`
 - Create: `frontend/src/components/canvas/CanvasUtils.ts`
@@ -130,10 +91,7 @@ git commit -m "feat(frontend): scaffold Next.js app with referee types and stand
 - [ ] **Step 1: Implement Canvas Utilities (`frontend/src/components/canvas/CanvasUtils.ts`)**
 
 - นิยามคู่กระดูก COCO-17 connections: ไหล่ไปศอก, ศอกไปมือ, ไหล่ไปสะโพก, สะโพกไปเข่า, เข่าไปข้อเท้า
-- ฟังก์ชันวาดเส้น Gradient ตามความมั่นใจ:
-  - Confidence $> 0.8$: สีเขียวมรกต (`#10B981`)
-  - Confidence $0.5 - 0.8$: สีเหลืองอำพัน (`#F59E0B`)
-  - Confidence $< 0.5$: สีแดงอ่อน (`#EF4444`)
+- ฟังก์ชันวาดเส้น Gradient ตามความมั่นใจ (เขียว $>0.8$, เหลือง $0.5-0.8$, แดง $<0.5$)
 - ฟังก์ชันวาดวงกลมมุมข้อต่อ (Angle Arc) และแสดงตัวเลของศาบน Canvas
 
 - [ ] **Step 2: Implement `SkeletonCanvas.tsx` with Ghost Guideline**
@@ -156,7 +114,7 @@ git commit -m "feat(frontend): implement 60 FPS HTML5 skeleton canvas with ghost
 
 ---
 
-### Task 5: Live Practice Drill & Real-Time Coaching HUD (`/drills`)
+### Task 3: Live Practice Drill & Real-Time Coaching HUD (`/drills`)
 **Files:**
 - Create: `frontend/src/components/drill/LiveDrillFeed.tsx`
 - Create: `frontend/src/components/drill/CoachingHUD.tsx`
@@ -164,21 +122,18 @@ git commit -m "feat(frontend): implement 60 FPS HTML5 skeleton canvas with ghost
 - Create: `frontend/src/app/drills/page.tsx`
 
 **Interfaces:**
-- Consumes: `useRefereeSocket`, `SkeletonCanvas`, `MOCK_IFAB_RULES`
+- Consumes: `useRefereeGatewaySocket`, `SkeletonCanvas`, `MOCK_IFAB_RULES`
 - Produces: Complete Interactive Drill Page at route `/drills`
 
 - [ ] **Step 1: Implement Drill Selector & Settings (`DrillSelector.tsx`)**
 
-การ์ดเลือกท่าฝึกซ้อม แบ่งตามหมวดหมู่ (ฟรีคิก, การให้สัญญาณได้เปรียบ, การให้ใบเตือน, การล้ำหน้า) พร้อมแสดงระดับความยาก และระยะเวลา Hold เป้าหมาย.
+การ์ดเลือกท่าฝึกซ้อม แบ่งตามหมวดหมู่ พร้อมแสดงระดับความยาก และระยะเวลา Hold เป้าหมาย.
 
 - [ ] **Step 2: Implement Real-Time Coaching HUD (`CoachingHUD.tsx`)**
 
 - แสดงวงล้อ Circular Countdown Timer เมื่อเข้าสู่สถานะ `HOLDING`
 - เกจวัดมุมข้อต่อแบบไดนามิก: องศาการยกแขน (Arm Elevation) และความเหยียดตรงของข้อศอก (Elbow Straightness)
-- ป้ายข้อความคำแนะนำแบบสด (Live Toast Banner) เช่น:
-  - 🟢 "ยอดเยี่ยม ค้างท่าไว้... 1.5s"
-  - 🟡 "ยกแขนขวาขึ้นอีก 15° (ปัจจุบัน 145°, เป้าหมาย 160°)"
-  - 🔴 "งอข้อศอกมากเกินไป กรุณายืดแขนให้ตรง"
+- ป้ายข้อความคำแนะนำแบบสด (Live Toast Banner) เช่น *"ยกแขนขวาขึ้นอีก 15°"*, *"ยอดเยี่ยม ค้างท่าไว้..."*
 
 - [ ] **Step 3: Implement Live Video/Webcam Stream (`LiveDrillFeed.tsx`)**
 
@@ -186,7 +141,6 @@ git commit -m "feat(frontend): implement 60 FPS HTML5 skeleton canvas with ghost
 
 - [ ] **Step 4: Build Drill Page (`src/app/drills/page.tsx`) & Verify Build**
 
-ประกอบคอมโพเนนต์เข้าด้วยกันในหน้า `/drills` และตรวจสอบการทำงาน
 Run: `cd frontend && npm run build`
 Expected: Build success with `/drills` generated.
 
@@ -213,7 +167,7 @@ git commit -m "feat(frontend): build live practice drill page with real-time coa
 
 - [ ] **Step 1: Implement Video Scrubber & Decision Timeline**
 
-- ไทม์ไลน์แสดงแถบเวลาของแมตช์ 90 นาที พร้อมหมุดเหตุการณ์ (Event Pins) ตามเวลาที่ผู้ตัดสินให้สัญญาณ (สีเขียว = ถูกต้องชัดเจน, สีเหลือง = ควรปรับปรุง, สีแดง = ผิดกติกา)
+- ไทม์ไลน์แสดงแถบเวลาของแมตช์ 90 นาที พร้อมหมุดเหตุการณ์ (Event Pins) ตามเวลาที่ผู้ตัดสินให้สัญญาณ
 - คลิกที่หมุดเพื่อกระโดดข้ามไปยังวิดีโอเฟรมนั้นทันที (Jump to Timestamp)
 
 - [ ] **Step 2: Implement Call Detail Inspector (`CallDetailInspector.tsx`)**
@@ -222,10 +176,7 @@ git commit -m "feat(frontend): build live practice drill page with real-time coa
 
 - [ ] **Step 3: Implement Assessment Scorecard (`ScorecardRadar.tsx`)**
 
-สรุปผลคะแนนรวมของผู้ตัดสินในแมตช์:
-- เรดาร์ชาร์ตความแม่นยำรายหมวดสัญญาณ
-- สรุปสถิติ: จำนวนการเป่าหยุดเกมทั้งหมด, คะแนนเฉลี่ย, จุดผิดพลาดที่พบบ่อย 3 อันดับแรก
-- ปุ่ม Export สรุปรายงานการประเมินเป็น PDF / พิมพ์ผล
+สรุปผลคะแนนรวมของผู้ตัดสินในแมตช์: เรดาร์ชาร์ตความแม่นยำรายหมวดสัญญาณ, สถิติคะแนนเฉลี่ย, จุดผิดพลาดที่พบบ่อย 3 อันดับแรก, และปุ่ม Export สรุปรายงานการประเมิน.
 
 - [ ] **Step 4: Build Assessment Page (`src/app/assessment/page.tsx`) & Verify Build**
 
@@ -276,47 +227,52 @@ git commit -m "feat(frontend): create IFAB digital rulebook catalog with 20 refe
 
 ---
 
-### Task 6: WebSocket Hook, Global Navigation & Landing Home View
+### Task 6: API Gateway Client, System Health Modal & Navigation Layout
 **Files:**
-- Create: `frontend/src/hooks/useRefereeSocket.ts`
+- Create: `frontend/src/hooks/useRefereeGatewaySocket.ts`
+- Create: `frontend/src/lib/gatewayClient.ts`
 - Create: `frontend/src/components/layout/Navbar.tsx`
+- Create: `frontend/src/components/layout/SystemHealthModal.tsx`
 - Create: `frontend/src/app/layout.tsx`
 - Create: `frontend/src/app/page.tsx`
 
 **Interfaces:**
 - Consumes: Tasks 1-5
-- Produces: Complete runnable Web Application with responsive Navigation, Home Dashboard, and Live Connection Status Indicator
+- Produces: Complete runnable Web Application with responsive Navigation, Home Dashboard, and Microservices Health Modal
 
-- [ ] **Step 1: Implement `useRefereeSocket.ts` with Simulation Fallback**
+- [ ] **Step 1: Implement `useRefereeGatewaySocket.ts` with Auto-Fallback**
 
-- สลับโหมดอัตโนมัติ: หากต่อ WebSocket เข้ากับ FastAPI ติด ให้ใช้ Live Data จาก Server
-- หากไม่ได้เปิด Server หรือต่อไม่ติด ให้สลับเข้าสู่โหมด Standalone Mock Simulation โดยอัตโนมัติ เพื่อให้หน้าเว็บใช้งานได้เสมอโดยไม่สะดุด
+เชื่อมต่อ WebSocket ไปยัง API Gateway `/ws/training-stream` หากต่อไม่ติดให้ Fallback เป็น `MicroservicesMockAdapter` อัตโนมัติ.
 
-- [ ] **Step 2: Implement Global Navbar & App Layout**
+- [ ] **Step 2: Implement Gateway HTTP Client (`src/lib/gatewayClient.ts`)**
+
+ไคลเอนต์เรียก API Gateway REST endpoints (`/api/v1/rules`, `/api/v1/drills`, `/api/v1/assessment/*`) พร้อมจัดการ Timeout และ Fallback Data.
+
+- [ ] **Step 3: Implement Global Navbar & System Health Modal (`Navbar.tsx`, `SystemHealthModal.tsx`)**
 
 - เมนูหลัก 3 หน้า: ฝึกซ้อมสด (`/drills`), ตรวจประเมินแมตช์ (`/assessment`), คลังกติกา IFAB (`/rules`)
-- ป้ายแสดงสถานะการเชื่อมต่อ: 🟢 Live AI Connected / 🟡 Simulation Mode
+- ป้ายแสดงสถานะการเชื่อมต่อ: 🟢 Microservices Online / 🟡 Simulation Mode พร้อมปุ่มคลิกเปิดดูสถานะรายบริการ (API Gateway, Vision Service, Coaching Engine, Rules Service)
 
-- [ ] **Step 3: Implement Landing Page (`src/app/page.tsx`)**
+- [ ] **Step 4: Implement Landing Page (`src/app/page.tsx`)**
 
 หน้าแรกแนะนำระบบ นำเสนอ 3 ฟังก์ชันเด่น พร้อมปุ่ม Quick Start เริ่มฝึกซ้อมได้ในคลิกเดียว.
 
-- [ ] **Step 4: End-to-End Build & Run Verification**
+- [ ] **Step 5: End-to-End Build & Run Verification**
 
 Run: `cd frontend && npm run build`
 Expected: PASS - All routes static/dynamic compiled successfully with 0 errors.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add frontend/
-git commit -m "feat(frontend): complete web app navigation, landing dashboard and socket hook"
+git commit -m "feat(frontend): complete microservices-ready web app layout, health monitor and gateway client"
 ```
 
 ---
 
 ## Plan Self-Review Checklist
-- [x] **Spec coverage:** ครอบคลุมงาน Frontend 100% (หน้าซ้อมสด Live Drill, หน้าตรวจประเมิน Match Review, คลังกติกา IFAB, และ Canvas Overlay)
-- [x] **Independence:** มี Mock Engine ทำให้พัฒนาและนำเสนอ Frontend ได้ทันทีโดยไม่ต้องผูกติดกับ Backend
+- [x] **Microservices alignment:** รองรับการเชื่อมต่อกับ API Gateway และมี Microservices Mock Adapter จำลองทั้ง 4 บริการ
+- [x] **Scope precision:** โฟกัสเฉพาะงาน Frontend ตามที่คุณรับผิดชอบอย่างแท้จริง
 - [x] **Step scan:** ทุก Step เป็น Action ที่ชัดเจนและมี Verification กำกับ
-- [x] **No backend overlap:** ปรับขอบเขตออกจาก Train/ML Pipeline เหลือเฉพาะงาน Frontend ของคุณอย่างแม่นยำ
+- [x] **Standalone viability:** หน้าเว็บสามารถรัน พรีเซนต์ และทดสอบได้ 100% ทันทีโดยไม่ต้องรอ Backend
