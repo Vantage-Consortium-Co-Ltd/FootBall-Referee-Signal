@@ -76,24 +76,10 @@ git commit -m "feat(frontend): scaffold Next.js app with microservices types and
 - Produces: 
   - `<Skeleton_Canvas keypoints={keypoints} targetRule={selectedRule} angles={angles} width={w} height={h} />`
 
-- [ ] **Step 1: Implement Canvas Utilities (`Front_End/src/UI_Components/Canvas_Engine/Canvas_Utils.ts`)**
-
-- นิยามคู่กระดูก COCO-17 connections: ไหล่ไปศอก, ศอกไปมือ, ไหล่ไปสะโพก, สะโพกไปเข่า, เข่าไปข้อเท้า
-- ฟังก์ชันวาดเส้น Gradient ตามความมั่นใจ (เขียว $>0.8$, เหลือง $0.5-0.8$, แดง $<0.5$)
-- ฟังก์ชันวาดวงกลมมุมข้อต่อ (Angle Arc) และแสดงตัวเลของศาบน Canvas
-
-- [ ] **Step 2: Implement `Skeleton_Canvas.tsx` with Ghost Guideline**
-
-- รับ Prop `keypoints` (ตำแหน่งปัจจุบันของผู้ใช้) และ Prop `targetRule` (เป้าหมายของท่าฝึก)
-- วาด **Ghost Skeleton** (โครงร่างสีฟ้าโปร่งแสง Cyan Opacity 35%) ซ้อนทับ เพื่อเป็นไกด์นำทางให้ผู้ตัดสินรู้ว่าต้องยกแขนไปที่ตำแหน่งไหน
-- วาด Skeleton ของผู้ใช้ทับด้านบนแบบ Real-time ด้วย `requestAnimationFrame`
-
-- [ ] **Step 3: Verification with Component Test**
-
-Run: `cd Front_End && npx tsc --noEmit`
-Expected: PASS with no type errors.
-
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Implement Canvas Utilities (`Front_End/src/UI_Components/Canvas_Engine/Canvas_Utils.ts`)**
+- [x] **Step 2: Implement `Skeleton_Canvas.tsx` with Ghost Guideline**
+- [x] **Step 3: Verification with Component Test**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Front_End/src/UI_Components/Canvas_Engine/
