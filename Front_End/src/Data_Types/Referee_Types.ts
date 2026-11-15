@@ -60,6 +60,7 @@ export interface GestureRule {
   descriptionTh: string;
   descriptionEn: string;
   coachingTips: string[];
+  commonMistakes?: string[];
 }
 
 export interface PostureAngles {
@@ -145,5 +146,95 @@ export interface TaggedPerson {
   isTagged: boolean; // active subject for posture analysis
   keypoints: Keypoint[];
   angles: PostureAngles;
+}
+
+// ==============================================================================
+// INSTRUCTIONAL SCENARIO EXAMINATION & TRAINEE GRADEBOOK TYPES
+// ==============================================================================
+
+export interface ScenarioDecisionOption {
+  id: "A" | "B" | "C" | "D";
+  labelTh: string;
+  labelEn: string;
+  linkedGestureId: number;
+  ifabLaw: string;
+}
+
+export interface ScenarioExamQuestion {
+  id: string;
+  questionNumber: number;
+  titleTh: string;
+  situationSummaryTh: string;
+  clipDurationSeconds: number;
+  decisionWindowSeconds: number;
+  pitchZoneTh: string;
+  correctOptionId: "A" | "B" | "C" | "D";
+  targetGestureId: number;
+  ifabLawReference: string;
+  explanationTh: string;
+  options: ScenarioDecisionOption[];
+}
+
+export interface ScenarioExamPack {
+  packId: string;
+  titleTh: string;
+  levelTh: string;
+  passingScore: number;
+  questions: ScenarioExamQuestion[];
+}
+
+export interface ExamAttemptResult {
+  questionId: string;
+  selectedOptionId: "A" | "B" | "C" | "D";
+  isDecisionCorrect: boolean;
+  postureScore: number;
+  reactionTimeSeconds: number;
+  holdDurationSeconds: number;
+  totalQuestionScore: number;
+  passed: boolean;
+  recordedAngles: PostureAngles;
+}
+
+export interface WeaknessDiagnosticItem {
+  id: string;
+  titleTh: string;
+  detailTh: string;
+  targetGestureId: number;
+  severity: "warning" | "error";
+  recommendedDrillLabelTh: string;
+}
+
+export interface ExamSessionHistoryItem {
+  sessionId: string;
+  date: string;
+  examTitleTh: string;
+  postureAccuracy: number;
+  reactionLatencySeconds: number;
+  passedCount: number;
+  totalQuestions: number;
+  passed: boolean;
+}
+
+export interface TraineeEvaluationReport {
+  reportId: string;
+  traineeName: string;
+  traineeCode: string;
+  classTierTh: string;
+  evaluationDate: string;
+  overallPostureAccuracy: number;
+  accuracyTrendDelta: string;
+  completedPacks: number;
+  passedPacks: number;
+  averageReactionSeconds: number;
+  overallGrade: "A" | "B" | "C" | "D";
+  categoryCompetency: {
+    restarts: number;
+    fouls: number;
+    match_control: number;
+    offside: number;
+  };
+  weaknessDiagnostics: WeaknessDiagnosticItem[];
+  examHistory: ExamSessionHistoryItem[];
+  instructorNotes: string[];
 }
 
