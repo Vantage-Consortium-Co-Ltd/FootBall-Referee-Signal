@@ -5,8 +5,8 @@ import {
   Keypoint,
   PostureAngles,
   SystemHealth,
-} from "../types/Referee_Types";
-import ifabSignalsData from "../data/Ifab_Signals.json";
+} from "../Data_Types/Referee_Types";
+import ifabSignalsData from "../Data_Sources/Ifab_Signals.json";
 
 export const MOCK_IFAB_RULES: GestureRule[] = ifabSignalsData as GestureRule[];
 
