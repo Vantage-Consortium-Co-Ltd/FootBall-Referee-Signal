@@ -283,7 +283,7 @@ export function generateMockAssessmentReport(): AssessmentReport {
   return {
     sessionId: "SES-20261115-01",
     traineeName: "ภูริภัทร เหมกุล (ผู้ตัดสินฝึกหัด Class 2)",
-    matchTitle: "PIM Academy League 2026 - Matchday 8",
+    matchTitle: "ชุดแบบฝึกประเมินผลผู้ตัดสิน PIM Academy - Module 2",
     date: "15 พ.ย. 2026",
     totalCalls: 18,
     averageScore: 88.4,

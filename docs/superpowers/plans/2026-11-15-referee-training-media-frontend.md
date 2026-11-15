@@ -61,10 +61,10 @@
 
 - [x] **Step 1: Setup Next.js Project Structure in `Front_End/`**
 - [x] **Step 2: Define Core TypeScript Interfaces (`Referee_Types.ts`)**
-- [ ] **Step 3: Refine Types for Educational Examination (`Referee_Types.ts`)**
+- [x] **Step 3: Refine Types for Educational Examination (`Referee_Types.ts`)**
   - เปลี่ยนจาก `AssessmentReport` แบบเดิมเป็น `TraineeEvaluationReport` และเพิ่ม `ScenarioExamQuestion` สำหรับชุดข้อสอบภาคปฏิบัติ
-- [ ] **Step 4: Update Mock Adapter with Instructional Scenario Clips & Exam Packs (`Microservices_Mock.ts`)**
-- [ ] **Step 5: Verify Typecheck & Commit**
+- [x] **Step 4: Update Mock Adapter with Instructional Scenario Clips & Exam Packs (`Microservices_Mock.ts`)**
+- [x] **Step 5: Verify Typecheck & Commit**
 
 ```bash
 cd Front_End && npm run build
@@ -134,21 +134,21 @@ git commit -m "feat(drills): build live practice drill studio with camera taggin
 - Consumes: `ScenarioExamPack`, `Microservices_Mock`, `Skeleton_Canvas`
 - Produces: Complete Scenario Practical Examination Studio at route `/examination`
 
-- [ ] **Step 1: Implement Instructional Scenario Video Player (`Scenario_Player.tsx`)**
+- [x] **Step 1: Implement Instructional Scenario Video Player (`Scenario_Player.tsx`)**
   - แสดงคลิปวิดีโอตัวอย่างสถานการณ์การแข่งขันสั้น (10-15 วินาที) สำหรับใช้เป็นโจทย์ทดสอบ (เช่น จังหวะแฮนด์บอล, สกัดฟาวล์ตัดเกม, ลูกล้ำหน้า)
   - มีแถบ Progress และตัวนับถอยหลังก่อนหมดจังหวะคลิปเพื่อเตือนผู้เรียนให้เตรียมตัวให้สัญญาณ
   - รองรับทั้งการเล่นคลิปวิดีโอจริงและการจำลองสถานการณ์กราฟิก (Scenario Graphics Preview)
-- [ ] **Step 2: Implement Exam Question Prompt & Decision Panel (`Exam_Question_Prompt.tsx`)**
+- [x] **Step 2: Implement Exam Question Prompt & Decision Panel (`Exam_Question_Prompt.tsx`)**
   - แสดงคำถามประจำสถานการณ์: "จากเหตุการณ์ในคลิป ในฐานะผู้ตัดสิน ท่านต้องให้สัญญาณใด?"
   - ตัวนับเวลาถอยหลังการตัดสินใจ (5 วินาที Reaction Window) สไตล์ Untitled UI Countdown Bar
   - ตัวเลือกคำตัดสิน 4 ตัวเลือก (สำหรับโหมด Interactive Selection) พร้อมปุ่ม "ยืนยันและเริ่มทำท่าทางหน้ากล้อง"
-- [ ] **Step 3: Implement Practical Posture Detector in Exam Mode (`Exam_Live_Detector.tsx`)**
+- [x] **Step 3: Implement Practical Posture Detector in Exam Mode (`Exam_Live_Detector.tsx`)**
   - ดึงภาพจากกล้องหรือโหมดจำลอง ตรวจวัดความเหยียดตรงของข้อศอก, องศาการยกแขน, และการค้างสัญญาณ
   - บันทึกคะแนน 3 มิติ: (1) ความถูกต้องของคำตัดสิน, (2) ความถูกต้องของสรีระท่าทาง (0-100), (3) เวลาตอบสนอง (Reaction Latency)
-- [ ] **Step 4: Implement Exam Result Breakdown Modal (`Exam_Result_Inspector.tsx`)**
+- [x] **Step 4: Implement Exam Result Breakdown Modal (`Exam_Result_Inspector.tsx`)**
   - หน้าต่างสรุปผลรายข้อ: แสดงภาพ Freeze Frame จังหวะที่ผู้เรียนทำท่าทาง พร้อมโครงกระดูกและองศาข้อต่อ
   - สรุปผลผ่าน/ไม่ผ่านตามเกณฑ์ IFAB พร้อมคำอธิบายเฉลยและกฎข้อที่เกี่ยวข้อง (IFAB Law Reference)
-- [ ] **Step 5: Assemble Full Examination Page (`src/app/examination/page.tsx`) & Verify Build**
+- [x] **Step 5: Assemble Full Examination Page (`src/app/examination/page.tsx`) & Verify Build**
   - รันการสอบเป็นชุด (Exam Pack: 5-10 ข้อ) พร้อมแถบความคืบหน้า (Question Progress 1/5)
   - เมื่อสอบครบทุกข้อ มีปุ่ม "ดูสมุดบันทึกผลการประเมิน (Go to Gradebook)"
   - Verify ด้วย `npm run build`
@@ -174,24 +174,24 @@ git commit -m "feat(exam): implement interactive scenario examination studio for
 - Consumes: `Ifab_Signals.json`, `GestureRule`
 - Produces: Complete Interactive Educational Handbook & Curriculum at route `/handbook` (Clean Minimalist Theme)
 
-- [ ] **Step 1: Implement Curriculum Header & Filter Controls (`Curriculum_Header.tsx`, `Curriculum_Filter_Tabs.tsx`)**
+- [x] **Step 1: Implement Curriculum Header & Filter Controls (`Curriculum_Header.tsx`, `Curriculum_Filter_Tabs.tsx`)**
   - Untitled UI Header พร้อมคำอธิบายหลักสูตรสื่อการสอนผู้ตัดสิน
   - ช่องค้นหาท่าสัญญาณ (Search Input) ด้วยชื่อไทย/อังกฤษ/กฎข้อบังคับ
   - แท็บแยกหมวดหมู่ตามกติกา IFAB: ทั้งหมด (20), ลูกตั้งเตะ (Restarts), การทำฟาวล์ (Fouls), การควบคุมเกม (Game Control), การล้ำหน้า (Offside)
-- [ ] **Step 2: Implement Signal Curriculum Cards Grid (`Signal_Curriculum_Card.tsx`)**
+- [x] **Step 2: Implement Signal Curriculum Cards Grid (`Signal_Curriculum_Card.tsx`)**
   - การ์ดสื่อการสอน 3 คอลัมน์ ดีไซน์ Untitled UI Elevated Cards:
     - หมายเลขท่าและชื่อทางการ (เช่น "ท่าที่ 1: ฟรีคิกทางตรง - Direct Free Kick")
     - ป้ายกำกับกติกา (Badge: `Law 13 - Free Kicks`, `Primary Arm: Right/Either`)
     - เกณฑ์มาตรฐาน IFAB: องศาการยกแขน `90°`, ความตรงของศอก `170°+`, เวลาค้างสัญญาณ `1.2s`
     - สรุปสาระสำคัญของสัญญาณและวัตถุประสงค์ในการสื่อสารในสนาม
-    - ปุ่ม Action 2 ปุ่ม: "📖 ดูรายละเอียดสื่อการสอน" และ "🎯 เข้าห้องฝึกซ้อมท่านี้ทันที" (Link to `/drills?signalId=X`)
-- [ ] **Step 3: Implement Signal Deep-Dive Drawer (`Signal_Deep_Dive_Drawer.tsx`)**
+    - ปุ่ม Action 2 ปุ่ม: "ดูรายละเอียดสื่อการสอน" และ "เข้าห้องฝึกซ้อมท่านี้ทันที" (Link to `/drills?signalId=X`)
+- [x] **Step 3: Implement Signal Deep-Dive Drawer (`Signal_Deep_Dive_Drawer.tsx`)**
   - Slide-over Drawer เลื่อนจากขวาเมื่อคลิกดูรายละเอียด:
     - ภาพและไดอะแกรมกายวิภาคศาสตร์ (Anatomical Vector Skeleton) แสดงจุดข้อต่อสำคัญ
     - ช่วงองศาที่ยอมรับได้ (Tolerance Range: Min-Max Degrees)
     - รายการ "ข้อผิดพลาดที่พบบ่อย (Common Mistakes to Avoid)" เช่น แขนงอ, ยกไม่ถึงแนวขนาน, ลดแขนเร็วเกินไป
     - เคล็ดลับการปฏิบัติจริงจากวิทยากรผู้ตัดสินระดับชาติ
-- [ ] **Step 4: Build Educational Handbook Page (`src/app/handbook/page.tsx`) & Verify Build**
+- [x] **Step 4: Build Educational Handbook Page (`src/app/handbook/page.tsx`) & Verify Build**
   - Verify ด้วย `npm run build`
 
 ```bash
@@ -216,24 +216,24 @@ git commit -m "feat(handbook): build IFAB interactive digital learning handbook 
 - Consumes: `TraineeEvaluationReport`, `Microservices_Mock`
 - Produces: Comprehensive Trainee Evaluation Gradebook at route `/gradebook`
 
-- [ ] **Step 1: Implement Trainee Metric Summary Cards (`Trainee_Metric_Cards.tsx`)**
+- [x] **Step 1: Implement Trainee Metric Summary Cards (`Trainee_Metric_Cards.tsx`)**
   - 4 Untitled UI Stat Cards:
     1. Overall Posture Accuracy (`88.4%` พร้อม Badge ทิศทางพัฒนาการ)
     2. Total Scenario Tests Completed (`24 ชุด` ผ่านเกณฑ์ 22 ชุด)
     3. Average Reaction Latency (`1.35 วินาที` - ดีเยี่ยม)
     4. Officiating Competency Tier (`ระดับ 3: ผู้ตัดสินฝึกหัดขั้นก้าวหน้า`)
-- [ ] **Step 2: Implement Competency Radar & Historical Chart (`Competency_Radar_Chart.tsx`)**
+- [x] **Step 2: Implement Competency Radar & Historical Chart (`Competency_Radar_Chart.tsx`)**
   - SVG Radar Chart แสดงสมรรถนะ 4 ด้าน: ลูกตั้งเตะ (92%), การทำฟาวล์ (84%), การควบคุมเกม (76%), การล้ำหน้า (90%)
   - เส้นเปรียบเทียบกับค่ามาตรฐาน IFAB Standard Target (80%)
-- [ ] **Step 3: Implement Weakness & Diagnostic Panel (`Weakness_Diagnostics_Panel.tsx`)**
+- [x] **Step 3: Implement Weakness & Diagnostic Panel (`Weakness_Diagnostics_Panel.tsx`)**
   - วิเคราะห์ข้อผิดพลาดซ้ำๆ ของผู้เรียนรายบุคคล:
     - "หมวดการควบคุมเกม: มักลดแขนก่อนเวลาที่กำหนด (เฉลี่ยค้าง 0.8s จากเกณฑ์ 1.5s)"
     - "ท่าสัญญาณได้เปรียบ: มุมกางแขนแคบเกินไป (ควรฝึกขยายมุมเพิ่มอีก 15°)"
-    - ปุ่ม "🎯 ฝึกซ้อมแก้ไขจุดอ่อนนี้" เพื่อกระโดดไปหน้า `/drills` โดยตรง
-- [ ] **Step 4: Implement Exam History Table & Certificate Preview (`Exam_History_Table.tsx`, `Certificate_Preview_Modal.tsx`)**
+    - ปุ่ม "ฝึกซ้อมแก้ไขจุดอ่อนนี้" เพื่อกระโดดไปหน้า `/drills` โดยตรง
+- [x] **Step 4: Implement Exam History Table & Certificate Preview (`Exam_History_Table.tsx`, `Certificate_Preview_Modal.tsx`)**
   - Untitled UI Table แสดงประวัติการทำแบบทดสอบสถานการณ์: วันที่, ชุดข้อสอบ, คะแนน, เวลาตอบสนอง, ผลการประเมิน (Badge: ผ่าน / ปรับปรุง)
-  - ปุ่ม "📜 ดูใบรายงานผลการฝึกอบรม (Certificate / Grade Summary)" แสดงป๊อปอัปผลการเรียนพร้อมสั่งพิมพ์/บันทึก PDF
-- [ ] **Step 5: Build Gradebook Page (`src/app/gradebook/page.tsx`) & Verify Build**
+  - ปุ่ม "ดูใบรายงานผลการฝึกอบรม (Certificate / Grade Summary)" แสดงป๊อปอัปผลการเรียนพร้อมสั่งพิมพ์/บันทึก PDF
+- [x] **Step 5: Build Gradebook Page (`src/app/gradebook/page.tsx`) & Verify Build**
   - Verify ด้วย `npm run build`
 
 ```bash
@@ -256,24 +256,24 @@ git commit -m "feat(gradebook): implement trainee performance gradebook and comp
 - Consumes: Tasks 1-6
 - Produces: Integrated Educational Portal Layout, Universal Navigation Bar, and Interactive Homepage
 
-- [ ] **Step 1: Implement Universal Educational Navbar (`Nav_Bar.tsx`)**
-  - Untitled UI Header พร้อม Logo `⚽ IFAB Referee Academy AI`
+- [x] **Step 1: Implement Universal Educational Navbar (`Nav_Bar.tsx`)**
+  - Untitled UI Header พร้อม Logo `IFAB Referee Academy AI`
   - เมนูหลัก 4 ห้องเรียน:
-    - 🎯 `ห้องฝึกซ้อมสด (/drills)`
-    - 📝 `ห้องสอบสถานการณ์ (/examination)`
-    - 📖 `คู่มือสื่อการสอน 20 ท่า (/handbook)`
-    - 📊 `สมุดผลการประเมิน (/gradebook)`
-  - Status Pill: 🟢 `ระบบสื่อการสอนพร้อมใช้งาน (Offline Demo)` / 🌐 `เชื่อมต่อ API Gateway`
+    - `ห้องฝึกซ้อมสด (/drills)`
+    - `ห้องสอบสถานการณ์ (/examination)`
+    - `คู่มือสื่อการสอน 20 ท่า (/handbook)`
+    - `สมุดผลการประเมิน (/gradebook)`
+  - Status Pill: `ระบบสื่อการสอนพร้อมใช้งาน (Offline Demo)` / `เชื่อมต่อ API Gateway`
   - ปุ่ม Theme Switcher สลับระหว่างโหมดสตูดิโอ (Dark) และโหมดอ่านหนังสือ (Light)
-- [ ] **Step 2: Update App Layout with Navigation (`Front_End/src/app/layout.tsx`)**
+- [x] **Step 2: Update App Layout with Navigation (`Front_End/src/app/layout.tsx`)**
   - ฝัง `Nav_Bar.tsx` ใน Root Layout อย่างสวยงาม
-- [ ] **Step 3: Redesign Home Landing Page (`Front_End/src/app/page.tsx`)**
+- [x] **Step 3: Redesign Home Landing Page (`Front_End/src/app/page.tsx`)**
   - Hero Section สื่อการสอนอัจฉริยะสำหรับผู้ตัดสินฟุตบอล
   - 4 Cards ทางลัดเข้าสู่ห้องเรียนแต่ละโมดูล
   - ภาพรวมกระบวนการเรียนรู้: "1. ศึกษาคู่มือ -> 2. ซ้อมหน้ากล้อง -> 3. ทำแบบทดสอบสถานการณ์ -> 4. รับผลประเมินและเกรด"
-- [ ] **Step 4: End-to-End Build and Verification**
+- [x] **Step 4: End-to-End Build and Verification**
   - รัน `npm run build` ตรวจสอบความถูกต้องของทุก Route (`/`, `/drills`, `/examination`, `/handbook`, `/gradebook`)
-- [ ] **Step 5: Final Commit**
+- [x] **Step 5: Final Commit**
 
 ```bash
 cd Front_End && npm run build
