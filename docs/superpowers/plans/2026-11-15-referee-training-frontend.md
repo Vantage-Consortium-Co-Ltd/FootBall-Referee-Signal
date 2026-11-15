@@ -52,24 +52,11 @@
   - `MicroservicesMockAdapter`: จำลอง Vision Service, Coaching Engine, Rules Service, Assessment Service
   - `MOCK_IFAB_RULES: GestureRule[]`
 
-- [ ] **Step 1: Setup Next.js Project Structure in `frontend/`**
-
-สร้างไฟล์ตั้งค่า `package.json` (ติดตั้ง `next`, `react`, `react-dom`, `lucide-react`, `tailwindcss`, `clsx`, `tailwind-merge`), `tsconfig.json`, `tailwind.config.ts`, และ `postcss.config.js`.
-
-- [ ] **Step 2: Define Core TypeScript Interfaces (`frontend/src/types/referee.ts`)**
-
-ประกาศ Types สำหรับ Keypoint, GestureRule, FrameFeedbackPayload, DrillState, AssessmentReport, และ ServiceHealth (`gateway`, `vision`, `coaching`, `rules`).
-
-- [ ] **Step 3: Implement Microservices Mock Adapter (`frontend/src/lib/microservicesMock.ts`)**
-
-สร้าง Mock Adapter ที่จำลองการตอบสนองของ Microservices แต่ละตัว (Vision: ส่ง Keypoints 17 จุด, Coaching: คำนวณองศาข้อต่อและคะแนน, Rules: รายการกติกา 20 สัญญาณ, Assessment: ประวัติและสถิติการตัดสิน) เพื่อให้หน้าเว็บทำงานได้สมบูรณ์แบบโดยไม่ต้องเปิด Backend.
-
-- [ ] **Step 4: Verify Scaffolding with `npm install` and Type Check**
-
-Run: `cd frontend && npm install && npx tsc --noEmit`
-Expected: SUCCESS with 0 type errors.
-
-- [ ] **Step 5: Commit**
+- [x] **Step 1: Setup Next.js Project Structure in `frontend/`**
+- [x] **Step 2: Define Core TypeScript Interfaces (`frontend/src/types/referee.ts`)**
+- [x] **Step 3: Implement Microservices Mock Adapter (`frontend/src/lib/microservicesMock.ts`)**
+- [x] **Step 4: Verify Scaffolding with `npm install` and Type Check**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/
