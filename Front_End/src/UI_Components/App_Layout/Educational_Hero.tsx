@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 const LEARNING_STEPS = [
   {
@@ -33,22 +34,22 @@ const LEARNING_STEPS = [
 
 export const Educational_Hero: React.FC = () => {
   return (
-    <section className="max-w-7xl mx-auto rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 border border-slate-800 p-6 md:p-8 shadow-2xl">
+    <section className="max-w-7xl mx-auto rounded-[24px] apple-material-dark p-6 md:p-8">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs font-semibold">
+        <div className="max-w-2xl space-y-3.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0A84FF]/15 border border-[#0A84FF]/35 text-[#64D2FF] text-xs font-semibold">
             <Google_Icon name="school" size={15} />
             <span>IFAB Educational &amp; Trainee Assessment Platform</span>
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-100 leading-tight">
+          <h1 className="text-2xl md:text-4xl font-bold apple-display text-[#F5F5F7]">
             สื่อการเรียนการสอนและฝึกปฏิบัติ{" "}
-            <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#30D158] via-[#64D2FF] to-[#0A84FF] bg-clip-text text-transparent">
               สัญญาณผู้ตัดสินฟุตบอล AI
             </span>
           </h1>
 
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-[#A1A1A6] apple-body">
             ระบบห้องเรียนอัจฉริยะสำหรับฝึกทักษะการให้สัญญาณ 20 ท่าทางตามมาตรฐาน IFAB
             Laws of the Game ผ่านกล้องตรวจจับโครงกระดูก 17 จุดแบบเรียลไทม์ พร้อมชุดข้อสอบสถานการณ์จำลองและสมุดบันทึกผลการประเมินผู้เรียนรายบุคคล
           </p>
@@ -56,7 +57,8 @@ export const Educational_Hero: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
               href="/drills"
-              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-cyan-500/20"
+              onPointerDown={() => triggerCausalFeedback("tap")}
+              className="px-5 py-2.5 rounded-2xl bg-[#0A84FF] hover:bg-[#3B9CFF] text-white text-xs font-bold flex items-center gap-2 apple-pressable shadow-lg shadow-[#0A84FF]/25"
             >
               <Google_Icon name="videocam" size={17} />
               <span>เข้าห้องฝึกซ้อมสด (Live Drills)</span>
@@ -64,15 +66,17 @@ export const Educational_Hero: React.FC = () => {
 
             <Link
               href="/examination"
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-bold flex items-center gap-2 transition"
+              onPointerDown={() => triggerCausalFeedback("tap")}
+              className="px-5 py-2.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-white/[0.12] text-[#F5F5F7] text-xs font-bold flex items-center gap-2 apple-pressable"
             >
-              <Google_Icon name="quiz" size={17} className="text-cyan-400" />
+              <Google_Icon name="quiz" size={17} className="text-[#0A84FF]" />
               <span>เริ่มสอบสถานการณ์จำลอง</span>
             </Link>
 
             <Link
               href="/handbook"
-              className="px-4 py-2.5 rounded-xl bg-slate-950/70 hover:bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-2 transition"
+              onPointerDown={() => triggerCausalFeedback("tap")}
+              className="px-4 py-2.5 rounded-2xl bg-[#141416] hover:bg-[#2C2C2E] border border-white/[0.1] text-[#A1A1A6] hover:text-[#F5F5F7] text-xs font-semibold flex items-center gap-2 apple-pressable"
             >
               <Google_Icon name="menu_book" size={16} />
               <span>เปิดคู่มือ 20 ท่า</span>
@@ -81,50 +85,51 @@ export const Educational_Hero: React.FC = () => {
         </div>
 
         {/* Right: Microservices Runtime Badge Box */}
-        <div className="lg:w-80 bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-3 shrink-0">
+        <div className="lg:w-80 bg-[#141416]/90 border border-white/[0.09] rounded-2xl p-4 space-y-3 shrink-0">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-slate-200 flex items-center gap-1.5">
-              <Google_Icon name="monitoring" size={16} className="text-emerald-400" />
+            <span className="font-semibold text-[#F5F5F7] flex items-center gap-1.5">
+              <Google_Icon name="monitoring" size={16} className="text-[#30D158]" />
               <span>สถานะระบบสื่อการสอน</span>
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/35 text-[#30D158] text-[10px] font-bold">
               STANDALONE
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-              <div className="text-[10px] text-slate-400">หลักสูตรสัญญาณ</div>
-              <div className="text-lg font-extrabold font-mono text-cyan-400">20 ท่า</div>
+            <div className="p-2.5 rounded-xl bg-[#1C1C1E] border border-white/[0.07]">
+              <div className="text-[10px] text-[#A1A1A6]">หลักสูตรสัญญาณ</div>
+              <div className="text-lg font-bold apple-tabular text-[#0A84FF]">20 ท่า</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-              <div className="text-[10px] text-slate-400">จุดข้อต่อโครงกระดูก</div>
-              <div className="text-lg font-extrabold font-mono text-emerald-400">17 COCO</div>
+            <div className="p-2.5 rounded-xl bg-[#1C1C1E] border border-white/[0.07]">
+              <div className="text-[10px] text-[#A1A1A6]">จุดข้อต่อโครงกระดูก</div>
+              <div className="text-lg font-bold apple-tabular text-[#30D158]">17 COCO</div>
             </div>
           </div>
 
-          <div className="text-[11px] text-slate-400 leading-relaxed">
+          <div className="text-[11px] text-[#A1A1A6] leading-relaxed">
             รองรับการทำงานแบบ Standalone Offline Simulation และเชื่อมต่อเว็บแคมได้ทันทีในห้องเรียน
           </div>
         </div>
       </div>
 
       {/* 4-Step Educational Workflow Strip */}
-      <div className="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-6 pt-5 border-t border-white/[0.08] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {LEARNING_STEPS.map((item) => (
           <Link
             key={item.step}
             href={item.href}
-            className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-cyan-500/40 transition flex items-start gap-3 group"
+            onPointerDown={() => triggerCausalFeedback("tap")}
+            className="p-3.5 rounded-2xl bg-[#141416]/85 border border-white/[0.08] hover:border-[#0A84FF]/45 hover:bg-[#1C1C1E] flex items-start gap-3 group apple-pressable"
           >
-            <span className="px-2 py-1 rounded-lg bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
+            <span className="px-2 py-1 rounded-lg bg-[#0A84FF]/15 border border-[#0A84FF]/35 text-[#0A84FF] text-xs font-mono font-bold apple-tabular">
               {item.step}
             </span>
             <div className="min-w-0">
-              <div className="text-xs font-bold text-slate-100 group-hover:text-cyan-300 transition">
+              <div className="text-xs font-bold text-[#F5F5F7] group-hover:text-[#0A84FF] transition">
                 {item.title}
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5 leading-snug">
+              <div className="text-[11px] text-[#A1A1A6] mt-0.5 leading-snug">
                 {item.desc}
               </div>
             </div>

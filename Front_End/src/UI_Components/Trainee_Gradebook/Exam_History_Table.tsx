@@ -3,6 +3,7 @@
 import React from "react";
 import { ExamSessionHistoryItem } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface ExamHistoryTableProps {
   history: ExamSessionHistoryItem[];
@@ -17,34 +18,34 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
 }) => {
   return (
     <div
-      className={`rounded-2xl border shadow-xs overflow-hidden ${
+      className={`rounded-[22px] border shadow-xs overflow-hidden ${
         isLightMode
-          ? "bg-white border-slate-200 text-slate-900"
-          : "bg-slate-900 border-slate-800 text-slate-100"
+          ? "apple-material-light border-black/[0.06] text-[#1D1D1F]"
+          : "apple-material-dark border-white/[0.08] text-[#F5F5F7]"
       }`}
     >
       {/* Header */}
       <div
         className={`px-5 py-4 border-b flex items-center justify-between ${
-          isLightMode ? "border-slate-200" : "border-slate-800"
+          isLightMode ? "border-black/[0.06]" : "border-white/[0.08]"
         }`}
       >
         <div className="flex items-center gap-2">
           <Google_Icon
             name="quiz"
             size={18}
-            className={isLightMode ? "text-cyan-700" : "text-cyan-400"}
+            className={isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}
           />
-          <h2 className="text-sm font-bold">
+          <h2 className="text-sm font-bold tracking-tight">
             ประวัติผลการประเมินล่าสุด (Recent Assessment Sessions)
           </h2>
         </div>
 
         <span
-          className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
+          className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold apple-tabular ${
             isLightMode
-              ? "bg-slate-100 border-slate-200 text-slate-600"
-              : "bg-slate-800 border-slate-700 text-slate-300"
+              ? "bg-[#F2F2F7] border-black/[0.06] text-[#6E6E73]"
+              : "bg-[#2C2C2E] border-white/[0.08] text-[#A1A1A6]"
           }`}
         >
           {history.length} รายการล่าสุด
@@ -57,8 +58,8 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
           <thead
             className={
               isLightMode
-                ? "bg-slate-50 text-slate-500 border-b border-slate-200"
-                : "bg-slate-950/60 text-slate-400 border-b border-slate-800"
+                ? "bg-[#F2F2F7]/80 text-[#6E6E73] border-b border-black/[0.06]"
+                : "bg-[#141416] text-[#A1A1A6] border-b border-white/[0.08]"
             }
           >
             <tr>
@@ -74,7 +75,7 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
 
           <tbody
             className={`divide-y ${
-              isLightMode ? "divide-slate-100" : "divide-slate-800/80"
+              isLightMode ? "divide-black/[0.05]" : "divide-white/[0.06]"
             }`}
           >
             {history.map((item) => {
@@ -90,16 +91,16 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
                   key={item.sessionId}
                   className={
                     isLightMode
-                      ? "hover:bg-slate-50/80 transition"
-                      : "hover:bg-slate-950/40 transition"
+                      ? "hover:bg-[#F2F2F7]/70 transition-colors"
+                      : "hover:bg-white/[0.03] transition-colors"
                   }
                 >
-                  <td className="py-3.5 px-4 font-mono font-semibold">
+                  <td className="py-3.5 px-4 font-mono font-semibold apple-tabular">
                     {item.sessionId}
                   </td>
                   <td
-                    className={`py-3.5 px-4 ${
-                      isLightMode ? "text-slate-600" : "text-slate-400"
+                    className={`py-3.5 px-4 apple-tabular ${
+                      isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
                     }`}
                   >
                     {item.date}
@@ -108,13 +109,13 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
                     {item.examTitleTh}
                   </td>
                   <td
-                    className={`py-3.5 px-4 font-mono font-bold ${
-                      isLightMode ? "text-cyan-700" : "text-cyan-400"
+                    className={`py-3.5 px-4 font-mono font-bold apple-tabular ${
+                      isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"
                     }`}
                   >
                     {item.postureAccuracy} / 100
                   </td>
-                  <td className="py-3.5 px-4 font-mono">
+                  <td className="py-3.5 px-4 font-mono apple-tabular">
                     {item.reactionLatencySeconds.toFixed(2)}s
                   </td>
                   <td className="py-3.5 px-4">
@@ -122,11 +123,11 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
                         item.passed
                           ? isLightMode
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-emerald-950/50 border-emerald-500/40 text-emerald-300"
+                            ? "bg-[#34C759]/12 border-[#34C759]/25 text-[#248A3D]"
+                            : "bg-[#30D158]/15 border-[#30D158]/30 text-[#30D158]"
                           : isLightMode
-                          ? "bg-amber-50 border-amber-200 text-amber-800"
-                          : "bg-amber-950/50 border-amber-500/40 text-amber-300"
+                          ? "bg-[#FF9500]/12 border-[#FF9500]/25 text-[#B25000]"
+                          : "bg-[#FF9F0A]/15 border-[#FF9F0A]/30 text-[#FF9F0A]"
                       }`}
                     >
                       <Google_Icon
@@ -139,11 +140,14 @@ export const Exam_History_Table: React.FC<ExamHistoryTableProps> = ({
                   <td className="py-3.5 px-4 text-right">
                     <button
                       type="button"
-                      onClick={() => onInspectSession(item)}
-                      className={`px-3 py-1 rounded-lg border text-[11px] font-semibold transition ${
+                      onClick={() => {
+                        triggerCausalFeedback("snap");
+                        onInspectSession(item);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-colors duration-150 apple-pressable ${
                         isLightMode
-                          ? "bg-white border-slate-200 hover:border-cyan-600 text-slate-700 hover:text-cyan-800"
-                          : "bg-slate-800 border-slate-700 hover:border-cyan-400 text-slate-200"
+                          ? "bg-white border-black/[0.08] hover:border-[#007AFF] text-[#1D1D1F] hover:text-[#007AFF]"
+                          : "bg-[#2C2C2E] border-white/[0.1] hover:border-[#0A84FF] text-[#F5F5F7] hover:text-[#0A84FF]"
                       }`}
                     >
                       ดูผลตรวจ

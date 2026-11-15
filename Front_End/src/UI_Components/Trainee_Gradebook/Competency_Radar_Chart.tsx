@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TraineeEvaluationReport } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import { useAppleSpring } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface CompetencyRadarChartProps {
   competency: TraineeEvaluationReport["categoryCompetency"];
@@ -15,6 +16,16 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
   competency,
   isLightMode,
 }) => {
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    setRevealed(true);
+  }, []);
+
+  const revealSpring = useAppleSpring(revealed ? 1 : 0, {
+    dampingRatio: 1.0,
+    response: 0.48,
+  });
+
   const axes = [
     {
       key: "restarts" as const,
@@ -22,7 +33,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
       labelFull: "ลูกตั้งเตะ (Restarts)",
       score: competency.restarts,
       angleRad: -Math.PI / 2, // Top
-      barColor: "bg-cyan-600",
+      barColor: isLightMode ? "bg-[#007AFF]" : "bg-[#0A84FF]",
     },
     {
       key: "fouls" as const,
@@ -30,7 +41,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
       labelFull: "การทำฟาวล์ (Fouls)",
       score: competency.fouls,
       angleRad: 0, // Right
-      barColor: "bg-emerald-500",
+      barColor: isLightMode ? "bg-[#34C759]" : "bg-[#30D158]",
     },
     {
       key: "match_control" as const,
@@ -38,7 +49,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
       labelFull: "การควบคุมเกม (Game Control)",
       score: competency.match_control,
       angleRad: Math.PI / 2, // Bottom
-      barColor: "bg-amber-500",
+      barColor: isLightMode ? "bg-[#FF9500]" : "bg-[#FF9F0A]",
     },
     {
       key: "offside" as const,
@@ -46,7 +57,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
       labelFull: "การล้ำหน้า (Offside)",
       score: competency.offside,
       angleRad: Math.PI, // Left
-      barColor: "bg-blue-600",
+      barColor: isLightMode ? "bg-[#5856D6]" : "bg-[#5E5CE6]",
     },
   ];
 
@@ -66,14 +77,15 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
 
   const ringLevels = [25, 50, 75, 100];
   const standardPolygon = polygonPoints(axes.map(() => IFAB_STANDARD_TARGET));
-  const traineePolygon = polygonPoints(axes.map((a) => a.score));
+  const animatedScores = axes.map((a) => a.score * revealSpring.value);
+  const traineePolygon = polygonPoints(animatedScores);
 
   return (
     <div
-      className={`h-full rounded-2xl border p-5 shadow-xs flex flex-col justify-between gap-4 ${
+      className={`h-full rounded-[22px] border p-5 shadow-xs flex flex-col justify-between gap-4 ${
         isLightMode
-          ? "bg-white border-slate-200 text-slate-900"
-          : "bg-slate-900 border-slate-800 text-slate-100"
+          ? "apple-material-light border-black/[0.06] text-[#1D1D1F]"
+          : "apple-material-dark border-white/[0.08] text-[#F5F5F7]"
       }`}
     >
       {/* Header */}
@@ -82,18 +94,18 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
           <Google_Icon
             name="radar"
             size={18}
-            className={isLightMode ? "text-cyan-700" : "text-cyan-400"}
+            className={isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}
           />
-          <h2 className="text-sm font-bold">
+          <h2 className="text-sm font-bold tracking-tight">
             สมรรถนะ 4 มิติ (Competency Radar)
           </h2>
         </div>
 
         <span
-          className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
+          className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold apple-tabular ${
             isLightMode
-              ? "bg-amber-50 border-amber-200 text-amber-700"
-              : "bg-amber-950/50 border-amber-500/40 text-amber-300"
+              ? "bg-[#FF9500]/12 border-[#FF9500]/25 text-[#B25000]"
+              : "bg-[#FF9F0A]/15 border-[#FF9F0A]/30 text-[#FF9F0A]"
           }`}
         >
           เกณฑ์ IFAB {IFAB_STANDARD_TARGET}%
@@ -116,7 +128,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
                 key={lvl}
                 points={polygonPoints([lvl, lvl, lvl, lvl])}
                 fill="none"
-                stroke={isLightMode ? "#E2E8F0" : "#334155"}
+                stroke={isLightMode ? "#E5E5EA" : "#2C2C2E"}
                 strokeWidth="1"
               />
             ))}
@@ -129,7 +141,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
                 y1={cy}
                 x2={cx + Math.cos(axis.angleRad) * maxR}
                 y2={cy + Math.sin(axis.angleRad) * maxR}
-                stroke={isLightMode ? "#CBD5E1" : "#334155"}
+                stroke={isLightMode ? "#D1D1D6" : "#3A3A3C"}
                 strokeWidth="1"
               />
             ))}
@@ -138,7 +150,7 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
             <polygon
               points={standardPolygon}
               fill="none"
-              stroke="#D97706"
+              stroke={isLightMode ? "#FF9500" : "#FF9F0A"}
               strokeWidth="1.5"
               strokeDasharray="4 3"
             />
@@ -146,14 +158,14 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
             {/* Trainee Competency Filled Polygon */}
             <polygon
               points={traineePolygon}
-              fill={isLightMode ? "#0E749033" : "#22D3EE33"}
-              stroke={isLightMode ? "#0E7490" : "#22D3EE"}
+              fill={isLightMode ? "#007AFF33" : "#0A84FF33"}
+              stroke={isLightMode ? "#007AFF" : "#0A84FF"}
               strokeWidth="2.5"
             />
 
             {/* Vertex Dots & Axis Labels */}
-            {axes.map((axis) => {
-              const r = (axis.score / 100) * maxR;
+            {axes.map((axis, idx) => {
+              const r = (animatedScores[idx] / 100) * maxR;
               const vx = cx + Math.cos(axis.angleRad) * r;
               const vy = cy + Math.sin(axis.angleRad) * r;
               const lx = cx + Math.cos(axis.angleRad) * (maxR + 18);
@@ -171,15 +183,15 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
                     cx={vx}
                     cy={vy}
                     r="3.8"
-                    fill={isLightMode ? "#0E7490" : "#22D3EE"}
-                    stroke={isLightMode ? "#FFFFFF" : "#0F172A"}
+                    fill={isLightMode ? "#007AFF" : "#0A84FF"}
+                    stroke={isLightMode ? "#FFFFFF" : "#1C1C1E"}
                     strokeWidth="1.5"
                   />
                   <text
                     x={lx}
                     y={ly + 3}
                     textAnchor={anchor}
-                    fill={isLightMode ? "#475467" : "#CBD5E1"}
+                    fill={isLightMode ? "#6E6E73" : "#A1A1A6"}
                     fontSize="10.5"
                     fontWeight="600"
                   >
@@ -201,14 +213,14 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
                   <span>{axis.labelFull}</span>
                 </span>
                 <span
-                  className={`font-mono font-bold ${
+                  className={`font-mono font-bold apple-tabular ${
                     axis.score >= IFAB_STANDARD_TARGET
                       ? isLightMode
-                        ? "text-cyan-700"
-                        : "text-cyan-400"
+                        ? "text-[#007AFF]"
+                        : "text-[#0A84FF]"
                       : isLightMode
-                      ? "text-amber-700"
-                      : "text-amber-400"
+                      ? "text-[#B25000]"
+                      : "text-[#FF9F0A]"
                   }`}
                 >
                   {axis.score}%
@@ -216,12 +228,12 @@ export const Competency_Radar_Chart: React.FC<CompetencyRadarChartProps> = ({
               </div>
               <div
                 className={`w-full h-2 rounded-full overflow-hidden ${
-                  isLightMode ? "bg-slate-100" : "bg-slate-800"
+                  isLightMode ? "bg-[#E5E5EA]" : "bg-[#2C2C2E]"
                 }`}
               >
                 <div
-                  className={`h-full rounded-full ${axis.barColor} transition-all duration-300`}
-                  style={{ width: `${Math.min(100, axis.score)}%` }}
+                  className={`h-full rounded-full ${axis.barColor}`}
+                  style={{ width: `${Math.min(100, axis.score * revealSpring.value)}%` }}
                 />
               </div>
             </div>

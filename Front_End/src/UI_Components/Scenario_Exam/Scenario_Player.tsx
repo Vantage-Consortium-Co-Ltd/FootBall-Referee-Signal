@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ScenarioExamQuestion } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import {
+  createVelocityTracker,
+  projectMomentum,
+  rubberband,
+  triggerCausalFeedback,
+  useAppleSpring,
+} from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface ScenarioPlayerProps {
   question: ScenarioExamQuestion;
@@ -94,20 +101,61 @@ export const Scenario_Player: React.FC<ScenarioPlayerProps> = ({
   const [slowMotion, setSlowMotion] = useState<boolean>(false);
   const [cueTriggered, setCueTriggered] = useState<boolean>(false);
 
+  // Apple 1:1 Pointer Scrubbing + Momentum Projection state
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const velocityTrackerRef = useRef(createVelocityTracker());
+  const wasPlayingBeforeScrubRef = useRef<boolean>(false);
+  const [isScrubbing, setIsScrubbing] = useState<boolean>(false);
+  const [isCoasting, setIsCoasting] = useState<boolean>(false);
+  const [scrubTargetSec, setScrubTargetSec] = useState<number>(0);
+  const [overshootTargetPx, setOvershootTargetPx] = useState<number>(0);
+
+  const coastSpring = useAppleSpring(scrubTargetSec, {
+    dampingRatio: 0.92,
+    response: 0.3,
+    precision: 0.015,
+  });
+  const overshootSpring = useAppleSpring(overshootTargetPx, {
+    dampingRatio: 0.8,
+    response: 0.28,
+    precision: 0.25,
+  });
+
   const duration = question.clipDurationSeconds || 8;
   const keyframes =
     SCENARIO_TACTICAL_DATA[question.id] || SCENARIO_TACTICAL_DATA["Q-01"];
 
   // Reset when question or replayTrigger changes
   useEffect(() => {
+    setIsScrubbing(false);
+    setIsCoasting(false);
+    setOvershootTargetPx(0);
+    setScrubTargetSec(0);
+    coastSpring.setImmediate(0);
+    overshootSpring.setImmediate(0);
     setElapsed(0);
     setIsPlaying(true);
     setCueTriggered(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id, replayTrigger]);
+
+  // Sync projected coast spring back to elapsed until settled
+  useEffect(() => {
+    if (!isCoasting || isScrubbing) return;
+    const clamped = Math.max(0, Math.min(duration, coastSpring.value));
+    setElapsed(clamped);
+    if (Math.abs(coastSpring.value - scrubTargetSec) < 0.025) {
+      setElapsed(Math.max(0, Math.min(duration, scrubTargetSec)));
+      setIsCoasting(false);
+      if (wasPlayingBeforeScrubRef.current && scrubTargetSec < duration - 0.05) {
+        setIsPlaying(true);
+      }
+    }
+  }, [isCoasting, isScrubbing, coastSpring.value, scrubTargetSec, duration]);
 
   // Frame-rate independent playback loop using performance.now()
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || isScrubbing || isCoasting) return;
     let animId: number;
     let lastTime = performance.now();
 
@@ -128,7 +176,77 @@ export const Scenario_Player: React.FC<ScenarioPlayerProps> = ({
 
     animId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying, slowMotion, duration]);
+  }, [isPlaying, isScrubbing, isCoasting, slowMotion, duration]);
+
+  const updateScrubFromPointer = (clientX: number, timeStamp: number) => {
+    const track = trackRef.current;
+    if (!track) return 0;
+    const rect = track.getBoundingClientRect();
+    const width = Math.max(1, rect.width);
+    const localX = clientX - rect.left;
+    const clampedPct = Math.max(0, Math.min(1, localX / width));
+    const nextSec = clampedPct * duration;
+
+    velocityTrackerRef.current.push(clientX, timeStamp);
+    setElapsed(nextSec);
+
+    if (localX < 0) {
+      const stretched = rubberband(localX, 42, 0.55);
+      setOvershootTargetPx(stretched);
+      overshootSpring.setImmediate(stretched);
+    } else if (localX > width) {
+      const stretched = rubberband(localX - width, 42, 0.55);
+      setOvershootTargetPx(stretched);
+      overshootSpring.setImmediate(stretched);
+    } else if (overshootTargetPx !== 0) {
+      setOvershootTargetPx(0);
+      overshootSpring.setImmediate(0);
+    }
+    return width;
+  };
+
+  const handleScrubPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    triggerCausalFeedback("tap");
+    wasPlayingBeforeScrubRef.current = isPlaying;
+    setIsPlaying(false);
+    setIsCoasting(false);
+    setIsScrubbing(true);
+    velocityTrackerRef.current.reset();
+    updateScrubFromPointer(e.clientX, e.timeStamp || performance.now());
+  };
+
+  const handleScrubPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isScrubbing) return;
+    updateScrubFromPointer(e.clientX, e.timeStamp || performance.now());
+  };
+
+  const handleScrubPointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isScrubbing) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    const track = trackRef.current;
+    const width = Math.max(1, track?.getBoundingClientRect().width ?? 1);
+    const velocityPxPerSec = velocityTrackerRef.current.getVelocity();
+    const velocitySecPerSec = (velocityPxPerSec / width) * duration;
+    const projectedSec = Math.max(
+      0,
+      Math.min(duration, elapsed + projectMomentum(velocitySecPerSec, 0.992))
+    );
+
+    setIsScrubbing(false);
+    setOvershootTargetPx(0);
+    coastSpring.setImmediate(elapsed, velocitySecPerSec);
+    setScrubTargetSec(projectedSec);
+
+    if (Math.abs(velocitySecPerSec) > 0.25 && Math.abs(projectedSec - elapsed) > 0.04) {
+      coastSpring.injectVelocity(velocitySecPerSec);
+      setIsCoasting(true);
+    } else if (wasPlayingBeforeScrubRef.current && elapsed < duration - 0.05) {
+      setIsPlaying(true);
+    }
+  };
 
   // Trigger decision cue at ~65% of clip playback
   const progress = Math.min(1, elapsed / duration);
@@ -148,26 +266,26 @@ export const Scenario_Player: React.FC<ScenarioPlayerProps> = ({
   const showIncident = progress >= 0.6;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+    <div className="apple-material-dark rounded-[22px] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="px-5 py-3.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap justify-between items-center gap-2">
+      <div className="px-5 py-3.5 bg-[#1C1C1E]/90 border-b border-white/[0.08] flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
-          <Google_Icon name="quiz" size={18} className="text-cyan-400" />
-          <h2 className="text-sm font-bold text-slate-100">
+          <Google_Icon name="quiz" size={18} className="text-[#0A84FF]" />
+          <h2 className="text-sm font-bold apple-title text-[#F5F5F7]">
             โจทย์สถานการณ์ (Instructional Scenario)
           </h2>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[11px] font-medium text-slate-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-[#2C2C2E] border border-white/[0.1] text-[11px] font-medium text-[#A1A1A6]">
             คลิปที่ {question.questionNumber} · {question.pitchZoneTh}
           </span>
         </div>
       </div>
 
       {/* Tactical 2D Pitch Simulation Screen */}
-      <div className="p-4 bg-slate-950/60">
-        <div className="relative rounded-xl overflow-hidden border border-emerald-800/60 bg-[#0B3B24] shadow-inner">
+      <div className="p-4 bg-[#141416]">
+        <div className="relative rounded-2xl overflow-hidden border border-[#30D158]/30 bg-[#0B3318] shadow-inner">
           <svg
             viewBox="0 0 460 230"
             className="w-full h-auto block select-none"
@@ -328,16 +446,16 @@ export const Scenario_Player: React.FC<ScenarioPlayerProps> = ({
 
           {/* Incident Callout Pill overlay when incident unfolds */}
           {showIncident && (
-            <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-rose-950/90 border border-rose-500/60 text-rose-200 text-xs font-semibold flex items-center gap-1.5 shadow-lg animate-pulse">
-              <Google_Icon name="warning" size={14} className="text-rose-400" />
+            <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-[#2B0B0D]/95 border border-[#FF453A]/60 text-[#FFD6D4] text-xs font-semibold flex items-center gap-1.5 shadow-lg animate-pulse">
+              <Google_Icon name="warning" size={14} className="text-[#FF453A]" />
               <span>{keyframes.incidentLabelTh}</span>
             </div>
           )}
 
           {/* Decision Cue Badge */}
           {progress >= 0.99 && (
-            <div className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-amber-950/90 border border-amber-500/60 text-amber-200 text-[11px] font-semibold flex items-center gap-1.5">
-              <Google_Icon name="bolt" size={14} className="text-amber-400" />
+            <div className="absolute bottom-3 left-3 px-3 py-1 rounded-xl bg-[#2C1A04]/95 border border-[#FF9F0A]/60 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1.5">
+              <Google_Icon name="bolt" size={14} className="text-[#FF9F0A]" />
               <span>หมดคลิปเหตุการณ์ — โปรดเลือกคำตัดสินและให้สัญญาณ!</span>
             </div>
           )}
@@ -347,58 +465,87 @@ export const Scenario_Player: React.FC<ScenarioPlayerProps> = ({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
+              onPointerDown={() => triggerCausalFeedback("tap")}
               onClick={() => {
+                setIsCoasting(false);
                 if (elapsed >= duration) setElapsed(0);
                 setIsPlaying(!isPlaying);
               }}
-              className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 rounded-xl bg-[#2C2C2E] border border-white/[0.1] hover:border-[#0A84FF]/60 text-[#F5F5F7] text-xs font-semibold flex items-center gap-1.5 apple-pressable"
             >
-              <Google_Icon name={isPlaying ? "pause" : "play_arrow"} size={16} className="text-cyan-400" />
+              <Google_Icon name={isPlaying ? "pause" : "play_arrow"} size={16} className="text-[#0A84FF]" />
               <span>{isPlaying ? "หยุดชั่วคราว" : "เล่นคลิป"}</span>
             </button>
 
             <button
+              onPointerDown={() => triggerCausalFeedback("tap")}
               onClick={() => {
+                setIsCoasting(false);
                 setElapsed(0);
                 setIsPlaying(true);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs flex items-center gap-1 transition"
+              className="px-2.5 py-1.5 rounded-xl bg-[#1C1C1E] border border-white/[0.1] hover:bg-[#2C2C2E] text-[#A1A1A6] hover:text-[#F5F5F7] text-xs flex items-center gap-1 apple-pressable"
               title="เล่นซ้ำตั้งแต่ต้น"
             >
               <Google_Icon name="replay" size={15} />
               <span>เล่นซ้ำ</span>
             </button>
 
-            <span className="font-mono text-xs text-slate-400 ml-1">
+            <span className="font-mono text-xs text-[#A1A1A6] ml-1 apple-tabular">
               00:0{elapsed.toFixed(1)}s / 00:0{duration.toFixed(1)}s
             </span>
           </div>
 
           <button
+            onPointerDown={() => triggerCausalFeedback("snap")}
             onClick={() => setSlowMotion(!slowMotion)}
-            className={`px-3 py-1 rounded-full border text-[11px] font-semibold transition ${
+            className={`px-3 py-1 rounded-full border text-[11px] font-semibold apple-pressable ${
               slowMotion
-                ? "bg-cyan-950/60 border-cyan-500/60 text-cyan-300"
-                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                ? "bg-[#0A84FF]/20 border-[#0A84FF]/60 text-[#0A84FF]"
+                : "bg-[#1C1C1E] border-white/[0.1] text-[#A1A1A6] hover:text-[#F5F5F7]"
             }`}
           >
             SLOW MOTION 0.5x: {slowMotion ? "ON" : "OFF"}
           </button>
         </div>
 
-        {/* Progress Scrubber Bar */}
+        {/* Apple 1:1 Pointer-Captured Fluid Progress Scrubber Bar */}
         <div
-          className="mt-2.5 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden cursor-pointer"
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            setElapsed(pct * duration);
+          ref={trackRef}
+          role="slider"
+          aria-label="คลิกลากเพื่อเลื่อนเวลาสถานการณ์"
+          aria-valuemin={0}
+          aria-valuemax={duration}
+          aria-valuenow={Number(elapsed.toFixed(2))}
+          tabIndex={0}
+          onPointerDown={handleScrubPointerDown}
+          onPointerMove={handleScrubPointerMove}
+          onPointerUp={handleScrubPointerEnd}
+          onPointerCancel={handleScrubPointerEnd}
+          style={{
+            transform: `translateX(${overshootSpring.value}px)`,
+            touchAction: "none",
           }}
+          className="mt-2.5 py-2 -my-1 cursor-grab active:cursor-grabbing group select-none"
         >
           <div
-            className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-75"
-            style={{ width: `${progress * 100}%` }}
-          />
+            className={`relative w-full bg-[#2C2C2E] rounded-full overflow-visible transition-[height] duration-150 ${
+              isScrubbing ? "h-3" : "h-1.5 group-hover:h-2.5"
+            }`}
+          >
+            <div
+              className="h-full bg-gradient-to-r from-[#0A84FF] to-[#30D158] rounded-full relative"
+              style={{ width: `${progress * 100}%` }}
+            >
+              <span
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full bg-white shadow-md border border-black/20 transition-transform duration-150 ${
+                  isScrubbing
+                    ? "w-4 h-4 scale-110"
+                    : "w-3 h-3 scale-0 group-hover:scale-100"
+                }`}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

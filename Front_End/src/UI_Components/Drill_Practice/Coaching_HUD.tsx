@@ -1,11 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   FrameFeedbackPayload,
   GestureRule,
 } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import {
+  triggerCausalFeedback,
+  useAppleSpring,
+} from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface CoachingHUDProps {
   feedback: FrameFeedbackPayload;
@@ -22,61 +26,82 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
 }) => {
   const { score, state, holdProgress, holdDuration, angles, feedbackTip } = feedback;
 
-  // Circular timer calculations
-  const radius = 38;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - holdProgress * circumference;
-
   const isCompleted = state === "COMPLETED";
   const isHolding = state === "HOLDING";
   const isLost = state === "LOST_POSTURE";
 
+  // Apple critically damped springs driven from live presentation values
+  const scoreSpring = useAppleSpring(score, { dampingRatio: 1.0, response: 0.36, precision: 0.25 });
+  const holdSpring = useAppleSpring(holdProgress, { dampingRatio: 1.0, response: 0.22, precision: 0.002 });
+  const elevationSpring = useAppleSpring(angles.rElevationAngle, { dampingRatio: 1.0, response: 0.3, precision: 0.25 });
+  const elbowSpring = useAppleSpring(angles.rElbowAngle, { dampingRatio: 1.0, response: 0.3, precision: 0.25 });
+
+  // Edge-triggered causal audio-haptic feedback on state transitions
+  const prevStateRef = useRef(state);
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    prevStateRef.current = state;
+    if (state === "COMPLETED" && prev !== "COMPLETED") {
+      triggerCausalFeedback("success");
+    } else if (state === "LOST_POSTURE" && prev === "HOLDING") {
+      triggerCausalFeedback("warning");
+    }
+  }, [state]);
+
+  // Circular timer calculations driven by spring hold progress
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const clampedHold = Math.min(1, Math.max(0, holdSpring.value));
+  const strokeDashoffset = circumference - clampedHold * circumference;
+
+  const displayedScore = Math.round(scoreSpring.value);
+  const displayedElevation = Math.round(elevationSpring.value);
+  const displayedElbow = Math.round(elbowSpring.value);
+
   const statusColor = isCompleted
-    ? "text-emerald-400 border-emerald-500/50 bg-emerald-950/40"
+    ? "text-[#30D158] border-[#30D158]/45 bg-[#30D158]/15"
     : isHolding
-    ? "text-cyan-400 border-cyan-500/50 bg-cyan-950/40"
+    ? "text-[#0A84FF] border-[#0A84FF]/45 bg-[#0A84FF]/15"
     : isLost
-    ? "text-amber-400 border-amber-500/50 bg-amber-950/40"
-    : "text-slate-400 border-slate-800 bg-slate-900/60";
+    ? "text-[#FF9F0A] border-[#FF9F0A]/45 bg-[#FF9F0A]/15"
+    : "text-[#A1A1A6] border-white/[0.1] bg-[#141416]/90";
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+    <div className="apple-material-dark rounded-[22px] p-5 flex flex-col gap-4">
       {/* Header: Score & Hold Circular Timer */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
         <div>
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+          <span className="text-xs text-[#A1A1A6] uppercase tracking-wider font-semibold">
             คะแนนความถูกต้อง (Posture Score)
           </span>
-          <div className="flex items-baseline gap-2 mt-0.5">
+          <div className="flex items-baseline gap-2 mt-0.5 apple-tabular">
             <span
-              className={`text-3xl font-extrabold font-mono ${
-                score >= 85
-                  ? "text-emerald-400"
-                  : score >= 70
-                  ? "text-cyan-400"
-                  : "text-amber-400"
+              className={`text-3xl font-bold font-mono apple-display ${
+                displayedScore >= 85
+                  ? "text-[#30D158]"
+                  : displayedScore >= 70
+                  ? "text-[#0A84FF]"
+                  : "text-[#FF9F0A]"
               }`}
             >
-              {score}
+              {displayedScore}
             </span>
-            <span className="text-xs text-slate-500">/ 100</span>
+            <span className="text-xs text-[#6E6E73]">/ 100</span>
           </div>
         </div>
 
         {/* Circular Countdown Progress Ring */}
         <div className="relative flex items-center justify-center">
           <svg className="w-20 h-20 transform -rotate-90">
-            {/* Background circle */}
             <circle
               cx="40"
               cy="40"
               r={radius}
               stroke="currentColor"
               strokeWidth="6"
-              className="text-slate-800"
+              className="text-[#2C2C2E]"
               fill="transparent"
             />
-            {/* Progress circle */}
             <circle
               cx="40"
               cy="40"
@@ -86,25 +111,25 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              className={`transition-all duration-150 ${
+              className={
                 isCompleted
-                  ? "text-emerald-400"
+                  ? "text-[#30D158]"
                   : isHolding
-                  ? "text-cyan-400"
-                  : "text-slate-700"
-              }`}
+                  ? "text-[#0A84FF]"
+                  : "text-[#6E6E73]"
+              }
               fill="transparent"
             />
           </svg>
-          <div className="absolute flex flex-col items-center justify-center">
+          <div className="absolute flex flex-col items-center justify-center apple-tabular">
             {isCompleted ? (
-              <Google_Icon name="check_circle" size={24} className="text-emerald-400 animate-bounce" filled />
+              <Google_Icon name="check_circle" size={24} className="text-[#30D158]" filled />
             ) : (
               <>
-                <span className="text-xs font-mono font-bold text-slate-100">
+                <span className="text-xs font-mono font-bold text-[#F5F5F7]">
                   {holdDuration.toFixed(1)}s
                 </span>
-                <span className="text-[9px] text-slate-400">
+                <span className="text-[9px] text-[#A1A1A6]">
                   /{targetRule.minHoldSeconds}s
                 </span>
               </>
@@ -115,14 +140,14 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
 
       {/* Live Coaching Toast Feedback Banner */}
       <div
-        className={`px-4 py-3 rounded-xl border flex items-center gap-3 transition-all ${statusColor}`}
+        className={`px-4 py-3 rounded-2xl border flex items-center gap-3 ${statusColor}`}
       >
         {isCompleted ? (
-          <Google_Icon name="check_circle" size={20} className="text-emerald-400" filled />
+          <Google_Icon name="check_circle" size={20} className="text-[#30D158]" filled />
         ) : isLost ? (
-          <Google_Icon name="warning" size={20} className="text-amber-400" filled />
+          <Google_Icon name="warning" size={20} className="text-[#FF9F0A]" filled />
         ) : (
-          <Google_Icon name="monitoring" size={20} className="text-cyan-400" />
+          <Google_Icon name="monitoring" size={20} className="text-[#0A84FF]" />
         )}
         <div className="text-xs font-medium leading-relaxed">
           {feedbackTip}
@@ -131,31 +156,31 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
 
       {/* Joint Angle Telemetry Gauges */}
       <div className="space-y-3">
-        <div className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <Google_Icon name="explore" size={16} className="text-cyan-400" />
+        <div className="text-xs font-semibold text-[#F5F5F7] flex items-center gap-1.5">
+          <Google_Icon name="explore" size={16} className="text-[#0A84FF]" />
           การวัดองศาข้อต่อตามกติกา IFAB
         </div>
 
         {/* Right Arm Elevation */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
-          <div className="flex justify-between items-center text-xs mb-1.5">
-            <span className="text-slate-400">องศาการยกแขน (Arm Elevation)</span>
-            <span className="font-mono font-bold text-cyan-400">
-              {angles.rElevationAngle}° / {targetRule.targetElevationDeg}°
+        <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3">
+          <div className="flex justify-between items-center text-xs mb-1.5 apple-tabular">
+            <span className="text-[#A1A1A6]">องศาการยกแขน (Arm Elevation)</span>
+            <span className="font-mono font-bold text-[#0A84FF]">
+              {displayedElevation}° / {targetRule.targetElevationDeg}°
             </span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-[#2C2C2E] rounded-full h-2 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-200"
+              className="bg-gradient-to-r from-[#0A84FF] to-[#64D2FF] h-2 rounded-full"
               style={{
                 width: `${Math.min(
                   100,
-                  (angles.rElevationAngle / targetRule.targetElevationDeg) * 100
+                  Math.max(0, (elevationSpring.value / targetRule.targetElevationDeg) * 100)
                 )}%`,
               }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+          <div className="flex justify-between text-[10px] text-[#6E6E73] mt-1 apple-tabular">
             <span>0° (แนบลำตัว)</span>
             <span>เกณฑ์ผ่าน: {targetRule.minElevationDeg}°+</span>
             <span>180° (ชูตรง)</span>
@@ -163,26 +188,26 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
         </div>
 
         {/* Elbow Straightness */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
-          <div className="flex justify-between items-center text-xs mb-1.5">
-            <span className="text-slate-400">ความเหยียดตรงของข้อศอก</span>
-            <span className="font-mono font-bold text-emerald-400">
-              {angles.rElbowAngle}° / 180°
+        <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3">
+          <div className="flex justify-between items-center text-xs mb-1.5 apple-tabular">
+            <span className="text-[#A1A1A6]">ความเหยียดตรงของข้อศอก</span>
+            <span className="font-mono font-bold text-[#30D158]">
+              {displayedElbow}° / 180°
             </span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-[#2C2C2E] rounded-full h-2 overflow-hidden">
             <div
-              className={`h-2 rounded-full transition-all duration-200 ${
-                angles.rElbowAngle >= targetRule.minStraightnessDeg
-                  ? "bg-emerald-400"
-                  : "bg-amber-400"
+              className={`h-2 rounded-full ${
+                displayedElbow >= targetRule.minStraightnessDeg
+                  ? "bg-[#30D158]"
+                  : "bg-[#FF9F0A]"
               }`}
               style={{
-                width: `${Math.min(100, (angles.rElbowAngle / 180) * 100)}%`,
+                width: `${Math.min(100, Math.max(0, (elbowSpring.value / 180) * 100))}%`,
               }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+          <div className="flex justify-between text-[10px] text-[#6E6E73] mt-1 apple-tabular">
             <span>90° (งอศอก)</span>
             <span>เกณฑ์ตรง: {targetRule.minStraightnessDeg}°+</span>
             <span>180° (เหยียดตรง)</span>
@@ -191,13 +216,13 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
       </div>
 
       {/* Practice Streak & Stats Footer */}
-      <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+      <div className="pt-3 border-t border-white/[0.08] flex justify-between items-center text-xs text-[#A1A1A6] apple-tabular">
         <div className="flex items-center gap-1.5">
-          <Google_Icon name="bolt" size={16} className="text-amber-400" filled />
-          <span>ต่อเนื่อง: <b className="text-slate-200">{streakCount} ครั้ง</b></span>
+          <Google_Icon name="bolt" size={16} className="text-[#FF9F0A]" filled />
+          <span>ต่อเนื่อง: <b className="text-[#F5F5F7]">{streakCount} ครั้ง</b></span>
         </div>
         <div>
-          <span>ฝึกไปแล้ว: <b className="text-slate-200">{totalAttempts} รอบ</b></span>
+          <span>ฝึกไปแล้ว: <b className="text-[#F5F5F7]">{totalAttempts} รอบ</b></span>
         </div>
       </div>
     </div>

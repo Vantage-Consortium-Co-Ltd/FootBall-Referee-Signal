@@ -1,10 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { GestureRule } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
 import { Signal_Anatomy_Svg } from "./Signal_Curriculum_Card";
+import {
+  createVelocityTracker,
+  rubberband,
+  triggerCausalFeedback,
+  useAppleSpring,
+} from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface SignalDeepDiveDrawerProps {
   rule: GestureRule;
@@ -32,33 +38,93 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
           `ข้อศอกงอต่ำกว่า ${rule.minStraightnessDeg}° หรือลดแขนลงก่อนครบ ${rule.minHoldSeconds} วินาที`,
         ];
 
+  const [dragTargetY, setDragTargetY] = useState(0);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragStartOffsetRef = useRef(0);
+  const velocityTrackerRef = useRef(createVelocityTracker());
+  const drawerSpring = useAppleSpring(dragTargetY, {
+    dampingRatio: 0.8,
+    response: 0.32,
+  });
+
+  const handleGrabDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStartYRef.current = e.clientY;
+    dragStartOffsetRef.current = drawerSpring.value;
+    velocityTrackerRef.current.reset();
+    velocityTrackerRef.current.push(0);
+    drawerSpring.setImmediate(drawerSpring.value);
+    triggerCausalFeedback("tap");
+  };
+
+  const handleGrabMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartYRef.current === null) return;
+    const rawDelta = dragStartOffsetRef.current + (e.clientY - dragStartYRef.current);
+    const dampedY =
+      rawDelta >= 0
+        ? rubberband(rawDelta, 160, 0.55)
+        : -rubberband(-rawDelta, 160, 0.55);
+    velocityTrackerRef.current.push(dampedY);
+    drawerSpring.setImmediate(dampedY);
+    setDragTargetY(dampedY);
+  };
+
+  const handleGrabEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartYRef.current === null) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    const vy = velocityTrackerRef.current.getVelocity();
+    dragStartYRef.current = null;
+    setDragTargetY(0);
+    drawerSpring.injectVelocity(vy * 0.35);
+    triggerCausalFeedback("snap");
+  };
+
   return (
     <aside
-      className={`rounded-2xl border p-5 shadow-lg lg:sticky lg:top-20 flex flex-col gap-4 ${
+      style={{ transform: `translate3d(0, ${drawerSpring.value}px, 0)` }}
+      className={`rounded-[22px] border p-5 shadow-lg lg:sticky lg:top-20 flex flex-col gap-4 ${
         isLightMode
-          ? "bg-white border-slate-200 text-slate-900"
-          : "bg-slate-900 border-slate-800 text-slate-100"
+          ? "apple-material-light border-black/[0.06] text-[#1D1D1F]"
+          : "apple-material-dark border-white/[0.1] text-[#F5F5F7]"
       }`}
     >
+      {/* Interactive Rubber-Banding Grab Handle */}
+      <div
+        onPointerDown={handleGrabDown}
+        onPointerMove={handleGrabMove}
+        onPointerUp={handleGrabEnd}
+        onPointerCancel={handleGrabEnd}
+        className="touch-none cursor-grab active:cursor-grabbing py-1.5 -mt-2 -mb-1 flex items-center justify-center"
+        title="ลากเพื่อทดสอบความหนืดและสปริงแบบ iOS Sheet"
+      >
+        <span
+          className={`w-10 h-1 rounded-full ${
+            isLightMode ? "bg-black/15" : "bg-white/25"
+          }`}
+        />
+      </div>
+
       {/* Top Badge */}
       <div>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-bold ${
             isLightMode
-              ? "bg-sky-50 border-sky-200 text-sky-700"
-              : "bg-blue-950/50 border-blue-500/40 text-blue-300"
+              ? "bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF]"
+              : "bg-[#0A84FF]/15 border-[#0A84FF]/30 text-[#0A84FF]"
           }`}
         >
           <Google_Icon name="menu_book" size={13} />
           <span>IFAB {shortLaw} · DEEP DIVE</span>
         </span>
 
-        <h2 className="text-lg font-extrabold mt-2.5 leading-snug">
+        <h2 className="apple-title text-lg font-bold mt-2.5 leading-snug tracking-tight">
           ท่าที่ {rule.id + 1}: {rule.nameTh} ({rule.name.replace(/_/g, " ")})
         </h2>
         <p
           className={`text-xs mt-0.5 ${
-            isLightMode ? "text-slate-500" : "text-slate-400"
+            isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
           }`}
         >
           Official Instructional Guideline for Referees
@@ -67,17 +133,17 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
 
       {/* Large Anatomical Posture Diagram */}
       <div
-        className={`relative rounded-xl border p-4 flex items-center justify-center ${
+        className={`relative rounded-2xl border p-4 flex items-center justify-center ${
           isLightMode
-            ? "bg-slate-50 border-slate-200"
-            : "bg-slate-950/70 border-slate-800"
+            ? "bg-[#F2F2F7] border-black/[0.05]"
+            : "bg-[#141416] border-white/[0.06]"
         }`}
       >
         <span
-          className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full border text-[11px] font-semibold inline-flex items-center gap-1 ${
+          className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full border text-[11px] font-semibold inline-flex items-center gap-1 apple-tabular ${
             isLightMode
-              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-              : "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
+              ? "bg-[#34C759]/12 border-[#34C759]/25 text-[#1E7E34]"
+              : "bg-[#30D158]/15 border-[#30D158]/30 text-[#30D158]"
           }`}
         >
           <Google_Icon name="straighten" size={12} />
@@ -97,7 +163,7 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
       {/* Description */}
       <p
         className={`text-xs leading-relaxed ${
-          isLightMode ? "text-slate-600" : "text-slate-300"
+          isLightMode ? "text-[#3A3A3C]" : "text-[#D1D1D6]"
         }`}
       >
         {rule.descriptionTh}
@@ -105,43 +171,43 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
 
       {/* IFAB Biomechanical Criteria */}
       <div
-        className={`space-y-2.5 pt-2 border-t ${
-          isLightMode ? "border-slate-200" : "border-slate-800"
+        className={`space-y-2.5 pt-2.5 border-t ${
+          isLightMode ? "border-black/[0.06]" : "border-white/[0.08]"
         }`}
       >
         <h3
           className={`text-xs font-bold uppercase tracking-wide ${
-            isLightMode ? "text-cyan-800" : "text-cyan-400"
+            isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"
           }`}
         >
           เกณฑ์มาตรฐานตามกติกา (IFAB Criteria)
         </h3>
 
-        <div className="space-y-2 text-xs">
+        <div className="space-y-2 text-xs apple-tabular">
           <div>
             <div className="font-semibold">มุมยกแขน (Shoulder Elevation)</div>
-            <div className={`font-medium ${isLightMode ? "text-cyan-700" : "text-cyan-400"}`}>
+            <div className={`font-medium ${isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}`}>
               เป้าหมาย {rule.targetElevationDeg}° (ขั้นต่ำ {rule.minElevationDeg}°+)
             </div>
           </div>
 
           <div>
             <div className="font-semibold">ความเหยียดศอก (Elbow Straightness)</div>
-            <div className={`font-medium ${isLightMode ? "text-cyan-700" : "text-cyan-400"}`}>
+            <div className={`font-medium ${isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}`}>
               เป้าหมาย {rule.targetStraightnessDeg}° (ไม่ต่ำกว่า {rule.minStraightnessDeg}°)
             </div>
           </div>
 
           <div>
             <div className="font-semibold">แขนที่ใช้ (Active Arm)</div>
-            <div className={`font-medium ${isLightMode ? "text-cyan-700" : "text-cyan-400"}`}>
+            <div className={`font-medium ${isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}`}>
               {ARM_LABELS_TH[rule.activeArm]}
             </div>
           </div>
 
           <div>
             <div className="font-semibold">ระยะเวลาค้าง (Hold Duration)</div>
-            <div className={`font-medium ${isLightMode ? "text-cyan-700" : "text-cyan-400"}`}>
+            <div className={`font-medium ${isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"}`}>
               ค้างท่าอย่างน้อย {rule.minHoldSeconds.toFixed(1)} วินาทีจนผู้เล่นเห็นชัดเจน
             </div>
           </div>
@@ -150,17 +216,17 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
 
       {/* Common Mistakes Callout */}
       <div
-        className={`rounded-xl border p-3.5 ${
+        className={`rounded-2xl border p-3.5 ${
           isLightMode
-            ? "bg-rose-50 border-rose-200 text-rose-800"
-            : "bg-rose-950/30 border-rose-500/40 text-rose-200"
+            ? "bg-[#FF3B30]/[0.08] border-[#FF3B30]/20 text-[#9B1C1C]"
+            : "bg-[#FF453A]/15 border-[#FF453A]/30 text-[#FFD3D0]"
         }`}
       >
         <div className="flex items-center gap-1.5 text-xs font-bold mb-1">
           <Google_Icon
             name="warning"
             size={15}
-            className={isLightMode ? "text-rose-600" : "text-rose-400"}
+            className={isLightMode ? "text-[#FF3B30]" : "text-[#FF453A]"}
           />
           <span>ข้อผิดพลาดที่พบบ่อย (Common Mistakes)</span>
         </div>
@@ -174,17 +240,17 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
       {/* Coaching Tips */}
       {rule.coachingTips && rule.coachingTips.length > 0 && (
         <div
-          className={`rounded-xl border p-3.5 ${
+          className={`rounded-2xl border p-3.5 ${
             isLightMode
-              ? "bg-amber-50 border-amber-200 text-amber-900"
-              : "bg-amber-950/25 border-amber-500/30 text-amber-200"
+              ? "bg-[#FF9500]/10 border-[#FF9500]/25 text-[#8A4B00]"
+              : "bg-[#FF9F0A]/15 border-[#FF9F0A]/30 text-[#FFE4B5]"
           }`}
         >
           <div className="flex items-center gap-1.5 text-xs font-bold mb-1">
             <Google_Icon
               name="lightbulb"
               size={15}
-              className={isLightMode ? "text-amber-600" : "text-amber-400"}
+              className={isLightMode ? "text-[#FF9500]" : "text-[#FF9F0A]"}
             />
             <span>เคล็ดลับจากวิทยากรผู้ตัดสิน</span>
           </div>
@@ -199,10 +265,11 @@ export const Signal_Deep_Dive_Drawer: React.FC<SignalDeepDiveDrawerProps> = ({
       {/* Primary Practice CTA */}
       <Link
         href={`/drills?signalId=${rule.id}`}
-        className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md ${
+        onClick={() => triggerCausalFeedback("tap")}
+        className={`w-full py-3 px-4 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors duration-150 shadow-md apple-pressable ${
           isLightMode
-            ? "bg-cyan-700 hover:bg-cyan-800 text-white"
-            : "bg-cyan-500 hover:bg-cyan-400 text-slate-950"
+            ? "bg-[#007AFF] hover:bg-[#0066D6] text-white"
+            : "bg-[#0A84FF] hover:bg-[#3395FF] text-white"
         }`}
       >
         <Google_Icon name="videocam" size={16} />

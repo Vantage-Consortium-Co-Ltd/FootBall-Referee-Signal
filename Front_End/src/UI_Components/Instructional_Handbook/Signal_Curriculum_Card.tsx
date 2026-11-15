@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { GestureRule } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface SignalAnatomySvgProps {
   rule: GestureRule;
@@ -65,9 +66,9 @@ export const Signal_Anatomy_Svg: React.FC<SignalAnatomySvgProps> = ({
   const rightArm = computeArmJoints(12, -22, 1, isRightActive);
   const leftArm = computeArmJoints(-12, -22, -1, isLeftActive);
 
-  const bodyStroke = isLightMode ? "#334155" : "#94A3B8";
-  const activeStroke = isLightMode ? "#0E7490" : "#22D3EE";
-  const jointFill = isLightMode ? "#0E7490" : "#34D399";
+  const bodyStroke = isLightMode ? "#3A3A3C" : "#A1A1A6";
+  const activeStroke = isLightMode ? "#007AFF" : "#0A84FF";
+  const jointFill = isLightMode ? "#34C759" : "#30D158";
 
   return (
     <svg
@@ -83,7 +84,7 @@ export const Signal_Anatomy_Svg: React.FC<SignalAnatomySvgProps> = ({
           y1={-22}
           x2={12 + Math.sin(rad) * (upperLen + foreLen + 8)}
           y2={-22 + Math.cos(rad) * (upperLen + foreLen + 8)}
-          stroke={isLightMode ? "#0284C7" : "#38BDF8"}
+          stroke={isLightMode ? "#007AFF" : "#64D2FF"}
           strokeWidth={2}
           strokeDasharray="4 4"
           strokeOpacity={0.55}
@@ -161,15 +162,18 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
 
   return (
     <div
-      onClick={() => onSelectRule(rule)}
-      className={`rounded-2xl border p-4 flex flex-col justify-between transition cursor-pointer ${
+      onClick={() => {
+        triggerCausalFeedback("snap");
+        onSelectRule(rule);
+      }}
+      className={`rounded-[20px] border p-4 flex flex-col justify-between transition-all duration-150 cursor-pointer apple-pressable ${
         isSelected
           ? isLightMode
-            ? "bg-white border-cyan-700 ring-2 ring-cyan-600/20 shadow-md"
-            : "bg-slate-900 border-cyan-400 ring-2 ring-cyan-400/20 shadow-xl"
+            ? "bg-white border-[#007AFF] ring-2 ring-[#007AFF]/20 shadow-md"
+            : "apple-material-dark border-[#0A84FF] ring-2 ring-[#0A84FF]/25 shadow-xl"
           : isLightMode
-          ? "bg-white border-slate-200 hover:border-slate-300 shadow-xs hover:shadow-sm"
-          : "bg-slate-900 border-slate-800 hover:border-slate-700"
+          ? "apple-material-light border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm"
+          : "apple-material-dark border-white/[0.08] hover:border-white/[0.18]"
       }`}
     >
       <div>
@@ -178,8 +182,8 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
           <span
             className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold inline-flex items-center gap-1 ${
               isLightMode
-                ? "bg-sky-50 border-sky-200 text-sky-700"
-                : "bg-blue-950/50 border-blue-500/40 text-blue-300"
+                ? "bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF]"
+                : "bg-[#0A84FF]/15 border-[#0A84FF]/30 text-[#0A84FF]"
             }`}
           >
             <Google_Icon name="menu_book" size={12} />
@@ -187,8 +191,8 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
           </span>
 
           <span
-            className={`text-[11px] font-mono font-semibold ${
-              isLightMode ? "text-slate-400" : "text-slate-500"
+            className={`text-[11px] font-mono font-semibold apple-tabular ${
+              isLightMode ? "text-[#8E8E93]" : "text-[#8E8E93]"
             }`}
           >
             #{String(rule.id + 1).padStart(2, "0")}
@@ -197,10 +201,10 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
 
         {/* Mini Posture Diagram Box */}
         <div
-          className={`rounded-xl border py-2 mb-3 flex items-center justify-center ${
+          className={`rounded-2xl border py-2 mb-3 flex items-center justify-center ${
             isLightMode
-              ? "bg-slate-50 border-slate-100"
-              : "bg-slate-950/60 border-slate-800"
+              ? "bg-[#F2F2F7] border-black/[0.04]"
+              : "bg-[#141416] border-white/[0.06]"
           }`}
         >
           <Signal_Anatomy_Svg rule={rule} isLightMode={isLightMode} className="w-full h-24" />
@@ -208,15 +212,15 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
 
         {/* Title */}
         <h3
-          className={`text-sm font-bold leading-snug ${
-            isLightMode ? "text-slate-900" : "text-slate-100"
+          className={`text-sm font-bold leading-snug tracking-tight ${
+            isLightMode ? "text-[#1D1D1F]" : "text-[#F5F5F7]"
           }`}
         >
           {rule.nameTh}
         </h3>
         <div
           className={`text-xs mt-0.5 ${
-            isLightMode ? "text-slate-500" : "text-slate-400"
+            isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
           }`}
         >
           {rule.name.replace(/_/g, " ")}
@@ -224,16 +228,16 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
 
         {/* Telemetry Requirements Row */}
         <div
-          className={`mt-2.5 flex flex-wrap items-center gap-3 text-[11px] font-medium ${
-            isLightMode ? "text-slate-600" : "text-slate-300"
+          className={`mt-2.5 flex flex-wrap items-center gap-3 text-[11px] font-medium apple-tabular ${
+            isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
           }`}
         >
           <span className="inline-flex items-center gap-1">
-            <Google_Icon name="straighten" size={13} className={isLightMode ? "text-cyan-700" : "text-cyan-400"} />
+            <Google_Icon name="straighten" size={13} className={isLightMode ? "text-[#007AFF]" : "text-[#0A84FF]"} />
             <span>แขน {rule.targetElevationDeg}°</span>
           </span>
           <span className="inline-flex items-center gap-1">
-            <Google_Icon name="schedule" size={13} className={isLightMode ? "text-emerald-700" : "text-emerald-400"} />
+            <Google_Icon name="schedule" size={13} className={isLightMode ? "text-[#34C759]" : "text-[#30D158]"} />
             <span>Hold {rule.minHoldSeconds}s</span>
           </span>
         </div>
@@ -242,23 +246,24 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
       {/* Action Buttons */}
       <div
         className={`mt-4 pt-3 border-t flex items-center gap-2 ${
-          isLightMode ? "border-slate-200" : "border-slate-800"
+          isLightMode ? "border-black/[0.06]" : "border-white/[0.08]"
         }`}
       >
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            triggerCausalFeedback("snap");
             onSelectRule(rule);
           }}
-          className={`flex-1 py-2 px-2.5 rounded-xl border text-[11px] font-semibold transition flex items-center justify-center gap-1 ${
+          className={`flex-1 py-2 px-2.5 rounded-xl border text-[11px] font-semibold transition-colors duration-150 flex items-center justify-center gap-1 apple-pressable ${
             isSelected
               ? isLightMode
-                ? "bg-teal-50 border-teal-600 text-teal-800"
-                : "bg-cyan-950/50 border-cyan-500 text-cyan-200"
+                ? "bg-[#007AFF]/10 border-[#007AFF]/30 text-[#007AFF]"
+                : "bg-[#0A84FF]/15 border-[#0A84FF]/40 text-[#0A84FF]"
               : isLightMode
-              ? "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-              : "bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800"
+              ? "bg-[#F2F2F7] border-black/[0.06] text-[#1D1D1F] hover:bg-[#E5E5EA]"
+              : "bg-[#2C2C2E]/80 border-white/[0.08] text-[#F5F5F7] hover:bg-[#3A3A3C]"
           }`}
         >
           <span>ดูรายละเอียด</span>
@@ -266,15 +271,18 @@ export const Signal_Curriculum_Card: React.FC<SignalCurriculumCardProps> = ({
 
         <Link
           href={`/drills?signalId=${rule.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className={`flex-1 py-2 px-2.5 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 ${
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerCausalFeedback("tap");
+          }}
+          className={`flex-1 py-2 px-2.5 rounded-xl text-[11px] font-semibold transition-colors duration-150 flex items-center justify-center gap-1 apple-pressable ${
             isSelected
               ? isLightMode
-                ? "bg-cyan-700 hover:bg-cyan-800 text-white"
-                : "bg-cyan-500 hover:bg-cyan-400 text-slate-950"
+                ? "bg-[#007AFF] hover:bg-[#0066D6] text-white shadow-xs"
+                : "bg-[#0A84FF] hover:bg-[#3395FF] text-white shadow-xs"
               : isLightMode
-              ? "bg-slate-100 hover:bg-slate-200 text-slate-800"
-              : "bg-slate-800 hover:bg-slate-700 text-slate-100"
+              ? "bg-[#F2F2F7] hover:bg-[#E5E5EA] text-[#1D1D1F]"
+              : "bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#F5F5F7]"
           }`}
         >
           <Google_Icon name="videocam" size={13} />

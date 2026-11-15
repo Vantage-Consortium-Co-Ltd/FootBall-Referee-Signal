@@ -12,6 +12,7 @@ import {
   Weakness_Diagnostics_Panel,
 } from "../../UI_Components/Trainee_Gradebook";
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export default function GradebookPage() {
   const report = useMemo(() => generateMockTraineeEvaluationReport(), []);
@@ -33,7 +34,7 @@ export default function GradebookPage() {
   return (
     <div
       className={`min-h-screen transition-colors duration-200 p-4 md:p-8 ${
-        isLightMode ? "bg-[#F9FAFB] text-slate-900" : "bg-slate-950 text-slate-100"
+        isLightMode ? "bg-[#F5F5F7] text-[#1D1D1F]" : "bg-black text-[#F5F5F7]"
       }`}
     >
       <div className="max-w-7xl mx-auto space-y-6">
@@ -42,25 +43,26 @@ export default function GradebookPage() {
           <div className="flex items-start md:items-center gap-3">
             <Link
               href="/"
-              className={`p-2 rounded-xl border transition inline-flex items-center justify-center ${
+              onClick={() => triggerCausalFeedback("tap")}
+              className={`w-10 h-10 rounded-xl border transition-colors duration-150 inline-flex items-center justify-center apple-pressable ${
                 isLightMode
-                  ? "bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-xs"
-                  : "bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200"
+                  ? "bg-white border-black/[0.08] hover:bg-[#F2F2F7] text-[#1D1D1F] shadow-xs"
+                  : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#A1A1A6] hover:text-[#F5F5F7]"
               }`}
             >
               <Google_Icon name="arrow_back" size={20} />
             </Link>
             <div>
               <h1
-                className={`text-xl md:text-2xl font-extrabold tracking-tight ${
-                  isLightMode ? "text-slate-900" : "text-slate-100"
+                className={`apple-title text-xl md:text-2xl font-bold tracking-tight ${
+                  isLightMode ? "text-[#1D1D1F]" : "text-[#F5F5F7]"
                 }`}
               >
                 สมุดบันทึกผลการประเมินผู้เรียน (Trainee Gradebook)
               </h1>
               <p
-                className={`text-xs mt-0.5 ${
-                  isLightMode ? "text-slate-500" : "text-slate-400"
+                className={`text-xs mt-0.5 apple-tabular ${
+                  isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
                 }`}
               >
                 สถิติการฝึกภาคปฏิบัติและผลสอบสถานการณ์จำลองตามเกณฑ์ IFAB ·{" "}
@@ -73,28 +75,34 @@ export default function GradebookPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setIsLightMode((prev) => !prev)}
-              className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
+              onClick={() => {
+                triggerCausalFeedback("tap");
+                setIsLightMode((prev) => !prev);
+              }}
+              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors duration-150 apple-pressable ${
                 isLightMode
-                  ? "bg-white border-slate-200 hover:bg-slate-100 text-slate-700"
-                  : "bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
+                  ? "bg-white border-black/[0.08] hover:bg-[#F2F2F7] text-[#1D1D1F] shadow-xs"
+                  : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#F5F5F7]"
               }`}
             >
               <Google_Icon
                 name={isLightMode ? "dark_mode" : "light_mode"}
                 size={15}
-                className={isLightMode ? "text-slate-600" : "text-amber-400"}
+                className={isLightMode ? "text-[#6E6E73]" : "text-[#FF9F0A]"}
               />
               <span>{isLightMode ? "โหมดมืด" : "โหมดสว่าง"}</span>
             </button>
 
             <button
               type="button"
-              onClick={openFullCertificate}
-              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
+              onClick={() => {
+                triggerCausalFeedback("tap");
+                openFullCertificate();
+              }}
+              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors duration-150 apple-pressable ${
                 isLightMode
-                  ? "bg-white border-slate-200 hover:bg-slate-100 text-slate-800"
-                  : "bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
+                  ? "bg-white border-black/[0.08] hover:bg-[#F2F2F7] text-[#1D1D1F] shadow-xs"
+                  : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#F5F5F7]"
               }`}
             >
               <Google_Icon name="download" size={16} />
@@ -103,11 +111,14 @@ export default function GradebookPage() {
 
             <button
               type="button"
-              onClick={openFullCertificate}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm ${
+              onClick={() => {
+                triggerCausalFeedback("tap");
+                openFullCertificate();
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors duration-150 shadow-sm apple-pressable ${
                 isLightMode
-                  ? "bg-cyan-700 hover:bg-cyan-800 text-white"
-                  : "bg-cyan-500 hover:bg-cyan-400 text-slate-950"
+                  ? "bg-[#007AFF] hover:bg-[#0066D6] text-white"
+                  : "bg-[#0A84FF] hover:bg-[#3395FF] text-white"
               }`}
             >
               <Google_Icon name="school" size={16} />

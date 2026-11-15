@@ -2,6 +2,7 @@
 
 import React from "react";
 import { GestureCategory } from "../../Data_Types/Referee_Types";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export type HandbookCategoryFilter = "all" | GestureCategory;
 
@@ -27,22 +28,31 @@ export const Curriculum_Filter_Tabs: React.FC<CurriculumFilterTabsProps> = ({
   isLightMode,
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className={`inline-flex flex-wrap items-center gap-1 p-1 rounded-2xl border ${
+        isLightMode
+          ? "bg-[#E5E5EA]/75 border-black/[0.06]"
+          : "bg-[#1C1C1E]/90 border-white/[0.08]"
+      }`}
+    >
       {FILTER_OPTIONS.map((item) => {
         const active = selectedCategory === item.key;
         return (
           <button
             key={item.key}
             type="button"
-            onClick={() => onSelectCategory(item.key)}
-            className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold transition ${
+            onClick={() => {
+              triggerCausalFeedback("tap");
+              onSelectCategory(item.key);
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 apple-pressable apple-tabular border ${
               active
                 ? isLightMode
-                  ? "bg-teal-50 border-teal-700 text-teal-800 shadow-xs"
-                  : "bg-cyan-950/60 border-cyan-400 text-cyan-200"
+                  ? "bg-white border-black/[0.06] text-[#007AFF] shadow-sm"
+                  : "bg-[#2C2C2E] border-white/[0.12] text-[#0A84FF] shadow-sm"
                 : isLightMode
-                ? "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                ? "border-transparent text-[#6E6E73] hover:text-[#1D1D1F]"
+                : "border-transparent text-[#A1A1A6] hover:text-[#F5F5F7]"
             }`}
           >
             {item.label} ({counts[item.key] ?? 0})

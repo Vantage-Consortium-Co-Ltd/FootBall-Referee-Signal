@@ -11,6 +11,7 @@ import {
   Scenario_Player,
 } from "../../UI_Components/Scenario_Exam";
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export default function ExaminationPage() {
   const examPack = MOCK_SCENARIO_EXAM_PACK;
@@ -95,24 +96,25 @@ export default function ExaminationPage() {
   const passedCount = results.filter((r) => r.passed).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
+    <div className="min-h-screen bg-black text-[#F5F5F7] p-4 md:p-8">
       {/* Page Title Bar */}
-      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800">
+      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/[0.08]">
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition inline-flex items-center justify-center"
+            onPointerDown={() => triggerCausalFeedback("tap")}
+            className="p-2.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.1] hover:bg-[#2C2C2E] text-[#A1A1A6] hover:text-[#F5F5F7] apple-pressable inline-flex items-center justify-center"
           >
             <Google_Icon name="arrow_back" size={20} />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <Google_Icon name="quiz" size={22} className="text-cyan-400" />
-              <h1 className="text-xl md:text-2xl font-extrabold text-slate-100">
+              <Google_Icon name="quiz" size={22} className="text-[#0A84FF]" />
+              <h1 className="text-xl md:text-2xl font-bold apple-title text-[#F5F5F7]">
                 ห้องสอบสถานการณ์จำลอง (Scenario Examination)
               </h1>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-[#A1A1A6] mt-0.5">
               {examPack.titleTh} · {examPack.levelTh}
             </p>
           </div>
@@ -120,14 +122,14 @@ export default function ExaminationPage() {
 
         {/* Progress & Timer Pills */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="px-3 py-1.5 rounded-full bg-blue-950/50 border border-blue-500/40 text-blue-300 text-xs font-semibold flex items-center gap-1.5">
+          <div className="px-3.5 py-1.5 rounded-full bg-[#0A84FF]/15 border border-[#0A84FF]/40 text-[#64D2FF] text-xs font-semibold apple-tabular flex items-center gap-1.5">
             <Google_Icon name="quiz" size={14} />
             <span>
               ข้อ {questionIndex + 1} / {totalQuestions} · {progressPct}%
             </span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-full bg-amber-950/50 border border-amber-500/40 text-amber-300 text-xs font-mono font-semibold flex items-center gap-1.5">
+          <div className="px-3.5 py-1.5 rounded-full bg-[#FF9F0A]/15 border border-[#FF9F0A]/40 text-[#FF9F0A] text-xs font-mono font-semibold apple-tabular flex items-center gap-1.5">
             <Google_Icon name="schedule" size={14} />
             <span>เวลาสอบเหลือ {mins}:{secs}</span>
           </div>
@@ -138,17 +140,17 @@ export default function ExaminationPage() {
       <div className="max-w-7xl mx-auto mt-6">
         {isExamFinished ? (
           /* Exam Pack Completion Report */
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800">
+          <div className="apple-material-dark rounded-[24px] p-6 md:p-8 space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/[0.08]">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#30D158]/15 border border-[#30D158]/40 text-[#30D158] text-xs font-bold mb-2">
                   <Google_Icon name="emoji_events" size={15} />
                   <span>สอบภาคปฏิบัติครบทั้ง {totalQuestions} สถานการณ์แล้ว</span>
                 </div>
-                <h2 className="text-2xl font-extrabold text-slate-100">
+                <h2 className="text-2xl font-bold apple-title text-[#F5F5F7]">
                   สรุปผลการประเมินชุดข้อสอบ {examPack.packId}
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[#A1A1A6] mt-1">
                   บันทึกผลคะแนนลงในสมุดบันทึกผู้เรียน (Trainee Gradebook) เรียบร้อยแล้ว
                 </p>
               </div>
@@ -156,15 +158,17 @@ export default function ExaminationPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
+                  onPointerDown={() => triggerCausalFeedback("tap")}
                   onClick={handleRestartExam}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 transition"
+                  className="px-4 py-2.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-white/[0.1] text-[#F5F5F7] text-xs font-semibold flex items-center gap-2 apple-pressable"
                 >
                   <Google_Icon name="replay" size={16} />
                   <span>สอบใหม่อีกครั้ง</span>
                 </button>
                 <Link
                   href="/gradebook"
-                  className="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-cyan-500/20"
+                  onPointerDown={() => triggerCausalFeedback("tap")}
+                  className="px-4 py-2.5 rounded-2xl bg-[#0A84FF] hover:bg-[#3B9CFF] text-white text-xs font-bold flex items-center gap-2 apple-pressable shadow-lg shadow-[#0A84FF]/25"
                 >
                   <Google_Icon name="monitoring" size={16} />
                   <span>ดูสมุดบันทึกผลการประเมิน (Go to Gradebook)</span>
@@ -174,35 +178,35 @@ export default function ExaminationPage() {
 
             {/* 3 KPI Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                <div className="text-xs text-slate-400">คะแนนเฉลี่ยรวม</div>
-                <div className="text-3xl font-extrabold font-mono text-emerald-400 mt-1">
+              <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-4">
+                <div className="text-xs text-[#A1A1A6]">คะแนนเฉลี่ยรวม</div>
+                <div className="text-3xl font-bold font-mono apple-tabular text-[#30D158] mt-1">
                   {avgScore}{" "}
-                  <span className="text-sm font-normal text-slate-500">/ 100</span>
+                  <span className="text-sm font-normal text-[#6E6E73]">/ 100</span>
                 </div>
               </div>
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                <div className="text-xs text-slate-400">จำนวนข้อที่ผ่านเกณฑ์</div>
-                <div className="text-3xl font-extrabold font-mono text-cyan-400 mt-1">
+              <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-4">
+                <div className="text-xs text-[#A1A1A6]">จำนวนข้อที่ผ่านเกณฑ์</div>
+                <div className="text-3xl font-bold font-mono apple-tabular text-[#0A84FF] mt-1">
                   {passedCount}{" "}
-                  <span className="text-sm font-normal text-slate-500">
+                  <span className="text-sm font-normal text-[#6E6E73]">
                     / {totalQuestions} ข้อ
                   </span>
                 </div>
               </div>
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                <div className="text-xs text-slate-400">เวลาตอบสนองเฉลี่ย</div>
-                <div className="text-3xl font-extrabold font-mono text-amber-400 mt-1">
+              <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-4">
+                <div className="text-xs text-[#A1A1A6]">เวลาตอบสนองเฉลี่ย</div>
+                <div className="text-3xl font-bold font-mono apple-tabular text-[#FF9F0A] mt-1">
                   {avgReaction}{" "}
-                  <span className="text-sm font-normal text-slate-500">วินาที</span>
+                  <span className="text-sm font-normal text-[#6E6E73]">วินาที</span>
                 </div>
               </div>
             </div>
 
             {/* Question-by-Question Breakdown */}
-            <div className="overflow-x-auto border border-slate-800 rounded-xl">
+            <div className="overflow-x-auto border border-white/[0.08] rounded-2xl bg-[#141416]">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                <thead className="bg-[#1C1C1E] text-[#A1A1A6] border-b border-white/[0.08]">
                   <tr>
                     <th className="py-3 px-4 font-semibold">ข้อสอบ</th>
                     <th className="py-3 px-4 font-semibold">คำตัดสิน</th>
@@ -212,40 +216,40 @@ export default function ExaminationPage() {
                     <th className="py-3 px-4 font-semibold">ผลการประเมิน</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/80">
+                <tbody className="divide-y divide-white/[0.06] apple-tabular">
                   {examPack.questions.map((q) => {
                     const res = results.find((r) => r.questionId === q.id);
                     return (
-                      <tr key={q.id} className="hover:bg-slate-950/40">
-                        <td className="py-3 px-4 font-medium text-slate-200">
+                      <tr key={q.id} className="hover:bg-[#1C1C1E]/70">
+                        <td className="py-3 px-4 font-medium text-[#F5F5F7]">
                           {q.titleTh}
                         </td>
                         <td className="py-3 px-4">
                           {res?.isDecisionCorrect ? (
-                            <span className="text-emerald-400 font-semibold">
+                            <span className="text-[#30D158] font-semibold">
                               ถูกต้อง (ข้อ {res.selectedOptionId})
                             </span>
                           ) : (
-                            <span className="text-rose-400 font-semibold">
+                            <span className="text-[#FF453A] font-semibold">
                               ไม่ถูกต้อง (เฉลย {q.correctOptionId})
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-300">
+                        <td className="py-3 px-4 font-mono text-[#A1A1A6]">
                           {res?.postureScore ?? 0}/100
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-300">
+                        <td className="py-3 px-4 font-mono text-[#A1A1A6]">
                           {res?.reactionTimeSeconds.toFixed(2) ?? "-"}s
                         </td>
-                        <td className="py-3 px-4 font-mono font-bold text-cyan-400">
+                        <td className="py-3 px-4 font-mono font-bold text-[#0A84FF]">
                           {res?.totalQuestionScore ?? 0}
                         </td>
                         <td className="py-3 px-4">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                               res?.passed
-                                ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40"
-                                : "bg-rose-950/60 text-rose-300 border border-rose-500/40"
+                                ? "bg-[#30D158]/15 text-[#30D158] border border-[#30D158]/40"
+                                : "bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/40"
                             }`}
                           >
                             {res?.passed ? "PASS" : "REVIEW"}

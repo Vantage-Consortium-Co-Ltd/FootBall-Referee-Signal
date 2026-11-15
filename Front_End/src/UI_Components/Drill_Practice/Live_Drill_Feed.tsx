@@ -12,6 +12,7 @@ import {
   generateMockPersons,
 } from "../../Core_Lib/Microservices_Mock";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface LiveDrillFeedProps {
   targetRule: GestureRule;
@@ -86,10 +87,11 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
   // Handle Tagging Person
   const handleTagPerson = (personId: string) => {
+    triggerCausalFeedback("snap");
     setActivePersonId(personId);
     setAutoTagReferee(false);
     const personName = personId === "person-1" ? "ผู้ตัดสิน (Referee)" : "ผู้เล่น #10 (Player)";
-    setLastTaggedAlert(`🎯 ล็อคเป้าหมาย: ${personName}`);
+    setLastTaggedAlert(`ล็อคเป้าหมาย: ${personName}`);
     setTimeout(() => setLastTaggedAlert(null), 3000);
   };
 
@@ -133,26 +135,27 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     detectedPersons.find((p) => p.isTagged) || detectedPersons[0];
 
   return (
-    <div className="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+    <div className="relative apple-material-dark rounded-[22px] overflow-hidden flex flex-col">
       {/* Top Viewport Header */}
-      <div className="px-5 py-3 bg-slate-900/90 border-b border-slate-800 flex justify-between items-center text-xs">
+      <div className="px-5 py-3 bg-[#1C1C1E]/90 border-b border-white/[0.08] flex justify-between items-center text-xs">
         <div className="flex items-center gap-2">
-          <Google_Icon name="videocam" size={16} className="text-cyan-400" />
-          <span className="font-semibold text-slate-200">
+          <Google_Icon name="videocam" size={16} className="text-[#0A84FF]" />
+          <span className="font-semibold text-[#F5F5F7]">
             {cameraActive ? "Live Camera AI Tagging" : "Camera AI Tagging Simulation"}
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
-            640x440
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#2C2C2E] text-[#A1A1A6] apple-tabular">
+            640×440
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => (cameraActive ? stopCamera() : startCamera())}
-            className={`px-2.5 py-1 rounded-lg border text-xs flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 apple-pressable ${
               cameraActive
-                ? "bg-slate-800 border-slate-700 text-slate-300"
-                : "bg-cyan-950 border-cyan-500/50 text-cyan-300 hover:bg-cyan-900"
+                ? "bg-[#2C2C2E] border-white/[0.1] text-[#F5F5F7]"
+                : "bg-[#0A84FF] border-[#0A84FF] text-white font-semibold"
             }`}
           >
             {cameraActive ? (
@@ -169,10 +172,10 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       </div>
 
       {/* Person Tagging Control Bar */}
-      <div className="px-4 py-2 bg-slate-950/70 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400 font-medium flex items-center gap-1">
-            <Google_Icon name="group" size={14} className="text-cyan-400" /> ตรวจพบบุคคล ({detectedPersons.length}):
+      <div className="px-4 py-2 bg-[#141416]/90 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[#A1A1A6] font-medium flex items-center gap-1">
+            <Google_Icon name="group" size={14} className="text-[#0A84FF]" /> ตรวจพบบุคคล ({detectedPersons.length}):
           </span>
 
           {/* Quick Tagging Buttons for each person */}
@@ -182,15 +185,15 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
               <button
                 key={person.id}
                 onClick={() => handleTagPerson(person.id)}
-                className={`px-2.5 py-1 rounded-lg font-medium text-[11px] transition flex items-center gap-1.5 border ${
+                className={`px-2.5 py-1 rounded-xl font-medium text-[11px] apple-pressable flex items-center gap-1.5 border ${
                   isSelected
-                    ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-sm"
-                    : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                    ? "bg-[#0A84FF]/20 border-[#0A84FF]/70 text-[#F5F5F7] shadow-sm"
+                    : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6] hover:text-[#F5F5F7]"
                 }`}
               >
-                <Google_Icon name="my_location" size={12} className={isSelected ? "text-cyan-400" : "text-slate-500"} />
+                <Google_Icon name="my_location" size={12} className={isSelected ? "text-[#0A84FF]" : "text-[#6E6E73]"} />
                 <span>{person.labelTh}</span>
-                <span className="font-mono text-[9px] text-slate-500">
+                <span className="font-mono text-[9px] text-[#6E6E73] apple-tabular">
                   {Math.round(person.confidence * 100)}%
                 </span>
               </button>
@@ -200,24 +203,25 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
         <div className="flex items-center gap-2">
           <button
+            onPointerDown={() => triggerCausalFeedback("snap")}
             onClick={() => {
               setAutoTagReferee(!autoTagReferee);
               if (!autoTagReferee) setActivePersonId("person-1");
             }}
-            className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-xl border text-[11px] font-medium apple-pressable flex items-center gap-1.5 ${
               autoTagReferee
-                ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-300"
-                : "bg-slate-900 border-slate-800 text-slate-400"
+                ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
+                : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
             }`}
           >
-            <Google_Icon name="how_to_reg" size={14} className="text-emerald-400" />
+            <Google_Icon name="how_to_reg" size={14} className="text-[#30D158]" />
             Auto-Tag ผู้ตัดสิน: {autoTagReferee ? "เปิด" : "ปิด"}
           </button>
         </div>
       </div>
 
       {/* Video & Interactive Canvas Viewport Layer */}
-      <div className="relative w-full h-[440px] bg-slate-950 flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-[440px] bg-[#060608] flex items-center justify-center overflow-hidden">
         {/* Background Video Element (if camera active) */}
         <video
           ref={videoRef}
@@ -231,7 +235,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
         {/* Pitch grid lines (if camera off) */}
         {!cameraActive && (
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#2C2C2E33_1px,transparent_1px),linear-gradient(to_bottom,#2C2C2E33_1px,transparent_1px)] bg-[size:32px_32px]"></div>
         )}
 
         {/* Skeleton & Tagging Canvas Overlay */}
@@ -254,78 +258,83 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
         {/* Floating Tagging Instructions & Status */}
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5">
-          <div className="bg-slate-900/90 backdrop-blur border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2">
+          <div className="apple-material-dark rounded-xl px-3 py-1.5 text-xs flex items-center gap-2">
             <span
               className={`w-2 h-2 rounded-full ${
-                cameraActive ? "bg-emerald-500 animate-ping" : "bg-cyan-400"
+                cameraActive ? "bg-[#30D158] animate-ping" : "bg-[#0A84FF]"
               }`}
             ></span>
-            <span className="font-mono text-slate-200">
+            <span className="font-mono text-[#F5F5F7]">
               {cameraActive ? "LIVE CAMERA STREAM" : "AI CAMERA SIMULATION"}
             </span>
           </div>
 
           {/* Click to Tag Hint */}
-          <div className="bg-slate-950/80 backdrop-blur border border-cyan-500/30 rounded-lg px-2.5 py-1 text-[11px] text-cyan-300 flex items-center gap-1.5">
-            <Google_Icon name="crop_free" size={14} className="text-cyan-400" />
+          <div className="apple-material-dark rounded-xl px-2.5 py-1 text-[11px] text-[#64D2FF] flex items-center gap-1.5">
+            <Google_Icon name="crop_free" size={14} className="text-[#0A84FF]" />
             <span>คลิกที่กรอบตัวบุคคลบนจอเพื่อสลับเป้าหมาย Tagging</span>
           </div>
 
           {lastTaggedAlert && (
-            <div className="bg-emerald-950/90 border border-emerald-500/60 rounded-lg px-3 py-1 text-xs text-emerald-200 font-semibold animate-pulse">
-              {lastTaggedAlert}
+            <div className="bg-[#062614]/95 border border-[#30D158]/60 rounded-xl px-3 py-1.5 text-xs text-[#30D158] font-semibold flex items-center gap-1.5 shadow-lg">
+              <Google_Icon name="my_location" size={14} className="text-[#30D158]" />
+              <span>{lastTaggedAlert}</span>
             </div>
           )}
 
           {cameraError && (
-            <div className="bg-amber-950/80 border border-amber-600/50 rounded-lg px-3 py-1 text-[11px] text-amber-200">
-              ⚠️ {cameraError}
+            <div className="bg-[#2C1A04]/95 border border-[#FF9F0A]/50 rounded-xl px-3 py-1 text-[11px] text-[#FF9F0A]">
+              {cameraError}
             </div>
           )}
         </div>
       </div>
 
       {/* Bottom Display Controls */}
-      <div className="px-5 py-3 bg-slate-900 border-t border-slate-800 flex flex-wrap justify-between items-center gap-3 text-xs">
-        <div className="flex items-center gap-2">
+      <div className="px-5 py-3 bg-[#1C1C1E]/90 border-t border-white/[0.08] flex flex-wrap justify-between items-center gap-3 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setShowBBoxes(!showBBoxes)}
-            className={`px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 apple-pressable ${
               showBBoxes
-                ? "bg-slate-800 border-slate-700 text-cyan-400"
-                : "bg-slate-900 border-slate-800 text-slate-400"
+                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
             }`}
           >
             <Google_Icon name="crop_free" size={14} />
             กรอบ Tagging: {showBBoxes ? "แสดง" : "ซ่อน"}
           </button>
           <button
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setMirror(!mirror)}
-            className={`px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition ${
+            className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 apple-pressable ${
               mirror
-                ? "bg-slate-800 border-slate-700 text-cyan-400"
-                : "bg-slate-900 border-slate-800 text-slate-400"
+                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
             }`}
           >
             <Google_Icon name="flip" size={14} />
             Mirror View: {mirror ? "ON" : "OFF"}
           </button>
           <button
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setShowGhost(!showGhost)}
-            className={`px-3 py-1.5 rounded-lg border text-xs transition ${
+            className={`px-3 py-1.5 rounded-xl border text-xs apple-pressable ${
               showGhost
-                ? "bg-slate-800 border-slate-700 text-cyan-400"
-                : "bg-slate-900 border-slate-800 text-slate-400"
+                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
             }`}
           >
             Ghost Guide: {showGhost ? "ON" : "OFF"}
           </button>
           <button
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setShowAngles(!showAngles)}
-            className={`px-3 py-1.5 rounded-lg border text-xs transition ${
+            className={`px-3 py-1.5 rounded-xl border text-xs apple-pressable ${
               showAngles
-                ? "bg-slate-800 border-slate-700 text-emerald-400"
-                : "bg-slate-900 border-slate-800 text-slate-400"
+                ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
             }`}
           >
             Angle Badges: {showAngles ? "ON" : "OFF"}
@@ -333,11 +342,12 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
         </div>
 
         <button
+          onPointerDown={() => triggerCausalFeedback("tap")}
           onClick={() => {
             setHoldTimer(0);
             setHasTriggeredSuccess(false);
           }}
-          className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 transition"
+          className="text-xs text-[#A1A1A6] hover:text-[#F5F5F7] flex items-center gap-1 apple-pressable"
         >
           <Google_Icon name="refresh" size={13} /> รีเซ็ตตัวนับ Hold
         </button>

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 const MODULE_CARDS = [
   {
@@ -13,9 +14,9 @@ const MODULE_CARDS = [
       "เปิดกล้อง Webcam หรือโหมดจำลองเพื่อฝึกซ้อม 20 ท่าทาง พร้อม Ghost Target Guide, Person Tagging Reticle และ Coaching HUD แบบเรียลไทม์",
     icon: "videocam",
     badge: "Module 1 · 60 FPS Canvas",
-    accentText: "text-emerald-400",
-    accentBorder: "hover:border-emerald-500/50",
-    iconBox: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    accentText: "text-[#30D158]",
+    accentBorder: "hover:border-[#30D158]/45",
+    iconBox: "bg-[#30D158]/15 border-[#30D158]/30 text-[#30D158]",
   },
   {
     href: "/examination",
@@ -25,9 +26,9 @@ const MODULE_CARDS = [
       "ชมคลิปสถานการณ์จำลองสั้น 8 วินาที ตัดสินใจเลือกกติกาภายใน 5 วินาที และแสดงท่าทางหน้ากล้องเพื่อวัดคะแนน 3 มิติ",
     icon: "quiz",
     badge: "Module 2 · 5 Scenarios",
-    accentText: "text-cyan-400",
-    accentBorder: "hover:border-cyan-500/50",
-    iconBox: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400",
+    accentText: "text-[#0A84FF]",
+    accentBorder: "hover:border-[#0A84FF]/45",
+    iconBox: "bg-[#0A84FF]/15 border-[#0A84FF]/30 text-[#0A84FF]",
   },
   {
     href: "/handbook",
@@ -37,9 +38,9 @@ const MODULE_CARDS = [
       "เปิดอ่านคู่มือสัญญาณผู้ตัดสินตามหมวดหมู่ IFAB พร้อมแผนภาพมุมยกแขน ข้อควรระวัง และปุ่มเข้าฝึกซ้อมแต่ละท่าได้ทันที",
     icon: "menu_book",
     badge: "Module 3 · Curriculum",
-    accentText: "text-blue-400",
-    accentBorder: "hover:border-blue-500/50",
-    iconBox: "bg-blue-500/10 border-blue-500/30 text-blue-400",
+    accentText: "text-[#64D2FF]",
+    accentBorder: "hover:border-[#64D2FF]/45",
+    iconBox: "bg-[#64D2FF]/15 border-[#64D2FF]/30 text-[#64D2FF]",
   },
   {
     href: "/gradebook",
@@ -49,9 +50,9 @@ const MODULE_CARDS = [
       "ติดตามพัฒนาการด้วยกราฟเรดาร์สมรรถนะ 4 ด้าน รายงานจุดอ่อนเฉพาะบุคคล ประวัติการสอบ และใบรับรองผลฝึกอบรม",
     icon: "monitoring",
     badge: "Module 4 · Evaluation",
-    accentText: "text-amber-400",
-    accentBorder: "hover:border-amber-500/50",
-    iconBox: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+    accentText: "text-[#FF9F0A]",
+    accentBorder: "hover:border-[#FF9F0A]/45",
+    iconBox: "bg-[#FF9F0A]/15 border-[#FF9F0A]/30 text-[#FF9F0A]",
   },
 ] as const;
 
@@ -62,7 +63,8 @@ export const Curriculum_Quick_Launch: React.FC = () => {
         <Link
           key={card.href}
           href={card.href}
-          className={`bg-slate-900/80 border border-slate-800 ${card.accentBorder} rounded-2xl p-5 flex flex-col justify-between transition group shadow-lg`}
+          onPointerDown={() => triggerCausalFeedback("tap")}
+          className={`apple-material-dark ${card.accentBorder} rounded-[22px] p-5 flex flex-col justify-between group apple-pressable`}
         >
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
@@ -71,24 +73,24 @@ export const Curriculum_Quick_Launch: React.FC = () => {
               >
                 <Google_Icon name={card.icon} size={20} />
               </div>
-              <span className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800">
+              <span className="text-[10px] font-mono apple-tabular text-[#A1A1A6] px-2.5 py-0.5 rounded-full bg-[#141416] border border-white/[0.08]">
                 {card.badge}
               </span>
             </div>
 
-            <div className="text-xs font-semibold text-cyan-400">
+            <div className={`text-xs font-semibold ${card.accentText}`}>
               {card.subtitleTh}
             </div>
-            <h3 className="text-base font-bold text-slate-100 mt-0.5">
+            <h3 className="text-base font-bold apple-title text-[#F5F5F7] mt-0.5">
               {card.title}
             </h3>
-            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+            <p className="text-xs text-[#A1A1A6] mt-2 leading-relaxed">
               {card.description}
             </p>
           </div>
 
           <div
-            className={`mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold ${card.accentText}`}
+            className={`mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-bold ${card.accentText}`}
           >
             <span>เปิดห้องเรียนนี้</span>
             <Google_Icon

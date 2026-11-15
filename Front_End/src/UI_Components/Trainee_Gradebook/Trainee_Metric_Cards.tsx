@@ -24,36 +24,36 @@ export const Trainee_Metric_Cards: React.FC<TraineeMetricCardsProps> = ({
       value: `${report.overallPostureAccuracy}%`,
       subtext: report.accuracyTrendDelta,
       icon: "monitoring",
-      lightBox: "bg-cyan-50 text-cyan-700 border-cyan-100",
-      darkBox: "bg-cyan-950/60 text-cyan-400 border-cyan-500/30",
-      subColor: isLightMode ? "text-emerald-700" : "text-emerald-400",
+      lightBox: "bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20",
+      darkBox: "bg-[#0A84FF]/15 text-[#0A84FF] border-[#0A84FF]/30",
+      subColor: isLightMode ? "text-[#248A3D]" : "text-[#30D158]",
     },
     {
       label: "ชุดข้อสอบที่ผ่าน (Passed)",
       value: `${report.passedPacks} / ${report.completedPacks}`,
       subtext: `อัตราผ่าน ${passRatePct}%`,
       icon: "quiz",
-      lightBox: "bg-emerald-50 text-emerald-700 border-emerald-100",
-      darkBox: "bg-emerald-950/60 text-emerald-400 border-emerald-500/30",
-      subColor: isLightMode ? "text-slate-600" : "text-slate-400",
+      lightBox: "bg-[#34C759]/12 text-[#248A3D] border-[#34C759]/25",
+      darkBox: "bg-[#30D158]/15 text-[#30D158] border-[#30D158]/30",
+      subColor: isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]",
     },
     {
       label: "เวลาตอบสนองเฉลี่ย (Reaction)",
       value: `${report.averageReactionSeconds}s`,
       subtext: "เร็วกว่าเกณฑ์มาตรฐาน 0.65s",
       icon: "speed",
-      lightBox: "bg-sky-50 text-sky-700 border-sky-100",
-      darkBox: "bg-blue-950/60 text-blue-400 border-blue-500/30",
-      subColor: isLightMode ? "text-emerald-700" : "text-emerald-400",
+      lightBox: "bg-[#5856D6]/10 text-[#5856D6] border-[#5856D6]/20",
+      darkBox: "bg-[#5E5CE6]/15 text-[#5E5CE6] border-[#5E5CE6]/30",
+      subColor: isLightMode ? "text-[#248A3D]" : "text-[#30D158]",
     },
     {
       label: "ระดับสมรรถนะ (Competency)",
       value: `เกรด ${report.overallGrade}`,
       subtext: `${report.classTierTh} · พร้อมสอบภาคสนาม`,
       icon: "school",
-      lightBox: "bg-violet-50 text-violet-700 border-violet-100",
-      darkBox: "bg-violet-950/60 text-violet-400 border-violet-500/30",
-      subColor: isLightMode ? "text-slate-600" : "text-slate-400",
+      lightBox: "bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20",
+      darkBox: "bg-[#BF5AF2]/15 text-[#BF5AF2] border-[#BF5AF2]/30",
+      subColor: isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]",
     },
   ];
 
@@ -62,14 +62,14 @@ export const Trainee_Metric_Cards: React.FC<TraineeMetricCardsProps> = ({
       {cards.map((c) => (
         <div
           key={c.label}
-          className={`rounded-2xl border p-4 shadow-xs flex items-start gap-3.5 ${
+          className={`rounded-[20px] border p-4 shadow-xs flex items-start gap-3.5 ${
             isLightMode
-              ? "bg-white border-slate-200"
-              : "bg-slate-900 border-slate-800"
+              ? "apple-material-light border-black/[0.06]"
+              : "apple-material-dark border-white/[0.08]"
           }`}
         >
           <div
-            className={`w-11 h-11 rounded-xl border shrink-0 flex items-center justify-center ${
+            className={`w-11 h-11 rounded-2xl border shrink-0 flex items-center justify-center ${
               isLightMode ? c.lightBox : c.darkBox
             }`}
           >
@@ -79,19 +79,19 @@ export const Trainee_Metric_Cards: React.FC<TraineeMetricCardsProps> = ({
           <div className="min-w-0 flex-1">
             <div
               className={`text-[11px] font-medium truncate ${
-                isLightMode ? "text-slate-500" : "text-slate-400"
+                isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
               }`}
             >
               {c.label}
             </div>
             <div
-              className={`text-2xl font-extrabold font-mono mt-0.5 ${
-                isLightMode ? "text-slate-900" : "text-slate-100"
+              className={`text-2xl font-bold font-mono apple-tabular mt-0.5 ${
+                isLightMode ? "text-[#1D1D1F]" : "text-[#F5F5F7]"
               }`}
             >
               {c.value}
             </div>
-            <div className={`text-[11px] font-medium mt-1 ${c.subColor}`}>
+            <div className={`text-[11px] font-medium mt-1 apple-tabular ${c.subColor}`}>
               {c.subtext}
             </div>
           </div>

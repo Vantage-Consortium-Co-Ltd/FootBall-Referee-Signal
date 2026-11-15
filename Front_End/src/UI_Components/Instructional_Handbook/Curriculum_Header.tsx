@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface CurriculumHeaderProps {
   searchQuery: string;
@@ -28,25 +29,26 @@ export const Curriculum_Header: React.FC<CurriculumHeaderProps> = ({
         <div className="flex items-start md:items-center gap-3">
           <Link
             href="/"
-            className={`p-2 rounded-xl border transition inline-flex items-center justify-center ${
+            onClick={() => triggerCausalFeedback("tap")}
+            className={`w-10 h-10 rounded-xl border transition-colors duration-150 inline-flex items-center justify-center apple-pressable ${
               isLightMode
-                ? "bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-xs"
-                : "bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200"
+                ? "bg-white border-black/[0.08] hover:bg-[#F2F2F7] text-[#1D1D1F] shadow-xs"
+                : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#A1A1A6] hover:text-[#F5F5F7]"
             }`}
           >
             <Google_Icon name="arrow_back" size={20} />
           </Link>
           <div>
             <h1
-              className={`text-xl md:text-2xl font-extrabold tracking-tight ${
-                isLightMode ? "text-slate-900" : "text-slate-100"
+              className={`apple-title text-xl md:text-2xl font-bold tracking-tight ${
+                isLightMode ? "text-[#1D1D1F]" : "text-[#F5F5F7]"
               }`}
             >
               คลังสื่อการสอนสัญญาณผู้ตัดสิน {totalCount} ท่า (IFAB Curriculum)
             </h1>
             <p
-              className={`text-xs mt-0.5 ${
-                isLightMode ? "text-slate-500" : "text-slate-400"
+              className={`text-xs mt-0.5 apple-tabular ${
+                isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
               }`}
             >
               คู่มือมาตรฐาน International Football Association Board · Laws of the Game 2025/26 (พบ {filteredCount} ท่าทาง)
@@ -57,10 +59,10 @@ export const Curriculum_Header: React.FC<CurriculumHeaderProps> = ({
         {/* Right Badges & Reading Theme Toggle */}
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 apple-tabular ${
               isLightMode
-                ? "bg-sky-50 border-sky-200 text-sky-700"
-                : "bg-blue-950/50 border-blue-500/40 text-blue-300"
+                ? "bg-[#007AFF]/10 border-[#007AFF]/20 text-[#007AFF]"
+                : "bg-[#0A84FF]/15 border-[#0A84FF]/30 text-[#0A84FF]"
             }`}
           >
             <Google_Icon name="menu_book" size={14} />
@@ -69,11 +71,14 @@ export const Curriculum_Header: React.FC<CurriculumHeaderProps> = ({
 
           <button
             type="button"
-            onClick={onToggleTheme}
-            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition ${
+            onClick={() => {
+              triggerCausalFeedback("tap");
+              onToggleTheme();
+            }}
+            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-colors duration-150 apple-pressable ${
               isLightMode
-                ? "bg-white border-slate-200 hover:bg-slate-100 text-slate-700"
-                : "bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
+                ? "bg-white border-black/[0.08] hover:bg-[#F2F2F7] text-[#1D1D1F] shadow-xs"
+                : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#FF9F0A]"
             }`}
           >
             <Google_Icon
@@ -92,7 +97,7 @@ export const Curriculum_Header: React.FC<CurriculumHeaderProps> = ({
           <Google_Icon
             name="search"
             size={18}
-            className={isLightMode ? "text-slate-400" : "text-slate-500"}
+            className="text-[#8E8E93]"
           />
         </div>
         <input
@@ -100,17 +105,22 @@ export const Curriculum_Header: React.FC<CurriculumHeaderProps> = ({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="ค้นหาท่าสัญญาณ กติกา หรือคำสำคัญ (เช่น ฟรีคิก, ล้ำหน้า, จุดโทษ, Law 13)..."
-          className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
+          className={`w-full pl-10 pr-10 py-2.5 rounded-2xl border text-sm transition-colors duration-150 focus:outline-none focus:ring-2 ${
             isLightMode
-              ? "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:ring-cyan-500/20"
-              : "bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20"
+              ? "bg-white border-black/[0.08] text-[#1D1D1F] placeholder:text-[#8E8E93] shadow-xs focus:border-[#007AFF] focus:ring-[#007AFF]/20"
+              : "bg-[#1C1C1E] border-white/[0.1] text-[#F5F5F7] placeholder:text-[#636366] focus:border-[#0A84FF] focus:ring-[#0A84FF]/25"
           }`}
         />
         {searchQuery && (
           <button
             type="button"
-            onClick={() => onSearchChange("")}
-            className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+            onClick={() => {
+              triggerCausalFeedback("tap");
+              onSearchChange("");
+            }}
+            className={`absolute inset-y-0 right-3 flex items-center transition-colors apple-pressable ${
+              isLightMode ? "text-[#8E8E93] hover:text-[#1D1D1F]" : "text-[#8E8E93] hover:text-[#F5F5F7]"
+            }`}
             aria-label="ล้างคำค้นหา"
           >
             <Google_Icon name="close" size={16} />

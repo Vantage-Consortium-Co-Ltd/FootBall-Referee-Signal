@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ScenarioExamQuestion } from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../Common/Google_Icon";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface ExamQuestionPromptProps {
   question: ScenarioExamQuestion;
@@ -53,21 +54,21 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
   );
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+    <div className="apple-material-dark rounded-[22px] p-5 flex flex-col gap-4">
       {/* Reaction Window Bar */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <Google_Icon name="timer" size={16} className="text-amber-400" />
+          <span className="text-xs font-semibold text-[#F5F5F7] flex items-center gap-1.5">
+            <Google_Icon name="timer" size={16} className="text-[#FF9F0A]" />
             เวลาตัดสินใจให้สัญญาณ ({windowSec}s Reaction Window)
           </span>
           <span
-            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono font-semibold flex items-center gap-1 ${
+            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono font-semibold apple-tabular flex items-center gap-1 ${
               isLocked
-                ? "bg-cyan-950/50 border-cyan-500/40 text-cyan-300"
+                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
                 : timeLeft <= 1.5
-                ? "bg-rose-950/50 border-rose-500/50 text-rose-300"
-                : "bg-amber-950/50 border-amber-500/40 text-amber-300"
+                ? "bg-[#FF453A]/15 border-[#FF453A]/45 text-[#FF453A]"
+                : "bg-[#FF9F0A]/15 border-[#FF9F0A]/45 text-[#FF9F0A]"
             }`}
           >
             <Google_Icon name="schedule" size={12} />
@@ -77,14 +78,14 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
           </span>
         </div>
 
-        <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+        <div className="w-full h-2 bg-[#141416] rounded-full overflow-hidden border border-white/[0.08]">
           <div
             className={`h-full rounded-full transition-all duration-75 ${
               timeLeft <= 1.5
-                ? "bg-rose-500"
+                ? "bg-[#FF453A]"
                 : isLocked
-                ? "bg-cyan-400"
-                : "bg-amber-400"
+                ? "bg-[#0A84FF]"
+                : "bg-[#FF9F0A]"
             }`}
             style={{ width: `${progressPct}%` }}
           />
@@ -92,18 +93,18 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
       </div>
 
       {/* Scenario Question Narrative */}
-      <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5">
-        <div className="text-xs font-bold text-cyan-400 mb-1">
+      <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3.5">
+        <div className="text-xs font-bold text-[#0A84FF] mb-1">
           {question.titleTh}
         </div>
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-[#A1A1A6] apple-body">
           {question.situationSummaryTh}
         </p>
       </div>
 
       {/* Main Prompt */}
       <div>
-        <h3 className="text-sm font-bold text-slate-100 mb-3">
+        <h3 className="text-sm font-bold apple-title text-[#F5F5F7] mb-3">
           คำถาม: จากเหตุการณ์ในคลิป ในฐานะผู้ตัดสิน ท่านต้องให้สัญญาณใด?
         </h3>
 
@@ -113,23 +114,23 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
             const isCorrectAnswer = opt.id === question.correctOptionId;
 
             let cardStyle =
-              "bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900";
-            let badgeStyle = "bg-slate-800 text-slate-300";
+              "bg-[#141416]/85 border-white/[0.08] text-[#A1A1A6] hover:border-white/[0.2] hover:bg-[#2C2C2E]/70";
+            let badgeStyle = "bg-[#2C2C2E] text-[#F5F5F7]";
 
             if (hasCompletedResult) {
               if (isCorrectAnswer) {
                 cardStyle =
-                  "bg-emerald-950/40 border-emerald-500/70 text-emerald-100 shadow-sm";
-                badgeStyle = "bg-emerald-500 text-slate-950";
+                  "bg-[#30D158]/15 border-[#30D158]/70 text-[#E5F9EC] shadow-sm";
+                badgeStyle = "bg-[#30D158] text-black";
               } else if (isSelected && !isCorrectAnswer) {
                 cardStyle =
-                  "bg-rose-950/40 border-rose-500/70 text-rose-100";
-                badgeStyle = "bg-rose-500 text-white";
+                  "bg-[#FF453A]/15 border-[#FF453A]/70 text-[#FFD6D4]";
+                badgeStyle = "bg-[#FF453A] text-white";
               }
             } else if (isSelected) {
               cardStyle =
-                "bg-cyan-950/50 border-cyan-400 text-cyan-100 shadow-md shadow-cyan-950/40";
-              badgeStyle = "bg-cyan-400 text-slate-950";
+                "bg-[#0A84FF]/15 border-[#0A84FF] text-[#F5F5F7] shadow-md shadow-[#0A84FF]/15";
+              badgeStyle = "bg-[#0A84FF] text-white";
             }
 
             return (
@@ -137,19 +138,22 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
                 key={opt.id}
                 type="button"
                 disabled={isLocked || hasCompletedResult}
+                onPointerDown={() => {
+                  if (!isLocked && !hasCompletedResult) triggerCausalFeedback("snap");
+                }}
                 onClick={() => onSelectOption(opt.id)}
-                className={`p-3.5 rounded-xl border text-left transition flex items-start gap-3 disabled:cursor-default ${cardStyle}`}
+                className={`p-3.5 rounded-2xl border text-left apple-pressable flex items-start gap-3 disabled:cursor-default ${cardStyle}`}
               >
                 <span
-                  className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-extrabold ${badgeStyle}`}
+                  className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${badgeStyle}`}
                 >
                   {opt.id}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold leading-snug">
+                  <div className="text-xs font-bold leading-snug text-[#F5F5F7]">
                     {opt.labelTh}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">
+                  <div className="text-[11px] text-[#A1A1A6] mt-0.5 line-clamp-2">
                     {opt.labelEn}
                   </div>
                 </div>
@@ -165,11 +169,14 @@ export const Exam_Question_Prompt: React.FC<ExamQuestionPromptProps> = ({
           <button
             type="button"
             disabled={!selectedOptionId}
+            onPointerDown={() => {
+              if (selectedOptionId) triggerCausalFeedback("tap");
+            }}
             onClick={() => onConfirmDecision(elapsedDecisionTime)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 apple-pressable ${
               selectedOptionId
-                ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                ? "bg-[#0A84FF] hover:bg-[#3B9CFF] text-white shadow-lg shadow-[#0A84FF]/25"
+                : "bg-[#2C2C2E] text-[#6E6E73] cursor-not-allowed"
             }`}
           >
             <Google_Icon name="how_to_reg" size={16} />

@@ -13,6 +13,10 @@ import {
   generateMockKeypoints,
 } from "../../Core_Lib/Microservices_Mock";
 import { Google_Icon } from "../Common/Google_Icon";
+import {
+  triggerCausalFeedback,
+  useAppleSpring,
+} from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface ExamLiveDetectorProps {
   question: ScenarioExamQuestion;
@@ -126,6 +130,8 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
 
   const holdTarget = targetRule.minHoldSeconds || 1.5;
   const holdPct = Math.min(100, (holdDuration / holdTarget) * 100);
+  const animatedHoldSpring = useAppleSpring(holdPct, { dampingRatio: 1.0, response: 0.24, precision: 0.2 });
+  const animatedScoreSpring = useAppleSpring(livePostureScore, { dampingRatio: 1.0, response: 0.34, precision: 0.25 });
 
   const handleRecordAndGrade = () => {
     if (!selectedOptionId) return;
@@ -155,6 +161,8 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     const passed =
       isDecisionCorrect && finalPostureScore >= 70 && totalQuestionScore >= 75;
 
+    triggerCausalFeedback(passed ? "success" : "warning");
+
     onSubmitAttempt({
       questionId: question.id,
       selectedOptionId,
@@ -169,12 +177,12 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+    <div className="apple-material-dark rounded-[22px] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="px-5 py-3.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap justify-between items-center gap-2">
+      <div className="px-5 py-3.5 bg-[#1C1C1E]/90 border-b border-white/[0.08] flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
-          <Google_Icon name="person" size={18} className="text-cyan-400" />
-          <h2 className="text-sm font-bold text-slate-100">
+          <Google_Icon name="person" size={18} className="text-[#0A84FF]" />
+          <h2 className="text-sm font-bold apple-title text-[#F5F5F7]">
             ท่าทางผู้เรียนสด (Live Trainee Posture)
           </h2>
         </div>
@@ -182,13 +190,13 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
         <span
           className={`px-2.5 py-0.5 rounded-full border text-[11px] font-medium flex items-center gap-1.5 ${
             cameraActive
-              ? "bg-emerald-950/50 border-emerald-500/40 text-emerald-300"
-              : "bg-blue-950/50 border-blue-500/40 text-blue-300"
+              ? "bg-[#30D158]/15 border-[#30D158]/40 text-[#30D158]"
+              : "bg-[#0A84FF]/15 border-[#0A84FF]/40 text-[#64D2FF]"
           }`}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              cameraActive ? "bg-emerald-400 animate-pulse" : "bg-blue-400"
+              cameraActive ? "bg-[#30D158] animate-pulse" : "bg-[#64D2FF]"
             }`}
           />
           {cameraActive ? "Webcam Live" : "Interactive Simulation Mode"}
@@ -197,7 +205,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
 
       {/* Camera / Skeleton Canvas Area */}
       <div className="p-4">
-        <div className="relative h-[260px] bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center">
+        <div className="relative h-[260px] bg-[#060608] rounded-2xl border border-white/[0.08] overflow-hidden flex items-center justify-center">
           <video
             ref={videoRef}
             autoPlay
@@ -209,7 +217,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
           />
 
           {!cameraActive && (
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b1a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b1a_1px,transparent_1px)] bg-[size:28px_28px]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#2C2C2E33_1px,transparent_1px),linear-gradient(to_bottom,#2C2C2E33_1px,transparent_1px)] bg-[size:28px_28px]" />
           )}
 
           <div className="relative z-10 flex items-center justify-center">
@@ -227,22 +235,22 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
           </div>
 
           {/* Floating Status Badges */}
-          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-full bg-rose-950/85 border border-rose-500/50 text-rose-200 text-[10px] font-bold flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-full bg-[#2B0B0D]/90 border border-[#FF453A]/50 text-[#FFD6D4] text-[10px] font-bold flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF453A] animate-pulse" />
             <span>{isDecisionLocked ? "RECORDING POSTURE" : "STANDBY"}</span>
           </div>
 
-          <div className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-cyan-300 text-[10px] font-mono">
+          <div className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-full bg-[#1C1C1E]/90 border border-white/[0.1] text-[#64D2FF] text-[10px] font-mono apple-tabular">
             {isDecisionLocked
               ? `Latency ${reactionSeconds.toFixed(2)}s`
               : "รอการยืนยันคำตัดสิน"}
           </div>
 
-          <div className="absolute bottom-3 left-3 z-20 px-3 py-1 rounded-full bg-emerald-950/85 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold flex items-center gap-1.5">
-            <Google_Icon name="my_location" size={13} className="text-emerald-400" />
+          <div className="absolute bottom-3 left-3 z-20 px-3 py-1 rounded-full bg-[#062614]/90 border border-[#30D158]/40 text-[#30D158] text-[11px] font-semibold apple-tabular flex items-center gap-1.5">
+            <Google_Icon name="my_location" size={13} className="text-[#30D158]" />
             <span>
               {isDecisionLocked
-                ? `ตรวจพบ: ${performedRule.name.replace(/_/g, " ")} · ${livePostureScore}%`
+                ? `ตรวจพบ: ${performedRule.name.replace(/_/g, " ")} · ${Math.round(animatedScoreSpring.value)}%`
                 : "เลือกข้อ A–D แล้วกดยืนยันคำตัดสิน"}
             </span>
           </div>
@@ -252,47 +260,49 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
         {isDecisionLocked && !hasCompletedResult && (
           <div className="mt-3 space-y-3">
             {/* Hold bar */}
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
-              <div className="flex justify-between items-center text-xs mb-1.5">
-                <span className="text-slate-300 font-medium flex items-center gap-1.5">
-                  <Google_Icon name="schedule" size={14} className="text-cyan-400" />
+            <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3">
+              <div className="flex justify-between items-center text-xs mb-1.5 apple-tabular">
+                <span className="text-[#F5F5F7] font-medium flex items-center gap-1.5">
+                  <Google_Icon name="schedule" size={14} className="text-[#0A84FF]" />
                   ค้างสัญญาณตามมาตรฐาน IFAB ({holdDuration.toFixed(1)}s / {holdTarget}s)
                 </span>
-                <span className="font-mono font-bold text-emerald-400">
-                  {Math.round(holdPct)}%
+                <span className="font-mono font-bold text-[#30D158]">
+                  {Math.round(animatedHoldSpring.value)}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-[#2C2C2E] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-100"
-                  style={{ width: `${holdPct}%` }}
+                  className="h-full bg-gradient-to-r from-[#0A84FF] to-[#30D158]"
+                  style={{ width: `${Math.min(100, Math.max(0, animatedHoldSpring.value))}%` }}
                 />
               </div>
             </div>
 
             {/* Simulation Quality Toggle when testing without physical camera pose */}
             {!cameraActive && (
-              <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-950/50 border border-slate-800 text-[11px]">
-                <span className="text-slate-400">จำลองสรีระในการทดสอบ:</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-[#141416] border border-white/[0.08] text-[11px]">
+                <span className="text-[#A1A1A6]">จำลองสรีระในการทดสอบ:</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
+                    onPointerDown={() => triggerCausalFeedback("tap")}
                     onClick={() => setSimFormQuality("optimal")}
-                    className={`px-2.5 py-1 rounded-lg border font-medium transition ${
+                    className={`px-2.5 py-1 rounded-xl border font-medium apple-pressable ${
                       simFormQuality === "optimal"
-                        ? "bg-emerald-950/50 border-emerald-500/60 text-emerald-300"
-                        : "bg-slate-900 border-slate-800 text-slate-400"
+                        ? "bg-[#30D158]/15 border-[#30D158]/55 text-[#30D158]"
+                        : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
                     }`}
                   >
                     ท่าตรงมาตรฐาน (95%+)
                   </button>
                   <button
                     type="button"
+                    onPointerDown={() => triggerCausalFeedback("tap")}
                     onClick={() => setSimFormQuality("weak")}
-                    className={`px-2.5 py-1 rounded-lg border font-medium transition ${
+                    className={`px-2.5 py-1 rounded-xl border font-medium apple-pressable ${
                       simFormQuality === "weak"
-                        ? "bg-amber-950/50 border-amber-500/60 text-amber-300"
-                        : "bg-slate-900 border-slate-800 text-slate-400"
+                        ? "bg-[#FF9F0A]/15 border-[#FF9F0A]/55 text-[#FF9F0A]"
+                        : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
                     }`}
                   >
                     แขนงอ/ต่ำกว่าเกณฑ์
@@ -304,7 +314,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
             <button
               type="button"
               onClick={handleRecordAndGrade}
-              className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20"
+              className="w-full py-2.5 px-4 rounded-2xl bg-[#30D158] hover:bg-[#42DF69] text-black font-bold text-xs flex items-center justify-center gap-2 apple-pressable shadow-lg shadow-[#30D158]/20"
             >
               <Google_Icon name="check_circle" size={18} />
               <span>บันทึกท่าสัญญาณและตรวจผลคะแนนข้อนี้</span>
