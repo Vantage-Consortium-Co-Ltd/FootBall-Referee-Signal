@@ -41,7 +41,7 @@ function LivePracticeContent() {
       : null;
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] bg-[#070B0F] text-slate-100 flex flex-col justify-center py-4 md:py-6 px-4 md:px-8">
+    <main className="min-h-[calc(100vh-3.5rem)] bg-[#F8FAFC] dark:bg-[#070B0F] text-slate-900 dark:text-slate-100 flex flex-col justify-center py-4 md:py-6 px-4 md:px-8 transition-colors duration-200">
       <div className="max-w-5xl w-full mx-auto">
         <Live_Drill_Feed targetSignal={selectedSignal} />
       </div>

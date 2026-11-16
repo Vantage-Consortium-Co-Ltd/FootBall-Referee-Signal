@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Nav_Bar } from "../UI_Components/App_Layout/Nav_Bar";
+import { ThemeProvider } from "../Core_Lib/Theme_Context";
 
 export const metadata: Metadata = {
   title: "IFAB Referee Signal AI | ระบบวิเคราะห์ท่าสัญญาณผู้ตัดสินฟุตบอลอัจฉริยะ",
@@ -14,10 +15,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className="dark">
-      <body className="min-h-screen bg-[#060B0F] text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-100">
-        <Nav_Bar />
-        {children}
+    <html lang="th" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('ifab-theme-mode');if(t==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-[#F8FAFC] dark:bg-[#060B0F] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-950 dark:selection:text-emerald-100 transition-colors duration-200">
+        <ThemeProvider>
+          <Nav_Bar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

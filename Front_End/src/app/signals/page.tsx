@@ -41,11 +41,11 @@ export default function SignalsPage() {
     IFAB_SIGNAL_CLASSES.find((c) => c.id === selectedId) || IFAB_SIGNAL_CLASSES[0];
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] bg-[#070B0F] text-slate-100">
+    <main className="min-h-[calc(100vh-3.5rem)] bg-[#F8FAFC] dark:bg-[#070B0F] text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h1 className="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Google_Icon name="menu_book" size={20} className="text-emerald-400" />
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <Google_Icon name="menu_book" size={20} className="text-emerald-600 dark:text-emerald-400" />
             <span>กติกาและท่าสัญญาณผู้ตัดสิน IFAB (20 ท่ามาตรฐาน)</span>
           </h1>
 
@@ -53,14 +53,14 @@ export default function SignalsPage() {
             <Google_Icon
               name="search"
               size={15}
-              className="text-slate-500 absolute left-3 top-2.5 pointer-events-none"
+              className="text-slate-400 dark:text-slate-500 absolute left-3 top-2.5 pointer-events-none"
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อท่าหรือกติกา..."
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400"
+              className="w-full bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-400 transition"
             />
           </div>
         </div>
@@ -77,8 +77,8 @@ export default function SignalsPage() {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
                   active
-                    ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-300 font-semibold"
-                    : "bg-white/[0.02] border-white/10 text-slate-400 hover:text-white"
+                    ? "bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-500/40 dark:border-emerald-400/50 text-emerald-700 dark:text-emerald-300 font-semibold"
+                    : "bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shadow-sm"
                 }`}
               >
                 {cat.label}
@@ -100,21 +100,21 @@ export default function SignalsPage() {
                     triggerCausalFeedback("snap");
                     setSelectedId(cls.id);
                   }}
-                  className={`w-full text-left p-3.5 rounded-xl border flex items-center justify-between gap-3 transition ${
+                  className={`w-full text-left p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition ${
                     isSelected
-                      ? "bg-emerald-500/15 border-emerald-400/60 text-white"
-                      : "bg-white/[0.02] border-white/[0.06] hover:border-white/20 text-slate-300"
+                      ? "bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500/50 dark:border-emerald-400/60 text-slate-900 dark:text-white shadow-sm"
+                      : "bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300 shadow-sm"
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="text-xs font-bold text-white truncate">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                       {cls.nameTh}
                     </div>
-                    <div className="text-[11px] text-slate-400 truncate">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                       {formatSignalEnglishName(cls.name)}
                     </div>
                   </div>
-                  <span className="shrink-0 px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/10 text-[10px] text-slate-300 font-mono">
+                  <span className="shrink-0 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-[10px] text-slate-600 dark:text-slate-300 font-mono">
                     {cls.ifabLaw.split(" - ")[0]}
                   </span>
                 </button>
@@ -122,16 +122,16 @@ export default function SignalsPage() {
             })}
           </div>
 
-          <div className="lg:col-span-7 bg-[#0D131A] border border-white/[0.08] rounded-2xl p-5 space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#0D131A] border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 space-y-5 shadow-sm transition-colors duration-200">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
-                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-xs font-semibold">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-400/35 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
                   {selectedClass.ifabLaw}
                 </span>
-                <h2 className="text-xl font-bold text-white mt-2">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-2">
                   {selectedClass.nameTh}
                 </h2>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {formatSignalEnglishName(selectedClass.name)}
                 </div>
               </div>
@@ -145,28 +145,28 @@ export default function SignalsPage() {
                   <span>ฝึกซ้อมท่านี้ด้วยกล้องสด</span>
                 </Link>
                 {selectedClass.isF1ZeroLimited && (
-                  <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-xs font-medium">
+                  <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-600 dark:text-amber-300 text-xs font-medium">
                     อยู่ระหว่างเพิ่มข้อมูลฝึกสอน
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="border-t border-white/[0.08] pt-4 space-y-3">
-              <div className="text-xs font-semibold text-slate-200">
+            <div className="border-t border-slate-200/80 dark:border-white/[0.08] pt-4 space-y-3">
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                 รายละเอียดกติกาและการปฏิบัติ
               </div>
-              <div className="text-xs text-slate-300 leading-relaxed bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5">
+              <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-4">
                 {selectedClass.descriptionTh}
               </div>
 
               {selectedClass.coachingTips.length > 0 && (
                 <div className="space-y-1.5 pt-1">
-                  <div className="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
+                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                     <Google_Icon name="lightbulb" size={14} />
                     <span>จุดสังเกตท่าทาง</span>
                   </div>
-                  <ul className="text-xs text-slate-300 space-y-1 list-disc pl-5">
+                  <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-disc pl-5">
                     {selectedClass.coachingTips.map((tip, idx) => (
                       <li key={idx}>{tip}</li>
                     ))}

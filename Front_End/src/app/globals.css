@@ -33,6 +33,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 @layer components {
