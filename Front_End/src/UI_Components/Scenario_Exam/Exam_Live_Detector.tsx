@@ -7,6 +7,7 @@ import {
   ModalDetection,
   PostureAngles,
   ScenarioExamQuestion,
+  TaggedPerson,
 } from "../../Data_Types/Referee_Types";
 import { Skeleton_Canvas } from "../Canvas_Engine/Skeleton_Canvas";
 import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
@@ -17,6 +18,10 @@ import {
   findRuleByLabel,
   predictImageBoth,
 } from "../../Core_Lib/Api_Client";
+import {
+  detectRealPosesFromVideo,
+  ensurePoseDetectorLoaded,
+} from "../../Core_Lib/Real_Pose_Tracker";
 import { Google_Icon } from "../Common/Google_Icon";
 import {
   triggerCausalFeedback,
@@ -57,6 +62,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [holdDuration, setHoldDuration] = useState<number>(0);
+  const [livePerson, setLivePerson] = useState<TaggedPerson | null>(null);
 
   // Modal AI WebSocket & Image Upload States
   const [liveDetections, setLiveDetections] = useState<ModalDetection[]>([]);
@@ -86,6 +92,11 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     uploadedDetections.find((d) => d.label.toLowerCase() === performedRule.name.toLowerCase()) ||
     uploadedDetections.find((d) => d.label.toLowerCase() === targetRule.name.toLowerCase()) ||
     null;
+
+  const liveDetectionsRef = useRef<ModalDetection[]>([]);
+  useEffect(() => {
+    liveDetectionsRef.current = liveDetections;
+  }, [liveDetections]);
 
   const isHoldMatchedRef = useRef<boolean>(false);
   isHoldMatchedRef.current = Boolean(cameraActive && wsConnected && matchedWsDet);
@@ -142,6 +153,59 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
       return null;
     });
   }, [question.id, isDecisionLocked]);
+
+  // Real-time MoveNet 17-keypoint tracking loop while camera is active
+  useEffect(() => {
+    if (!cameraActive || uploadedExamImageUrl || hasCompletedResult) {
+      setLivePerson(null);
+      return;
+    }
+
+    let cancelled = false;
+    let rafId = 0;
+    let running = false;
+
+    const run = async () => {
+      const ok = await ensurePoseDetectorLoaded();
+      if (cancelled || !ok) return;
+
+      const tick = async () => {
+        if (cancelled) return;
+        if (!running && videoRef.current && videoRef.current.readyState >= 2) {
+          running = true;
+          try {
+            const res = await detectRealPosesFromVideo(
+              videoRef.current,
+              liveDetectionsRef.current,
+              "person-1",
+              true
+            );
+            if (!cancelled) {
+              setLivePerson(res.activePerson);
+            }
+          } finally {
+            running = false;
+          }
+        }
+        if (!cancelled) {
+          rafId = requestAnimationFrame(() => {
+            void tick();
+          });
+        }
+      };
+
+      rafId = requestAnimationFrame(() => {
+        void tick();
+      });
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [cameraActive, uploadedExamImageUrl, hasCompletedResult]);
 
   // Lock-step WebSocket connection during active exam recording
   useEffect(() => {
@@ -426,7 +490,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
       holdDurationSeconds: finalHoldDuration,
       totalQuestionScore,
       passed,
-      recordedAngles: ZERO_ANGLES,
+      recordedAngles: livePerson?.angles || ZERO_ANGLES,
     });
   };
 
@@ -437,7 +501,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
         <div className="flex items-center gap-2">
           <Google_Icon name="person" size={18} className="text-[#0A84FF]" />
           <h2 className="text-sm font-bold apple-title text-[#F5F5F7]">
-            ตรวจจับท่าทางผู้เรียนจริง (Modal YOLO26n-pose)
+            ตรวจจับท่าทางผู้เรียนจริง (17-KP + Modal YOLO26n-pose)
           </h2>
         </div>
 
@@ -468,12 +532,12 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
             : wsWarming
             ? "Warming Modal CPU..."
             : cameraActive
-            ? "Webcam Ready"
+            ? "17-KP Skeleton Ready"
             : "No Camera (Use Photo Upload)"}
         </span>
       </div>
 
-      {/* Camera / Ghost Guide / Uploaded Photo Area */}
+      {/* Camera / Real Skeleton Canvas / Uploaded Photo Area */}
       <div className="p-4">
         <div className="relative h-[260px] bg-[#060608] rounded-2xl border border-white/[0.08] overflow-hidden flex items-center justify-center">
           <video
@@ -481,8 +545,8 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
             autoPlay
             playsInline
             muted
-            className={`absolute inset-0 w-full h-full object-cover z-0 scale-x-[-1] transition-opacity ${
-              cameraActive && !uploadedExamImageUrl ? "opacity-80" : "opacity-0"
+            className={`absolute inset-0 w-full h-full object-contain z-0 scale-x-[-1] transition-opacity ${
+              cameraActive && !uploadedExamImageUrl ? "opacity-85" : "opacity-0"
             }`}
           />
 
@@ -494,7 +558,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
               </div>
               <p className="text-[11px] text-[#A1A1A6]">
                 {cameraError ||
-                  "เปิดกล้องเว็บแคมเพื่อสตรีมเข้า /ws/webcam หรืออัปโหลดภาพถ่ายจริงด้านล่าง"}
+                  "เปิดกล้องเว็บแคมเพื่อวาดโครงกระดูก 17 จุดและสตรีมเข้า /ws/webcam หรืออัปโหลดภาพถ่ายจริงด้านล่าง"}
               </p>
               <button
                 type="button"
@@ -529,18 +593,19 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
               </button>
             </div>
           ) : (
-            cameraActive &&
-            isDecisionLocked && (
-              <div className="relative z-10 flex items-center justify-center pointer-events-none">
+            cameraActive && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <Skeleton_Canvas
-                  keypoints={[]}
-                  targetRule={targetRule}
+                  keypoints={livePerson?.keypoints || []}
+                  targetRule={isDecisionLocked ? targetRule : undefined}
+                  angles={livePerson?.angles}
                   width={440}
-                  height={250}
+                  height={330}
                   mirror={true}
-                  showGhost={true}
-                  showAngles={false}
+                  showGhost={isDecisionLocked}
+                  showAngles={isDecisionLocked && Boolean(livePerson)}
                   showBBoxes={false}
+                  className="w-full h-full object-contain"
                 />
               </div>
             )

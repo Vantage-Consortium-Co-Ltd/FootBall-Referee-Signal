@@ -6,6 +6,7 @@ import {
   FrameFeedbackPayload,
   GestureRule,
   ModalDetection,
+  TaggedPerson,
 } from "../../Data_Types/Referee_Types";
 import { Skeleton_Canvas } from "../Canvas_Engine/Skeleton_Canvas";
 import {
@@ -16,6 +17,10 @@ import {
   findRuleByLabel,
   predictImageAnnotatedUrl,
 } from "../../Core_Lib/Api_Client";
+import {
+  detectRealPosesFromVideo,
+  ensurePoseDetectorLoaded,
+} from "../../Core_Lib/Real_Pose_Tracker";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
@@ -33,6 +38,8 @@ type WsConnectionStatus =
   | "closed"
   | "error";
 
+type PoseEngineState = "idle" | "loading" | "ready" | "error";
+
 export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   targetRule,
   onFeedbackUpdate,
@@ -48,6 +55,15 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [mirror, setMirror] = useState<boolean>(true);
   const [showGhost, setShowGhost] = useState<boolean>(true);
+  const [showAngles, setShowAngles] = useState<boolean>(true);
+  const [showBBoxes, setShowBBoxes] = useState<boolean>(true);
+
+  // Real-time browser MoveNet 17-keypoint tracker states
+  const [poseEngineState, setPoseEngineState] = useState<PoseEngineState>("idle");
+  const [livePersons, setLivePersons] = useState<TaggedPerson[]>([]);
+  const [activePersonId, setActivePersonId] = useState<string>("person-1");
+  const [autoTagReferee, setAutoTagReferee] = useState<boolean>(true);
+  const [lastTaggedAlert, setLastTaggedAlert] = useState<string | null>(null);
 
   // Real Modal WebSocket states
   const [wsStatus, setWsStatus] = useState<WsConnectionStatus>("idle");
@@ -56,15 +72,20 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   const [latestDetections, setLatestDetections] = useState<ModalDetection[]>([]);
   const [wsReconnectNonce, setWsReconnectNonce] = useState<number>(0);
 
-  // Real YOLO ?annotated=true snapshot modal state
+  // YOLO Server Stream (?annotated=true continuous stream) + single snapshot modal
+  const [serverAnnotatedMode, setServerAnnotatedMode] = useState<boolean>(false);
+  const [serverStreamUrl, setServerStreamUrl] = useState<string | null>(null);
   const [isCapturingAnnotated, setIsCapturingAnnotated] = useState<boolean>(false);
   const [annotatedSnapshotUrl, setAnnotatedSnapshotUrl] = useState<string | null>(null);
   const [annotatedError, setAnnotatedError] = useState<string | null>(null);
 
-  // Frame hold refs & state
+  // Refs for real-time loops
   const holdTimerRef = useRef<number>(0);
   const hasTriggeredSuccessRef = useRef<boolean>(false);
   const latestDetectionsRef = useRef<ModalDetection[]>([]);
+  const activePersonRef = useRef<TaggedPerson | null>(null);
+  const activePersonIdRef = useRef<string>(activePersonId);
+  const autoTagRefereeRef = useRef<boolean>(autoTagReferee);
   const targetRuleRef = useRef<GestureRule>(targetRule);
   const onFeedbackUpdateRef = useRef(onFeedbackUpdate);
   const onDrillSuccessRef = useRef(onDrillSuccess);
@@ -72,6 +93,14 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   useEffect(() => {
     targetRuleRef.current = targetRule;
   }, [targetRule]);
+
+  useEffect(() => {
+    activePersonIdRef.current = activePersonId;
+  }, [activePersonId]);
+
+  useEffect(() => {
+    autoTagRefereeRef.current = autoTagReferee;
+  }, [autoTagReferee]);
 
   useEffect(() => {
     onFeedbackUpdateRef.current = onFeedbackUpdate;
@@ -85,14 +114,18 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     latestDetectionsRef.current = latestDetections;
   }, [latestDetections]);
 
-  // Revoke previous annotated snapshot blob URL on change/unmount
+  // Revoke object URLs on change/unmount
   useEffect(() => {
     return () => {
-      if (annotatedSnapshotUrl) {
-        URL.revokeObjectURL(annotatedSnapshotUrl);
-      }
+      if (annotatedSnapshotUrl) URL.revokeObjectURL(annotatedSnapshotUrl);
     };
   }, [annotatedSnapshotUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (serverStreamUrl) URL.revokeObjectURL(serverStreamUrl);
+    };
+  }, [serverStreamUrl]);
 
   // Start webcam
   const startCamera = useCallback(async () => {
@@ -127,6 +160,8 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       videoRef.current.srcObject = null;
     }
     setCameraActive(false);
+    setLivePersons([]);
+    activePersonRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -139,9 +174,74 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     holdTimerRef.current = 0;
     hasTriggeredSuccessRef.current = false;
     onFeedbackUpdateRef.current(
-      evaluateRealDetections(latestDetectionsRef.current, targetRule, 0).feedback
+      evaluateRealDetections(
+        latestDetectionsRef.current,
+        targetRule,
+        0,
+        activePersonRef.current
+      ).feedback
     );
   }, [targetRule]);
+
+  // Real-time 17-keypoint MoveNet tracking loop while camera is active
+  useEffect(() => {
+    if (!cameraActive) {
+      setPoseEngineState("idle");
+      return;
+    }
+
+    let cancelled = false;
+    let rafId = 0;
+    let running = false;
+
+    const initAndRun = async () => {
+      setPoseEngineState("loading");
+      const ok = await ensurePoseDetectorLoaded();
+      if (cancelled) return;
+      if (!ok) {
+        setPoseEngineState("error");
+        return;
+      }
+      setPoseEngineState("ready");
+
+      const tick = async () => {
+        if (cancelled) return;
+        if (!running && videoRef.current && videoRef.current.readyState >= 2) {
+          running = true;
+          try {
+            const result = await detectRealPosesFromVideo(
+              videoRef.current,
+              latestDetectionsRef.current,
+              activePersonIdRef.current,
+              autoTagRefereeRef.current
+            );
+            if (!cancelled) {
+              activePersonRef.current = result.activePerson;
+              setLivePersons(result.persons);
+            }
+          } finally {
+            running = false;
+          }
+        }
+        if (!cancelled) {
+          rafId = requestAnimationFrame(() => {
+            void tick();
+          });
+        }
+      };
+
+      rafId = requestAnimationFrame(() => {
+        void tick();
+      });
+    };
+
+    void initAndRun();
+
+    return () => {
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [cameraActive]);
 
   // Lock-step WebSocket streaming to Modal /ws/webcam
   useEffect(() => {
@@ -306,7 +406,103 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     };
   }, [cameraActive, wsReconnectNonce]);
 
-  // Capture current webcam frame and call /api/inference/image?annotated=true
+  // Continuous YOLO Server Annotated Stream (?annotated=true) when toggled on
+  useEffect(() => {
+    if (!cameraActive || !serverAnnotatedMode) {
+      setServerStreamUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      return;
+    }
+
+    let cancelled = false;
+    let timerId: number | null = null;
+
+    const pumpAnnotated = async () => {
+      if (cancelled) return;
+      if (videoRef.current && videoRef.current.readyState >= 2) {
+        try {
+          const blob = await captureVideoFrameAsJpeg(videoRef.current, 640, 0.78);
+          if (blob && !cancelled) {
+            const url = await predictImageAnnotatedUrl(blob, "live-stream.jpg");
+            if (cancelled) {
+              URL.revokeObjectURL(url);
+              return;
+            }
+            setServerStreamUrl((prev) => {
+              if (prev) URL.revokeObjectURL(prev);
+              return url;
+            });
+          }
+        } catch {
+          // Keep last frame on transient error
+        }
+      }
+      if (!cancelled) {
+        timerId = window.setTimeout(() => {
+          void pumpAnnotated();
+        }, 120);
+      }
+    };
+
+    void pumpAnnotated();
+
+    return () => {
+      cancelled = true;
+      if (timerId !== null) window.clearTimeout(timerId);
+    };
+  }, [cameraActive, serverAnnotatedMode]);
+
+  // Real-time evaluation loop combining Modal /ws/webcam detections + real joint angles
+  useEffect(() => {
+    if (!cameraActive) return;
+
+    let animId: number;
+    let lastTime = performance.now();
+
+    const loop = (currentTime: number) => {
+      const deltaSec = Math.min(0.1, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
+
+      const real = evaluateRealDetections(
+        latestDetectionsRef.current,
+        targetRuleRef.current,
+        holdTimerRef.current,
+        activePersonRef.current
+      );
+
+      if (real.isHoldActive) {
+        holdTimerRef.current = holdTimerRef.current + deltaSec;
+      } else {
+        holdTimerRef.current = 0;
+        hasTriggeredSuccessRef.current = false;
+      }
+
+      onFeedbackUpdateRef.current(real.feedback);
+
+      if (real.feedback.state === "COMPLETED" && !hasTriggeredSuccessRef.current) {
+        hasTriggeredSuccessRef.current = true;
+        if (onDrillSuccessRef.current) onDrillSuccessRef.current(real.feedback);
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, [cameraActive]);
+
+  const handleTagPerson = (personId: string) => {
+    triggerCausalFeedback("snap");
+    setActivePersonId(personId);
+    setAutoTagReferee(false);
+    const matched = livePersons.find((p) => p.id === personId);
+    setLastTaggedAlert(`ล็อคเป้าหมาย: ${matched?.labelTh || personId}`);
+    setTimeout(() => setLastTaggedAlert(null), 2500);
+  };
+
+  // Capture single webcam frame and call /api/inference/image?annotated=true
   const handleCaptureAnnotatedPlot = async () => {
     if (!videoRef.current || isCapturingAnnotated) return;
     setIsCapturingAnnotated(true);
@@ -335,45 +531,8 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   };
 
   const isLiveAiStreaming = cameraActive && wsStatus === "connected";
-
-  // Real-time evaluation loop driven strictly by Modal /ws/webcam detections
-  useEffect(() => {
-    if (!isLiveAiStreaming) return;
-
-    let animId: number;
-    let lastTime = performance.now();
-
-    const loop = (currentTime: number) => {
-      const deltaSec = Math.min(0.1, (currentTime - lastTime) / 1000);
-      lastTime = currentTime;
-
-      const real = evaluateRealDetections(
-        latestDetectionsRef.current,
-        targetRuleRef.current,
-        holdTimerRef.current
-      );
-
-      if (real.isHoldActive) {
-        holdTimerRef.current = holdTimerRef.current + deltaSec;
-      } else {
-        holdTimerRef.current = 0;
-        hasTriggeredSuccessRef.current = false;
-      }
-
-      onFeedbackUpdateRef.current(real.feedback);
-
-      if (real.feedback.state === "COMPLETED" && !hasTriggeredSuccessRef.current) {
-        hasTriggeredSuccessRef.current = true;
-        if (onDrillSuccessRef.current) onDrillSuccessRef.current(real.feedback);
-      }
-
-      animId = requestAnimationFrame(loop);
-    };
-
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
-  }, [isLiveAiStreaming]);
-
+  const activeTaggedPerson =
+    livePersons.find((p) => p.isTagged) || livePersons[0] || null;
   const isLimitedClass = (F1_ZERO_LIMITED_CLASSES as readonly string[]).includes(
     targetRule.name
   );
@@ -387,15 +546,34 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <Google_Icon name="videocam" size={16} className="text-[#0A84FF]" />
           <span className="font-semibold text-[#F5F5F7]">
-            {isLiveAiStreaming
-              ? "Live Modal AI (/ws/webcam)"
+            {serverAnnotatedMode && cameraActive
+              ? "YOLO26n-pose Server Skeleton Stream"
+              : isLiveAiStreaming
+              ? "Live 17-Keypoint + Modal AI (/ws/webcam)"
               : cameraActive
-              ? "Connecting Modal AI..."
+              ? "Live Camera & Pose Tracker"
               : "Webcam Standby"}
           </span>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#2C2C2E] text-[#A1A1A6] apple-tabular">
-            640×440
+            640×480
           </span>
+          {cameraActive && (
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full border font-mono ${
+                poseEngineState === "ready"
+                  ? "bg-[#30D158]/15 border-[#30D158]/40 text-[#30D158]"
+                  : poseEngineState === "loading"
+                  ? "bg-[#FF9F0A]/15 border-[#FF9F0A]/40 text-[#FF9F0A]"
+                  : "bg-[#2C2C2E] border-white/[0.1] text-[#A1A1A6]"
+              }`}
+            >
+              {poseEngineState === "ready"
+                ? "17-KP Skeleton Live"
+                : poseEngineState === "loading"
+                ? "กำลังโหลดตัวติดตามโครงกระดูก..."
+                : "Pose Tracker Standby"}
+            </span>
+          )}
           {isLiveAiStreaming && wsLatencyMs !== null && (
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/40 text-[#30D158] font-mono apple-tabular">
               CPU RTT {wsLatencyMs}ms
@@ -443,71 +621,125 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
         </div>
       )}
 
-      {/* Real Model Detections Bar */}
+      {/* Real Person Tagging & YOLO Detections Control Bar */}
       <div className="px-4 py-2 bg-[#141416]/90 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[#A1A1A6] font-medium flex items-center gap-1">
-            <Google_Icon name="monitoring" size={14} className="text-[#0A84FF]" />{" "}
-            ผลตรวจจับจาก YOLO26n-pose ({latestDetections.length}):
+            <Google_Icon name="group" size={14} className="text-[#0A84FF]" /> ตรวจพบบุคคลจริง (
+            {livePersons.length}):
           </span>
 
-          {latestDetections.length === 0 ? (
+          {livePersons.length === 0 ? (
             <span className="text-[11px] text-[#6E6E73]">
-              {isLiveAiStreaming
-                ? "ไม่พบบุคคลหรือสัญญาณในเฟรม (conf ≥ 0.25)"
-                : "เปิดกล้องเพื่อเริ่มส่งภาพไปยัง Modal AI"}
+              {cameraActive
+                ? "กำลังสแกนโครงกระดูก 17 จุดจากกล้อง..."
+                : "เปิดกล้องเพื่อเริ่มตรวจจับโครงกระดูกจริง"}
             </span>
           ) : (
-            latestDetections.map((det, idx) => {
-              const rule = findRuleByLabel(det.label);
-              const isMatch = det.label.toLowerCase() === targetRule.name.toLowerCase();
+            livePersons.map((person) => {
+              const isSelected = person.isTagged;
               return (
-                <span
-                  key={`${det.label}-${idx}`}
-                  className={`px-2.5 py-1 rounded-xl font-medium text-[11px] flex items-center gap-1.5 border ${
-                    isMatch
-                      ? "bg-[#30D158]/20 border-[#30D158]/60 text-[#30D158]"
-                      : "bg-[#1C1C1E] border-white/[0.08] text-[#F5F5F7]"
+                <button
+                  key={person.id}
+                  type="button"
+                  onClick={() => handleTagPerson(person.id)}
+                  className={`px-2.5 py-1 rounded-xl font-medium text-[11px] apple-pressable flex items-center gap-1.5 border ${
+                    isSelected
+                      ? "bg-[#0A84FF]/20 border-[#0A84FF]/70 text-[#F5F5F7] shadow-sm"
+                      : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6] hover:text-[#F5F5F7]"
                   }`}
                 >
-                  <span>{rule ? rule.nameTh : det.label}</span>
-                  <span className="font-mono text-[10px] opacity-80 apple-tabular">
-                    {Math.round(det.confidence * 100)}%
+                  <Google_Icon
+                    name="my_location"
+                    size={12}
+                    className={isSelected ? "text-[#0A84FF]" : "text-[#6E6E73]"}
+                  />
+                  <span>{person.labelTh}</span>
+                  <span className="font-mono text-[9px] text-[#6E6E73] apple-tabular">
+                    {Math.round(person.confidence * 100)}%
                   </span>
-                </span>
+                </button>
               );
             })
           )}
         </div>
 
-        {cameraActive && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {cameraActive && (
+            <button
+              type="button"
+              onPointerDown={() => triggerCausalFeedback("snap")}
+              onClick={() => setServerAnnotatedMode((prev) => !prev)}
+              className={`px-2.5 py-1 rounded-xl border text-[11px] font-semibold apple-pressable flex items-center gap-1.5 ${
+                serverAnnotatedMode
+                  ? "bg-[#30D158]/20 border-[#30D158]/60 text-[#30D158]"
+                  : "bg-[#1C1C1E] border-white/[0.1] text-[#A1A1A6] hover:text-[#F5F5F7]"
+              }`}
+              title="สลับดูภาพโครงกระดูกที่วาดจากฝั่ง Modal Server (?annotated=true)"
+            >
+              <Google_Icon name="monitoring" size={13} />
+              <span>
+                YOLO Server Stream: {serverAnnotatedMode ? "ON" : "OFF"}
+              </span>
+            </button>
+          )}
+
+          {cameraActive && (
+            <button
+              type="button"
+              disabled={isCapturingAnnotated}
+              onClick={handleCaptureAnnotatedPlot}
+              className="px-2.5 py-1 rounded-xl border border-[#64D2FF]/40 bg-[#0A84FF]/15 hover:bg-[#0A84FF]/25 text-[#64D2FF] text-[11px] font-semibold apple-pressable flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Google_Icon name="crop_free" size={13} />
+              <span>
+                {isCapturingAnnotated
+                  ? "กำลังวาด..."
+                  : "แคป YOLO Plot"}
+              </span>
+            </button>
+          )}
+
           <button
             type="button"
-            disabled={isCapturingAnnotated}
-            onClick={handleCaptureAnnotatedPlot}
-            className="px-2.5 py-1 rounded-xl border border-[#64D2FF]/40 bg-[#0A84FF]/15 hover:bg-[#0A84FF]/25 text-[#64D2FF] text-[11px] font-semibold apple-pressable flex items-center gap-1.5 disabled:opacity-50"
+            onPointerDown={() => triggerCausalFeedback("snap")}
+            onClick={() => {
+              setAutoTagReferee(!autoTagReferee);
+            }}
+            className={`px-2.5 py-1 rounded-xl border text-[11px] font-medium apple-pressable flex items-center gap-1.5 ${
+              autoTagReferee
+                ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
+                : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
+            }`}
           >
-            <Google_Icon name="crop_free" size={13} />
-            <span>
-              {isCapturingAnnotated
-                ? "กำลังวาดโครงกระดูก..."
-                : "แคปภาพวาดกระดูกจริง (?annotated=true)"}
-            </span>
+            <Google_Icon name="how_to_reg" size={14} className="text-[#30D158]" />
+            Auto-Tag: {autoTagReferee ? "เปิด" : "ปิด"}
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Video & Static Ghost Target Guide Layer */}
+      {/* Video & Real-Time Skeleton Canvas Viewport Layer */}
       <div className="relative w-full h-[440px] bg-[#060608] flex items-center justify-center overflow-hidden">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-300 ${
-            cameraActive ? "opacity-85" : "opacity-0"
+          className={`absolute inset-0 w-full h-full object-contain z-0 transition-opacity duration-300 ${
+            cameraActive && !(serverAnnotatedMode && serverStreamUrl)
+              ? "opacity-90"
+              : "opacity-0"
           } ${mirror ? "scale-x-[-1]" : ""}`}
         />
+
+        {/* Continuous YOLO26n-pose Server Annotated Stream */}
+        {cameraActive && serverAnnotatedMode && serverStreamUrl && (
+          <img
+            src={serverStreamUrl}
+            alt="YOLO26n-pose live annotated stream"
+            className="absolute inset-0 w-full h-full object-contain z-10"
+          />
+        )}
 
         {!cameraActive && (
           <div className="relative z-20 max-w-md mx-auto p-6 text-center space-y-3">
@@ -519,7 +751,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
             </div>
             <p className="text-xs text-[#A1A1A6] leading-relaxed">
               {cameraError ||
-                "อนุญาตสิทธิ์การใช้กล้องเว็บแคมเพื่อสตรีมภาพจริงไปยัง Modal FastAPI (/ws/webcam) หรือสลับไปใช้แท็บอัปโหลดรูปภาพและคลิปวิดีโอ"}
+                "อนุญาตสิทธิ์การใช้กล้องเว็บแคมเพื่อวาดโครงกระดูก 17 จุดจริงแบบ Real-time และส่งภาพไปยัง Modal FastAPI (/ws/webcam)"}
             </p>
             <button
               type="button"
@@ -532,18 +764,21 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           </div>
         )}
 
-        {cameraActive && showGhost && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+        {/* Real-Time HTML5 Canvas 17-Keypoint Skeleton Overlay */}
+        {cameraActive && !(serverAnnotatedMode && serverStreamUrl) && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
             <Skeleton_Canvas
-              keypoints={[]}
-              persons={[]}
+              keypoints={activeTaggedPerson?.keypoints || []}
+              persons={livePersons}
               targetRule={targetRule}
+              angles={activeTaggedPerson?.angles}
               width={640}
-              height={440}
+              height={480}
               mirror={mirror}
               showGhost={showGhost}
-              showAngles={false}
-              showBBoxes={false}
+              showAngles={showAngles}
+              showBBoxes={showBBoxes}
+              onTagPerson={handleTagPerson}
               className="w-full h-full object-contain"
             />
           </div>
@@ -551,7 +786,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
         {/* Floating Status Badges */}
         {cameraActive && (
-          <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 max-w-[90%]">
+          <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 max-w-[90%] pointer-events-none">
             <div className="apple-material-dark rounded-xl px-3 py-1.5 text-xs flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${
@@ -583,8 +818,15 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
               </div>
             )}
 
+            {lastTaggedAlert && (
+              <div className="bg-[#062614]/95 border border-[#30D158]/60 rounded-xl px-3 py-1.5 text-xs text-[#30D158] font-semibold flex items-center gap-1.5 shadow-lg">
+                <Google_Icon name="my_location" size={14} className="text-[#30D158]" />
+                <span>{lastTaggedAlert}</span>
+              </div>
+            )}
+
             {(wsStatus === "error" || wsStatus === "closed") && (
-              <div className="bg-[#2B0B0D]/95 border border-[#FF453A]/50 rounded-xl px-3 py-2 text-[11px] text-[#FFD6D4] flex flex-wrap items-center gap-2">
+              <div className="pointer-events-auto bg-[#2B0B0D]/95 border border-[#FF453A]/50 rounded-xl px-3 py-2 text-[11px] text-[#FFD6D4] flex flex-wrap items-center gap-2">
                 <span>{wsError || "WebSocket ขาดการเชื่อมต่อ"}</span>
                 <button
                   type="button"
@@ -604,7 +846,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           </div>
         )}
 
-        {/* Annotated Snapshot Overlay (from /predict/image?annotated=true) */}
+        {/* One-Shot Annotated Snapshot Overlay (from /predict/image?annotated=true) */}
         {annotatedSnapshotUrl && (
           <div className="absolute inset-3 z-30 bg-[#141416]/95 border border-white/[0.15] rounded-2xl p-3 flex flex-col gap-2 shadow-2xl">
             <div className="flex items-center justify-between text-xs">
@@ -637,6 +879,19 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           <button
             type="button"
             onPointerDown={() => triggerCausalFeedback("tap")}
+            onClick={() => setShowBBoxes(!showBBoxes)}
+            className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 apple-pressable ${
+              showBBoxes
+                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
+            }`}
+          >
+            <Google_Icon name="crop_free" size={14} />
+            กรอบ Tagging: {showBBoxes ? "แสดง" : "ซ่อน"}
+          </button>
+          <button
+            type="button"
+            onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setMirror(!mirror)}
             className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 apple-pressable ${
               mirror
@@ -659,6 +914,18 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           >
             Ghost Guide: {showGhost ? "ON" : "OFF"}
           </button>
+          <button
+            type="button"
+            onPointerDown={() => triggerCausalFeedback("tap")}
+            onClick={() => setShowAngles(!showAngles)}
+            className={`px-3 py-1.5 rounded-xl border text-xs apple-pressable ${
+              showAngles
+                ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
+                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
+            }`}
+          >
+            Angle Badges: {showAngles ? "ON" : "OFF"}
+          </button>
         </div>
 
         <button
@@ -668,8 +935,12 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
             holdTimerRef.current = 0;
             hasTriggeredSuccessRef.current = false;
             onFeedbackUpdateRef.current(
-              evaluateRealDetections(latestDetectionsRef.current, targetRuleRef.current, 0)
-                .feedback
+              evaluateRealDetections(
+                latestDetectionsRef.current,
+                targetRuleRef.current,
+                0,
+                activePersonRef.current
+              ).feedback
             );
           }}
           className="text-xs text-[#A1A1A6] hover:text-[#F5F5F7] flex items-center gap-1 apple-pressable"
