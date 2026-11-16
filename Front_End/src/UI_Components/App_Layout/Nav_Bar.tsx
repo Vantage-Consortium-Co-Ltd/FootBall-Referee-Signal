@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Google_Icon } from "../Common/Google_Icon";
-import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
-import { checkModalHealth } from "../../Core_Lib/Api_Client";
-import type { ModalHealthResponse } from "../../Data_Types/Referee_Types";
 
 const NAV_LINKS = [
   { href: "/", label: "หน้าหลัก", icon: "sports_soccer" },
@@ -15,50 +12,66 @@ const NAV_LINKS = [
   { href: "/signals", label: "กติกา 20 ท่า", icon: "menu_book" },
 ] as const;
 
-function formatLatencySec(latencyMs?: number): string | null {
-  if (typeof latencyMs !== "number" || !Number.isFinite(latencyMs)) return null;
-  return `${(latencyMs / 1000).toFixed(1)}s`;
-}
-
 export const Nav_Bar: React.FC = () => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [healthState, setHealthState] = useState<"warming" | "online" | "offline">(
-    "warming"
-  );
-  const [healthInfo, setHealthInfo] = useState<ModalHealthResponse | null>(null);
 
-  const refreshHealth = useCallback(async () => {
-    setHealthState("warming");
-    const res = await checkModalHealth();
-    setHealthInfo(res);
-    setHealthState(res.status === "ok" ? "online" : "offline");
-  }, []);
+  // References to tab links to compute smooth sliding underline and hover pill
+  const navContainerRef = useRef<HTMLElement | null>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
-  useEffect(() => {
-    let active = true;
-    checkModalHealth().then((res) => {
-      if (!active) return;
-      setHealthInfo(res);
-      setHealthState(res.status === "ok" ? "online" : "offline");
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [activeRect, setActiveRect] = useState<{ left: number; width: number } | null>(null);
+  const [hoverRect, setHoverRect] = useState<{ left: number; width: number } | null>(null);
 
   // Close mobile drawer upon navigating
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const formattedLatency = formatLatencySec(healthInfo?.latencyMs);
+  const activeIndex = NAV_LINKS.findIndex((link) => {
+    if (link.href === "/") return pathname === "/";
+    return pathname.startsWith(link.href);
+  });
 
-  const isLinkActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
+  // Update active indicator geometry
+  useEffect(() => {
+    const updateActiveRect = () => {
+      if (activeIndex === -1) {
+        setActiveRect(null);
+        return;
+      }
+      const el = linkRefs.current[activeIndex];
+      const container = navContainerRef.current;
+      if (el && container) {
+        const containerLeft = container.getBoundingClientRect().left;
+        const elRect = el.getBoundingClientRect();
+        setActiveRect({
+          left: elRect.left - containerLeft,
+          width: elRect.width,
+        });
+      }
+    };
+
+    updateActiveRect();
+    window.addEventListener("resize", updateActiveRect);
+    return () => window.removeEventListener("resize", updateActiveRect);
+  }, [activeIndex, pathname]);
+
+  const handleMouseEnter = (index: number) => {
+    const el = linkRefs.current[index];
+    const container = navContainerRef.current;
+    if (el && container) {
+      const containerLeft = container.getBoundingClientRect().left;
+      const elRect = el.getBoundingClientRect();
+      setHoverRect({
+        left: elRect.left - containerLeft,
+        width: elRect.width,
+      });
     }
-    return pathname.startsWith(href);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverRect(null);
   };
 
   return (
@@ -67,7 +80,6 @@ export const Nav_Bar: React.FC = () => {
         {/* Left: Brand / Logo */}
         <Link
           href="/"
-          onPointerDown={() => triggerCausalFeedback("tap")}
           className="flex items-center gap-2.5 shrink-0 rounded-xl p-1 -ml-1 apple-pressable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/15 border border-emerald-400/35 text-emerald-400">
@@ -78,82 +90,66 @@ export const Nav_Bar: React.FC = () => {
           </span>
         </Link>
 
-        {/* Center: Underline Navigation Tabs (Desktop / Tablet) */}
+        {/* Center: Underline Navigation Tabs with Sliding Indicator & Hover Pill */}
         <nav
+          ref={navContainerRef}
+          onMouseLeave={handleMouseLeave}
           aria-label="เมนูหลัก"
-          className="hidden md:flex items-center gap-6 h-full"
+          className="hidden md:flex items-center gap-1.5 h-full relative"
         >
-          {NAV_LINKS.map((link) => {
-            const active = isLinkActive(link.href);
+          {/* Subtle Hover Pill */}
+          {hoverRect && (
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-2 rounded-lg bg-white/[0.06] transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
+              style={{
+                left: `${hoverRect.left}px`,
+                width: `${hoverRect.width}px`,
+              }}
+            />
+          )}
+
+          {/* Smooth Sliding Underline Indicator */}
+          {activeRect && (
+            <span
+              aria-hidden="true"
+              className="absolute bottom-0 h-0.5 bg-emerald-400 rounded-full transition-all duration-250 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
+              style={{
+                left: `${activeRect.left}px`,
+                width: `${activeRect.width}px`,
+              }}
+            />
+          )}
+
+          {NAV_LINKS.map((link, index) => {
+            const isActive = index === activeIndex;
             return (
               <Link
                 key={link.href}
+                ref={(el) => {
+                  linkRefs.current[index] = el;
+                }}
                 href={link.href}
-                onPointerDown={() => triggerCausalFeedback("snap")}
-                className={`relative h-full flex items-center gap-1.5 text-xs lg:text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-sm ${
-                  active
+                onMouseEnter={() => handleMouseEnter(index)}
+                className={`relative h-full px-3 flex items-center text-xs lg:text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-md z-10 ${
+                  isActive
                     ? "text-emerald-400 font-semibold"
-                    : "text-slate-400 hover:text-slate-200"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 <span>{link.label}</span>
-                {active && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-0 inset-x-0 h-0.5 bg-emerald-400 rounded-full"
-                  />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Right: Minimal AI Status Badge + Mobile Hamburger Toggle */}
+        {/* Right: Mobile Hamburger Toggle */}
         <div className="flex items-center gap-2.5">
-          <Link
-            href="/system"
-            role="status"
-            aria-live="polite"
-            title="คลิกเพื่อดูสถานะระบบและข้อมูลโมเดล"
-            onPointerDown={() => triggerCausalFeedback("tap")}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium apple-tabular transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
-              healthState === "online"
-                ? "bg-emerald-500/10 border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/15"
-                : healthState === "warming"
-                ? "bg-amber-500/10 border-amber-400/30 text-amber-200 hover:bg-amber-500/15"
-                : "bg-rose-500/10 border-rose-400/35 text-rose-200 hover:bg-rose-500/15"
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                healthState === "online"
-                  ? "bg-emerald-400"
-                  : healthState === "warming"
-                  ? "bg-amber-400 animate-pulse"
-                  : "bg-rose-400"
-              }`}
-            />
-            {healthState === "online" && (
-              <>
-                <span>AI พร้อมใช้งาน</span>
-                {formattedLatency && (
-                  <span className="text-emerald-200/80">{formattedLatency}</span>
-                )}
-              </>
-            )}
-            {healthState === "warming" && <span>กำลังเตรียมระบบ...</span>}
-            {healthState === "offline" && <span>ออฟไลน์</span>}
-          </Link>
-
-          {/* Mobile Hamburger Toggle Button */}
           <button
             type="button"
             aria-label={mobileMenuOpen ? "ปิดเมนูนำทาง" : "เปิดเมนูนำทาง"}
             aria-expanded={mobileMenuOpen}
-            onClick={() => {
-              triggerCausalFeedback("tap");
-              setMobileMenuOpen(!mobileMenuOpen);
-            }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <Google_Icon name={mobileMenuOpen ? "close" : "menu"} size={18} />
@@ -161,22 +157,21 @@ export const Nav_Bar: React.FC = () => {
         </div>
       </div>
 
-      {/* Sleek Mobile Drawer */}
+      {/* Sleek Mobile Drawer with Smooth Drop Transition */}
       {mobileMenuOpen && (
         <div
           role="dialog"
           aria-label="เมนูนำทางบนมือถือ"
-          className="md:hidden border-t border-white/[0.08] bg-[#070B0F]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-2xl animate-in slide-in-from-top-2 duration-150"
+          className="md:hidden border-t border-white/[0.08] bg-[#070B0F]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-2xl animate-in slide-in-from-top-2 duration-200"
         >
-          {NAV_LINKS.map((link) => {
-            const active = isLinkActive(link.href);
+          {NAV_LINKS.map((link, index) => {
+            const isActive = index === activeIndex;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                onPointerDown={() => triggerCausalFeedback("snap")}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                  active
+                  isActive
                     ? "bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-400/30"
                     : "text-slate-300 hover:bg-white/[0.05] hover:text-white"
                 }`}
@@ -184,29 +179,12 @@ export const Nav_Bar: React.FC = () => {
                 <Google_Icon
                   name={link.icon}
                   size={18}
-                  className={active ? "text-emerald-400" : "text-slate-400"}
+                  className={isActive ? "text-emerald-400" : "text-slate-400"}
                 />
                 <span>{link.label}</span>
               </Link>
             );
           })}
-
-          <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between px-3 text-xs text-slate-400">
-            <Link
-              href="/system"
-              className="text-emerald-400 hover:underline inline-flex items-center gap-1.5 py-1"
-            >
-              <Google_Icon name="monitoring" size={14} />
-              <span>ตรวจสอบข้อมูลระบบ & โมเดล</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => void refreshHealth()}
-              className="text-slate-400 hover:text-white py-1"
-            >
-              รีเฟรชสถานะ
-            </button>
-          </div>
         </div>
       )}
     </header>

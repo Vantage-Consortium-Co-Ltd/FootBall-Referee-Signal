@@ -154,3 +154,19 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(142, 142, 147, 0.54);
 }
+
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
