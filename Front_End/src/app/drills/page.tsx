@@ -15,6 +15,7 @@ import {
   Coaching_HUD,
   Drill_Selector,
   Live_Drill_Feed,
+  Media_Upload_Analyzer,
 } from "../../UI_Components/Drill_Practice";
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
@@ -40,6 +41,7 @@ function DrillsStudioContent() {
     }
   }, [initialSignalIdParam]);
 
+  const [activeMode, setActiveMode] = useState<"webcam" | "image" | "video">("webcam");
   const [streakCount, setStreakCount] = useState<number>(0);
   const [totalAttempts, setTotalAttempts] = useState<number>(0);
   const [feedback, setFeedback] = useState<FrameFeedbackPayload>(() =>
@@ -97,15 +99,64 @@ function DrillsStudioContent() {
         </div>
       </header>
 
+      {/* Mode Switcher Segmented Control */}
+      <div className="max-w-7xl mx-auto mt-6">
+        <div className="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-[#141416] border border-white/[0.08]">
+          {[
+            {
+              id: "webcam" as const,
+              label: "กล้องฝึกซ้อมสด (Live Webcam /ws/webcam)",
+              icon: "videocam",
+            },
+            {
+              id: "image" as const,
+              label: "วิเคราะห์รูปภาพ (Image /predict/image)",
+              icon: "crop_free",
+            },
+            {
+              id: "video" as const,
+              label: "วิเคราะห์คลิปวิดีโอ (Video /predict/video)",
+              icon: "play_arrow",
+            },
+          ].map((tab) => {
+            const isActive = activeMode === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onPointerDown={() => triggerCausalFeedback("snap")}
+                onClick={() => setActiveMode(tab.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 apple-pressable border ${
+                  isActive
+                    ? "bg-[#0A84FF] border-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/25"
+                    : "border-transparent text-[#A1A1A6] hover:text-[#F5F5F7] hover:bg-[#1C1C1E]"
+                }`}
+              >
+                <Google_Icon name={tab.icon} size={15} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main Practice Workspace Grid */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-        {/* Left Column: Live Viewport (lg: 7 cols) */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+        {/* Left Column: Live Viewport or Media Upload Analyzer (lg: 7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-5">
-          <Live_Drill_Feed
-            targetRule={selectedRule}
-            onFeedbackUpdate={setFeedback}
-            onDrillSuccess={handleDrillSuccess}
-          />
+          {activeMode === "webcam" ? (
+            <Live_Drill_Feed
+              targetRule={selectedRule}
+              onFeedbackUpdate={setFeedback}
+              onDrillSuccess={handleDrillSuccess}
+            />
+          ) : (
+            <Media_Upload_Analyzer
+              mode={activeMode}
+              targetRule={selectedRule}
+              onSelectRule={handleSelectDrill}
+            />
+          )}
 
           {/* Drill Description Card */}
           <div className="apple-material-dark rounded-[22px] p-5">
