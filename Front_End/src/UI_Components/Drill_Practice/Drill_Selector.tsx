@@ -57,7 +57,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
   return (
     <aside
       aria-label="ท่าสัญญาณ IFAB 20 ท่า"
-      className="rounded-2xl bg-[#0D131A] border border-white/[0.08] p-4 flex flex-col gap-3"
+      className="rounded-3xl bg-[#0A0E14] border border-white/10 p-4 sm:p-5 flex flex-col gap-3.5 shadow-2xl"
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -127,7 +127,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
       </div>
 
       {/* Compact Signal Rows */}
-      <div className="overflow-y-auto space-y-1.5 pr-1 max-h-[500px]">
+      <div className="overflow-y-auto space-y-1.5 pr-1 max-h-[520px]">
         {filtered.length === 0 ? (
           <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] py-6 text-center text-xs text-slate-400">
             ไม่พบรายการ

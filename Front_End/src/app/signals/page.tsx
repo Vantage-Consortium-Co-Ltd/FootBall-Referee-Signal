@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   formatSignalEnglishName,
   IFAB_SIGNAL_CLASSES,
@@ -122,7 +123,7 @@ export default function SignalsPage() {
           </div>
 
           <div className="lg:col-span-7 bg-[#0D131A] border border-white/[0.08] rounded-2xl p-5 space-y-4">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-xs font-semibold">
                   {selectedClass.ifabLaw}
@@ -135,11 +136,20 @@ export default function SignalsPage() {
                 </div>
               </div>
 
-              {selectedClass.isF1ZeroLimited && (
-                <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-xs font-medium">
-                  อยู่ระหว่างเพิ่มข้อมูลฝึกสอน
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/?signal=${selectedClass.id}`}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold inline-flex items-center gap-1.5 apple-pressable shadow-md shadow-emerald-500/20 transition"
+                >
+                  <Google_Icon name="videocam" size={15} />
+                  <span>ฝึกซ้อมท่านี้ด้วยกล้องสด</span>
+                </Link>
+                {selectedClass.isF1ZeroLimited && (
+                  <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-xs font-medium">
+                    อยู่ระหว่างเพิ่มข้อมูลฝึกสอน
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="border-t border-white/[0.08] pt-4 space-y-3">
