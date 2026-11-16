@@ -16,27 +16,11 @@ type StudioMode = "webcam" | "image" | "video";
 const STUDIO_TABS: {
   id: StudioMode;
   label: string;
-  hint: string;
   icon: string;
 }[] = [
-  {
-    id: "webcam",
-    label: "1. กล้องวิเคราะห์สด",
-    hint: "ฝึกซ้อมและตรวจจับแบบเรียลไทม์",
-    icon: "videocam",
-  },
-  {
-    id: "image",
-    label: "2. วิเคราะห์จากรูปภาพ",
-    hint: "ตรวจสอบภาพถ่ายและเส้นโครงกระดูก",
-    icon: "photo_camera",
-  },
-  {
-    id: "video",
-    label: "3. วิเคราะห์จากวิดีโอ",
-    hint: "สร้างไทม์ไลน์จังหวะสัญญาณ",
-    icon: "movie",
-  },
+  { id: "webcam", label: "กล้องสด", icon: "videocam" },
+  { id: "image", label: "รูปภาพ", icon: "photo_camera" },
+  { id: "video", label: "วิดีโอ", icon: "movie" },
 ];
 
 export default function Home() {
@@ -84,27 +68,21 @@ export default function Home() {
       : null;
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[#060B0F] via-[#091218] to-[#060B0F] text-slate-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6">
-        {/* Studio Intro & Accessible Mode Switcher */}
+    <main className="min-h-[calc(100vh-3.5rem)] bg-[#070B0F] text-slate-100">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
+        {/* Minimal Workspace Bar */}
         <section
           aria-label="เลือกโหมดการทำงาน"
-          className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-white/10"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
-          <div className="space-y-1.5">
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-              สตูดิโอวิเคราะห์ท่าสัญญาณผู้ตัดสินฟุตบอล
-            </h1>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              จำแนกและฝึกซ้อมท่าสัญญาณผู้ตัดสินตามกติกาสากล IFAB ครบ 20 ท่ามาตรฐาน
-              ผ่านกล้องสด ภาพถ่าย และคลิปวิดีโอการแข่งขัน
-            </p>
-          </div>
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-white">
+            ระบบวิเคราะห์สัญญาณผู้ตัดสิน
+          </h1>
 
           <div
             role="tablist"
-            aria-label="โหมดวิเคราะห์สัญญาณผู้ตัดสิน"
-            className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-white/10 shrink-0"
+            aria-label="โหมดวิเคราะห์"
+            className="inline-flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] self-start sm:self-auto"
           >
             {STUDIO_TABS.map((tab, idx) => {
               const isActive = activeTab === tab.id;
@@ -120,30 +98,21 @@ export default function Home() {
                   onKeyDown={(e) => handleTabKeyDown(e, idx)}
                   onPointerDown={() => triggerCausalFeedback("snap")}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3.5 py-2 rounded-xl text-left transition apple-pressable border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                     isActive
-                      ? "bg-emerald-500 border-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20"
-                      : "border-transparent text-slate-200 hover:bg-slate-800/80"
+                      ? "bg-emerald-500 text-slate-950 shadow-sm"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.05]"
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 text-xs font-bold">
-                    <Google_Icon name={tab.icon} size={15} />
-                    <span>{tab.label}</span>
-                  </div>
-                  <div
-                    className={`text-[11px] mt-0.5 ${
-                      isActive ? "text-slate-900 font-medium" : "text-slate-400"
-                    }`}
-                  >
-                    {tab.hint}
-                  </div>
+                  <Google_Icon name={tab.icon} size={15} />
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
           </div>
         </section>
 
-        {/* Main Content Workspace: 8 Col Studio + 4 Col Interactive IFAB Guide */}
+        {/* Main 2-Column Workspace */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div
             id={`panel-${activeTab}`}

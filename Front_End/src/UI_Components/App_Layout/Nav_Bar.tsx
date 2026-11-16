@@ -8,12 +8,9 @@ import { checkModalHealth } from "../../Core_Lib/Api_Client";
 import { IFAB_SIGNAL_CLASSES } from "../../Core_Lib/Ifab_Rules_Catalog";
 import type { ModalHealthResponse } from "../../Data_Types/Referee_Types";
 
-function formatResponseTimeTh(latencyMs?: number): string | null {
+function formatLatencySec(latencyMs?: number): string | null {
   if (typeof latencyMs !== "number" || !Number.isFinite(latencyMs)) return null;
-  if (latencyMs < 1000) {
-    return `${(latencyMs / 1000).toFixed(1)} วินาที`;
-  }
-  return `${(latencyMs / 1000).toFixed(1)} วินาที`;
+  return `${(latencyMs / 1000).toFixed(1)}s`;
 }
 
 export const Nav_Bar: React.FC = () => {
@@ -67,72 +64,59 @@ export const Nav_Bar: React.FC = () => {
       : null;
 
   const shortLaw = targetSignal ? targetSignal.ifabLaw.split(" - ")[0] : "";
-  const formattedLatency = formatResponseTimeTh(healthInfo?.latencyMs);
+  const formattedLatency = formatLatencySec(healthInfo?.latencyMs);
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0A1014]/90 backdrop-blur-xl border-b border-white/10 text-slate-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 min-h-16 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        {/* Brand Identity */}
+    <header className="sticky top-0 z-40 bg-[#070B0F]/85 backdrop-blur-xl border-b border-white/[0.08] text-slate-100">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between gap-3">
         <Link
           href="/"
           onPointerDown={() => triggerCausalFeedback("tap")}
-          className="flex items-center gap-3 shrink-0 rounded-xl p-1 -ml-1 apple-pressable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          className="flex items-center gap-2.5 shrink-0 rounded-xl p-1 -ml-1 apple-pressable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
-          <span className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500/25 to-teal-500/10 border border-emerald-400/40 text-emerald-400 shadow-sm shadow-emerald-950/50">
-            <Google_Icon name="sports_soccer" size={22} />
+          <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/15 border border-emerald-400/35 text-emerald-400">
+            <Google_Icon name="sports_soccer" size={18} />
           </span>
-          <div className="leading-snug">
-            <div className="text-sm md:text-base font-bold tracking-tight text-white">
-              IFAB Referee Signal AI
-            </div>
-            <div className="text-[11px] text-slate-300">
-              ระบบวิเคราะห์และจำแนกท่าสัญญาณผู้ตัดสินฟุตบอลตามกติกาสากล
-            </div>
-          </div>
+          <span className="text-sm font-semibold tracking-tight text-white">
+            IFAB Referee Signal AI
+          </span>
         </Link>
 
-        {/* Right Controls: Target Signal Pill + AI Connection Status */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {targetSignal && (
-            <div className="hidden lg:flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full bg-slate-800/80 border border-white/15 text-xs text-slate-200">
+            <div className="hidden md:flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs text-slate-200">
               <Google_Icon
                 name="verified"
-                size={14}
+                size={13}
                 className="text-emerald-400 shrink-0"
               />
-              <span className="max-w-[260px] truncate">
-                ท่าที่กำลังศึกษา:{" "}
-                <strong className="font-semibold text-white">
-                  {targetSignal.nameTh}
-                </strong>{" "}
-                <span className="text-slate-300">({shortLaw})</span>
+              <span className="max-w-[240px] truncate font-medium text-white">
+                {targetSignal.nameTh} · {shortLaw}
               </span>
               <button
                 type="button"
                 onClick={handleResetSignal}
-                aria-label="ล้างท่าฝึกซ้อมที่เลือก"
-                title="ล้างท่าฝึกซ้อมที่เลือก"
-                className="p-1 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                aria-label="ล้างท่าที่เลือก"
+                className="p-0.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
               >
                 <Google_Icon name="close" size={13} />
               </button>
             </div>
           )}
 
-          {/* AI Connection Status Pill */}
           <div
             role="status"
             aria-live="polite"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium apple-tabular ${
+            className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium apple-tabular ${
               healthState === "online"
-                ? "bg-emerald-500/15 border-emerald-400/35 text-emerald-300"
+                ? "bg-emerald-500/10 border-emerald-400/30 text-emerald-300"
                 : healthState === "warming"
-                ? "bg-amber-500/15 border-amber-400/35 text-amber-200"
-                : "bg-rose-500/15 border-rose-400/40 text-rose-200"
+                ? "bg-amber-500/10 border-amber-400/30 text-amber-200"
+                : "bg-rose-500/10 border-rose-400/35 text-rose-200"
             }`}
           >
             <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                 healthState === "online"
                   ? "bg-emerald-400"
                   : healthState === "warming"
@@ -145,32 +129,24 @@ export const Nav_Bar: React.FC = () => {
                 type="button"
                 onPointerDown={() => triggerCausalFeedback("tap")}
                 onClick={() => void refreshHealth()}
-                className="inline-flex items-center gap-1.5 text-left hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded"
-                title="คลิกเพื่อตรวจสอบความพร้อมของระบบ AI อีกครั้ง"
+                className="inline-flex items-center gap-1.5 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded"
               >
-                <span>ระบบวิเคราะห์ AI พร้อมใช้งาน</span>
+                <span>AI พร้อมใช้งาน</span>
                 {formattedLatency && (
-                  <span className="text-emerald-200/90 font-semibold">
-                    ({formattedLatency})
-                  </span>
+                  <span className="text-emerald-200/80">{formattedLatency}</span>
                 )}
               </button>
             )}
-            {healthState === "warming" && (
-              <span>กำลังเตรียมพร้อมระบบ AI...</span>
-            )}
+            {healthState === "warming" && <span>กำลังเตรียมระบบ...</span>}
             {healthState === "offline" && (
-              <div className="flex items-center gap-2">
-                <span>ไม่สามารถเชื่อมต่อระบบ AI</span>
-                <button
-                  type="button"
-                  onPointerDown={() => triggerCausalFeedback("tap")}
-                  onClick={() => void refreshHealth()}
-                  className="px-2 py-0.5 rounded-full bg-rose-500 hover:bg-rose-400 text-white text-[11px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                >
-                  ลองเชื่อมต่อใหม่
-                </button>
-              </div>
+              <button
+                type="button"
+                onPointerDown={() => triggerCausalFeedback("tap")}
+                onClick={() => void refreshHealth()}
+                className="hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded"
+              >
+                ออฟไลน์
+              </button>
             )}
           </div>
         </div>

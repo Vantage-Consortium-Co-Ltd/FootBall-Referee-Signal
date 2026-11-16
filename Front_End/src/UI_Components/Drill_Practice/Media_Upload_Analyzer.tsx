@@ -34,12 +34,12 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  // Photo Analysis state
+  // Photo state
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [annotatedImageUrl, setAnnotatedImageUrl] = useState<string | null>(null);
   const [imageDetections, setImageDetections] = useState<ModalDetection[]>([]);
 
-  // Video Analysis state
+  // Video state
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [videoResult, setVideoResult] = useState<ModalVideoPredictResponse | null>(
     null
@@ -71,7 +71,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
     if (file.size > maxBytes) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
       setErrorMsg(
-        `ไฟล์มีขนาด ${sizeMb} MB เกินขนาดสูงสุดที่รองรับ (${MODEL_SPEC_INFO.maxUploadMb} MB)`
+        `ขนาดไฟล์ ${sizeMb} MB เกินขีดจำกัด ${MODEL_SPEC_INFO.maxUploadMb} MB`
       );
       triggerCausalFeedback("warning");
       return;
@@ -114,9 +114,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
       }
     } catch (err: unknown) {
       setErrorMsg(
-        err instanceof Error
-          ? err.message
-          : "ไม่สามารถวิเคราะห์ไฟล์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"
+        err instanceof Error ? err.message : "วิเคราะห์ไฟล์ไม่สำเร็จ"
       );
       triggerCausalFeedback("warning");
     } finally {
@@ -150,7 +148,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
     if (!videoResult) {
       return {
         totalDetections: 0,
-        topSignalTh: "ไม่มีสัญญาณที่ตรวจพบ",
+        topSignalTh: "-",
         analyzedDurationSec: 0,
         uniqueLabels: [] as string[],
       };
@@ -179,7 +177,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
       ? topRule
         ? topRule.nameTh
         : formatSignalEnglishName(topLabel)
-      : "ยังไม่มีสัญญาณที่ตรวจพบ";
+      : "-";
 
     const durationFromFrames =
       videoResult.fps > 0 && videoResult.frames_read > 0
@@ -211,30 +209,20 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
 
   return (
     <section
-      aria-label={mode === "image" ? "วิเคราะห์สัญญาณจากภาพถ่าย" : "วิเคราะห์ไทม์ไลน์วิดีโอการแข่งขัน"}
-      className="rounded-3xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-2xl shadow-black/50 flex flex-col"
+      aria-label={mode === "image" ? "วิเคราะห์รูปภาพ" : "วิเคราะห์วิดีโอ"}
+      className="rounded-2xl bg-[#0D131A] border border-white/[0.08] overflow-hidden flex flex-col"
     >
-      {/* Header */}
-      <div className="px-5 py-4 bg-slate-950/60 border-b border-white/10 flex flex-wrap justify-between items-center gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-emerald-400 shrink-0">
-            <Google_Icon
-              name={mode === "image" ? "photo_camera" : "movie"}
-              size={18}
-            />
-          </span>
-          <div>
-            <h2 className="text-sm md:text-base font-bold text-white">
-              {mode === "image"
-                ? "วิเคราะห์ท่าสัญญาณจากภาพถ่าย"
-                : "วิเคราะห์จังหวะสัญญาณจากคลิปวิดีโอ"}
-            </h2>
-            <p className="text-xs text-slate-300">
-              {mode === "image"
-                ? "อัปโหลดภาพผู้ตัดสินเพื่อวาดเส้นโครงกระดูกและจำแนกท่าตามกติกา IFAB"
-                : `อัปโหลดคลิปการแข่งขันเพื่อค้นหาช่วงเวลาที่ผู้ตัดสินให้สัญญาณ (วิเคราะห์สูงสุด ${MODEL_SPEC_INFO.videoMaxSeconds} วินาที)`}
-            </p>
-          </div>
+      {/* Compact Header */}
+      <div className="px-4 py-3 bg-white/[0.02] border-b border-white/[0.08] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Google_Icon
+            name={mode === "image" ? "photo_camera" : "movie"}
+            size={17}
+            className="text-emerald-400 shrink-0"
+          />
+          <h2 className="text-sm font-semibold text-white">
+            {mode === "image" ? "วิเคราะห์รูปภาพ" : "วิเคราะห์วิดีโอ"}
+          </h2>
         </div>
 
         <button
@@ -242,10 +230,10 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           onPointerDown={() => triggerCausalFeedback("tap")}
           onClick={() => fileInputRef.current?.click()}
           disabled={isLoading}
-          className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 apple-pressable disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 apple-pressable disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
-          <Google_Icon name="layers" size={15} />
-          <span>{mode === "image" ? "เลือกรูปภาพ" : "เลือกคลิปวิดีโอ"}</span>
+          <Google_Icon name="layers" size={14} />
+          <span>{mode === "image" ? "เลือกรูปภาพ" : "เลือกวิดีโอ"}</span>
         </button>
 
         <input
@@ -261,16 +249,12 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
         />
       </div>
 
-      <div className="p-5 space-y-5">
-        {/* Dropzone */}
+      <div className="p-4 md:p-5 space-y-4">
+        {/* Single-Line Minimal Dropzone */}
         <div
           role="button"
           tabIndex={0}
-          aria-label={
-            mode === "image"
-              ? "พื้นที่วางหรือเลือกไฟล์ภาพถ่ายผู้ตัดสิน"
-              : "พื้นที่วางหรือเลือกไฟล์คลิปวิดีโอการแข่งขัน"
-          }
+          aria-label="เลือกหรือวางไฟล์"
           onDragOver={(e) => {
             e.preventDefault();
             setIsDragging(true);
@@ -284,185 +268,134 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
               fileInputRef.current?.click();
             }
           }}
-          className={`rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+          className={`rounded-xl border border-dashed px-4 py-6 text-center cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
             isDragging
               ? "border-emerald-400 bg-emerald-500/10"
-              : "border-white/15 bg-slate-950/60 hover:border-emerald-400/50"
+              : "border-white/15 bg-white/[0.02] hover:border-emerald-400/50"
           }`}
         >
-          <div className="flex flex-col items-center gap-2.5">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-emerald-400">
-              <Google_Icon
-                name={mode === "image" ? "photo_camera" : "movie"}
-                size={22}
-              />
-            </div>
-            <div className="text-xs md:text-sm font-semibold text-white">
+          <div className="flex flex-col items-center gap-2">
+            <Google_Icon
+              name={mode === "image" ? "photo_camera" : "movie"}
+              size={22}
+              className="text-emerald-400"
+            />
+            <span className="text-xs font-medium text-slate-200">
               {isLoading
-                ? "กำลังวิเคราะห์ไฟล์ด้วยระบบ AI..."
+                ? "กำลังวิเคราะห์..."
                 : fileName
-                ? `ไฟล์ล่าสุด: ${fileName} — คลิกหรือวางไฟล์ใหม่เพื่อวิเคราะห์อีกครั้ง`
-                : mode === "image"
-                ? "คลิกเพื่อเลือกภาพ หรือวางไฟล์ที่นี่ (JPG, PNG, WebP)"
-                : "คลิกเพื่อเลือกคลิป หรือวางไฟล์ที่นี่ (MP4, MOV, WebM)"}
-            </div>
-            <p className="text-xs text-slate-300">
-              {mode === "image"
-                ? `รองรับขนาดไฟล์สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB · แนะนำภาพผู้ตัดสินเต็มตัวและเห็นแขนชัดเจน`
-                : `รองรับขนาดสูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB · วิเคราะห์ความยาวสูงสุด ${MODEL_SPEC_INFO.videoMaxSeconds} วินาทีต่อคลิป`}
-            </p>
-          </div>
-        </div>
-
-        {isLoading && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="px-4 py-3 rounded-2xl bg-sky-500/15 border border-sky-400/35 text-xs text-sky-200 flex items-center gap-3"
-          >
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping shrink-0" />
-            <span>
-              กำลังวิเคราะห์ท่าสัญญาณด้วยระบบ AI (การประมวลผลครั้งแรกอาจใช้เวลาประมาณ 10–30 วินาที)...
+                ? fileName
+                : `วางไฟล์หรือคลิกเพื่อเลือกไฟล์ · สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB`}
             </span>
           </div>
-        )}
+        </div>
 
         {errorMsg && (
           <div
             role="alert"
-            className="px-4 py-3 rounded-2xl bg-rose-950/90 border border-rose-400/45 text-xs text-rose-100 flex items-center gap-2.5"
+            className="px-3.5 py-2.5 rounded-xl bg-rose-950/80 border border-rose-400/40 text-xs text-rose-100 flex items-center gap-2"
           >
-            <Google_Icon name="warning" size={16} className="text-rose-400 shrink-0" />
+            <Google_Icon name="warning" size={15} className="text-rose-400 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* PHOTO ANALYSIS RESULTS */}
+        {/* PHOTO RESULTS */}
         {mode === "image" && (originalImageUrl || annotatedImageUrl) && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-950/75 border border-white/10 rounded-2xl p-3.5 space-y-2.5">
-                <div className="text-xs font-semibold text-slate-200">
-                  ภาพต้นฉบับ
-                </div>
-                <div className="h-[260px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div className="bg-black/40 border border-white/[0.08] rounded-xl p-3 space-y-2">
+                <div className="text-xs font-medium text-slate-300">ต้นฉบับ</div>
+                <div className="h-[240px] bg-black rounded-lg overflow-hidden flex items-center justify-center">
                   {originalImageUrl && (
                     <img
                       src={originalImageUrl}
-                      alt="ภาพถ่ายผู้ตัดสินต้นฉบับ"
+                      alt="ภาพต้นฉบับ"
                       className="max-h-full max-w-full object-contain"
                     />
                   )}
                 </div>
               </div>
 
-              <div className="bg-slate-950/75 border border-emerald-400/30 rounded-2xl p-3.5 space-y-2.5">
+              <div className="bg-black/40 border border-emerald-400/25 rounded-xl p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-semibold text-emerald-300">
-                    ภาพวิเคราะห์โครงกระดูกและท่าสัญญาณ (AI Pose)
-                  </span>
+                  <span className="font-medium text-emerald-300">ผลวิเคราะห์ AI</span>
                   {annotatedImageUrl && (
                     <a
                       href={annotatedImageUrl}
                       download={`referee-pose-${fileName || "result"}.jpg`}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400/45 text-emerald-200 hover:bg-emerald-500/30 text-[11px] font-semibold inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                      className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/30 text-[11px] font-semibold inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
-                      <Google_Icon name="download" size={13} />
-                      <span>ดาวน์โหลดภาพผลลัพธ์</span>
+                      <Google_Icon name="download" size={12} />
+                      <span>ดาวน์โหลด</span>
                     </a>
                   )}
                 </div>
-                <div className="h-[260px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
+                <div className="h-[240px] bg-black rounded-lg overflow-hidden flex items-center justify-center">
                   {annotatedImageUrl ? (
                     <img
                       src={annotatedImageUrl}
-                      alt="ภาพผลวิเคราะห์โครงกระดูกและท่าสัญญาณผู้ตัดสิน"
+                      alt="ภาพผลวิเคราะห์ AI"
                       className="max-h-full max-w-full object-contain"
                     />
                   ) : (
-                    <span className="text-xs text-slate-400">
-                      กำลังจัดทำภาพวิเคราะห์...
-                    </span>
+                    <span className="text-xs text-slate-400">กำลังประมวลผล...</span>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Human-Friendly Signal Cards */}
-            <div className="bg-slate-950/75 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <h3 className="text-sm font-bold text-white">
-                  ผลการจำแนกท่าสัญญาณผู้ตัดสิน
-                </h3>
-                <span className="text-xs text-slate-300 apple-tabular">
-                  ตรวจพบ {imageDetections.length} สัญญาณ
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <h3 className="font-semibold text-white">สัญญาณที่ตรวจพบ</h3>
+                <span className="text-slate-400 apple-tabular">
+                  {imageDetections.length} รายการ
                 </span>
               </div>
 
               {imageDetections.length === 0 ? (
-                <div className="rounded-xl bg-slate-900 border border-white/10 p-4 text-xs text-slate-300 leading-relaxed">
-                  ยังไม่พบผู้ตัดสินหรือท่าสัญญาณที่ชัดเจนในภาพนี้ — แนะนำให้ใช้ภาพที่เห็นผู้ตัดสินตั้งแต่ศีรษะถึงลำตัวชัดเจน มีแสงสว่างเพียงพอ และไม่ถูกผู้เล่นบดบังช่วงแขน
+                <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] px-3.5 py-3 text-xs text-slate-400">
+                  ไม่พบสัญญาณ
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {imageDetections.map((det, idx) => {
                     const info = findRuleByLabel(det.label);
                     const meta = getConfidenceVisualMeta(det.confidence);
 
                     return (
-                      <article
+                      <div
                         key={`${det.label}-${idx}`}
-                        className="p-4 rounded-2xl border bg-slate-900/90 border-white/10 space-y-3"
+                        className="p-3.5 rounded-xl border bg-white/[0.03] border-white/[0.08] space-y-2"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
-                          <div className="space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {info && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/5 border border-white/10 text-slate-200">
-                                  {info.ifabLaw}
-                                </span>
-                              )}
-                              {info?.isF1ZeroLimited && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-amber-500/15 border border-amber-400/35 text-amber-300">
-                                  อยู่ระหว่างเพิ่มข้อมูลฝึกสอน
-                                </span>
-                              )}
-                            </div>
-                            <h4 className="text-base font-bold text-white">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-sm font-bold text-white truncate">
                               {info ? info.nameTh : formatSignalEnglishName(det.label)}
-                            </h4>
-                            <div className="text-xs text-slate-300">
+                            </div>
+                            <div className="text-[11px] text-slate-400 truncate">
                               {formatSignalEnglishName(det.label)}
                             </div>
                           </div>
-
-                          <div className="sm:text-right space-y-1 shrink-0 apple-tabular">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-bold ${meta.badgeClass}`}
-                            >
-                              ความเชื่อมั่น {meta.pct}% · {meta.tierLabel}
+                          {info && (
+                            <span className="shrink-0 px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/10 text-[11px] text-slate-300">
+                              {info.ifabLaw.split(" - ")[0]}
                             </span>
-                          </div>
+                          )}
                         </div>
 
-                        <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${meta.barClass}`}
-                            style={{ width: `${meta.pct}%` }}
-                          />
-                        </div>
-
-                        {info && (
-                          <div className="space-y-1.5 pt-1 text-xs text-slate-300">
-                            <p className="leading-relaxed">{info.descriptionTh}</p>
-                            {info.coachingTips.length > 0 && (
-                              <p className="text-emerald-300/90">
-                                <strong>จุดสังเกตท่าทาง:</strong> {info.coachingTips.join(" · ")}
-                              </p>
-                            )}
+                        <div className="flex items-center gap-2.5 apple-tabular">
+                          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${meta.barClass}`}
+                              style={{ width: `${meta.pct}%` }}
+                            />
                           </div>
-                        )}
-                      </article>
+                          <span className={`text-xs font-bold ${meta.textClass}`}>
+                            {meta.pct}%
+                          </span>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -471,64 +404,48 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           </div>
         )}
 
-        {/* VIDEO ANALYSIS RESULTS */}
+        {/* VIDEO RESULTS */}
         {mode === "video" && videoPreviewUrl && (
           <div className="space-y-4">
-            <div className="bg-black rounded-2xl border border-white/10 overflow-hidden">
+            <div className="bg-black rounded-xl border border-white/[0.08] overflow-hidden">
               <video
                 ref={videoPreviewRef}
                 src={videoPreviewUrl}
                 controls
-                className="w-full max-h-[340px] object-contain"
+                className="w-full max-h-[320px] object-contain"
               />
             </div>
 
             {videoResult && (
               <>
-                {/* Plain-language Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 apple-tabular">
-                  <div className="bg-slate-950/75 border border-white/10 rounded-2xl p-3.5">
-                    <div className="text-xs text-slate-300">
-                      จำนวนจังหวะที่ตรวจพบสัญญาณ
-                    </div>
-                    <div className="text-xl font-bold text-emerald-400 mt-1">
-                      {videoStats.totalDetections} จังหวะ
+                <div className="grid grid-cols-3 gap-3 apple-tabular">
+                  <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3">
+                    <div className="text-[11px] text-slate-400">จังหวะที่พบ</div>
+                    <div className="text-lg font-bold text-emerald-400 mt-0.5">
+                      {videoStats.totalDetections}
                     </div>
                   </div>
-                  <div className="bg-slate-950/75 border border-white/10 rounded-2xl p-3.5">
-                    <div className="text-xs text-slate-300">
-                      สัญญาณที่พบบ่อยที่สุด
-                    </div>
-                    <div className="text-base font-bold text-white mt-1.5 truncate">
+                  <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3">
+                    <div className="text-[11px] text-slate-400">สัญญาณหลัก</div>
+                    <div className="text-sm font-bold text-white mt-1 truncate">
                       {videoStats.topSignalTh}
                     </div>
                   </div>
-                  <div className="bg-slate-950/75 border border-white/10 rounded-2xl p-3.5">
-                    <div className="text-xs text-slate-300">
-                      ความยาวคลิปที่วิเคราะห์
-                    </div>
-                    <div className="text-xl font-bold text-sky-300 mt-1">
-                      {videoStats.analyzedDurationSec.toFixed(1)} วินาที
+                  <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3">
+                    <div className="text-[11px] text-slate-400">ความยาวคลิป</div>
+                    <div className="text-lg font-bold text-sky-300 mt-0.5">
+                      {videoStats.analyzedDurationSec.toFixed(1)}s
                     </div>
                   </div>
                 </div>
 
-                {/* Interactive Match Signal Timeline */}
-                <div className="bg-slate-950/75 border border-white/10 rounded-2xl overflow-hidden">
-                  <div className="px-4 py-3 bg-slate-900 border-b border-white/10 space-y-2.5">
-                    <div className="flex flex-wrap justify-between items-center gap-2">
-                      <h3 className="text-sm font-bold text-white">
-                        ไทม์ไลน์การให้สัญญาณผู้ตัดสิน
-                      </h3>
-                      <span className="text-xs text-slate-300">
-                        คลิกที่ช่วงเวลาเพื่อกระโดดไปยังจังหวะนั้นในวิดีโอทันที
-                      </span>
-                    </div>
-
+                <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl overflow-hidden">
+                  <div className="px-3.5 py-2.5 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-xs font-semibold text-white">ไทม์ไลน์สัญญาณ</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {[
-                        { id: "detected", label: "เฉพาะจังหวะที่พบสัญญาณ" },
-                        { id: "all", label: "ทุกช่วงเวลาที่ตรวจ" },
+                        { id: "detected", label: "ที่พบ" },
+                        { id: "all", label: "ทั้งหมด" },
                         ...videoStats.uniqueLabels.map((label) => {
                           const rule = findRuleByLabel(label);
                           return {
@@ -545,10 +462,10 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                             key={pill.id}
                             type="button"
                             onClick={() => setTimelineFilter(pill.id)}
-                            className={`px-3 py-1 rounded-full text-xs font-medium border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                               active
-                                ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-300"
-                                : "bg-slate-950 border-white/10 text-slate-300 hover:text-white"
+                                ? "bg-emerald-500/20 border-emerald-400/45 text-emerald-300"
+                                : "bg-transparent border-white/10 text-slate-400 hover:text-white"
                             }`}
                           >
                             {pill.label}
@@ -559,11 +476,11 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                   </div>
 
                   {filteredTimelineRows.length === 0 ? (
-                    <div className="p-5 text-center text-xs text-slate-300">
-                      ยังไม่พบท่าสัญญาณชัดเจนในช่วงที่เลือก — คุณสามารถกดดู &ldquo;ทุกช่วงเวลาที่ตรวจ&rdquo; หรือเลือกคลิปที่เห็นท่าทางผู้ตัดสินชัดเจนขึ้น
+                    <div className="p-4 text-center text-xs text-slate-400">
+                      ไม่พบสัญญาณ
                     </div>
                   ) : (
-                    <div className="max-h-[300px] overflow-y-auto divide-y divide-white/10 text-xs apple-tabular">
+                    <div className="max-h-[260px] overflow-y-auto divide-y divide-white/[0.06] text-xs apple-tabular">
                       {filteredTimelineRows.map((row) => {
                         const isActive = activeFrameIdx === row.frame;
                         return (
@@ -571,30 +488,28 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                             key={row.frame}
                             type="button"
                             onClick={() => handleSeekVideo(row.frame, row.time)}
-                            className={`w-full text-left px-4 py-3 flex flex-wrap items-center justify-between gap-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                            className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between gap-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                               isActive
                                 ? "bg-emerald-500/15 text-white"
-                                : "hover:bg-slate-900 text-slate-200"
+                                : "hover:bg-white/[0.03] text-slate-300"
                             }`}
                           >
-                            <div className="flex items-center gap-2.5 shrink-0">
+                            <div className="flex items-center gap-2 shrink-0">
                               <Google_Icon
                                 name="play_arrow"
-                                size={16}
+                                size={14}
                                 className={
-                                  isActive ? "text-emerald-400" : "text-slate-400"
+                                  isActive ? "text-emerald-400" : "text-slate-500"
                                 }
                               />
-                              <span className="px-2.5 py-0.5 rounded-lg bg-slate-800 border border-white/10 font-semibold text-white">
+                              <span className="font-mono text-white">
                                 {formatTimestampSec(row.time)}
                               </span>
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-end gap-2">
+                            <div className="flex flex-wrap items-center justify-end gap-1.5">
                               {row.detections.length === 0 ? (
-                                <span className="text-slate-400">
-                                  ไม่พบสัญญาณในช่วงเวลานี้
-                                </span>
+                                <span className="text-slate-500">-</span>
                               ) : (
                                 row.detections.map((d, idx) => {
                                   const info = findRuleByLabel(d.label);
@@ -602,19 +517,12 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                                   return (
                                     <span
                                       key={`${row.frame}-${d.label}-${idx}`}
-                                      className={`px-2.5 py-1 rounded-full border text-xs font-medium inline-flex items-center gap-1.5 ${meta.badgeClass}`}
+                                      className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${meta.badgeClass}`}
                                     >
-                                      <span>
-                                        {info
-                                          ? info.nameTh
-                                          : formatSignalEnglishName(d.label)}
-                                      </span>
-                                      {info && (
-                                        <span className="opacity-80">
-                                          ({info.ifabLaw.split(" - ")[0]})
-                                        </span>
-                                      )}
-                                      <span className="font-bold">· {meta.pct}%</span>
+                                      {info
+                                        ? info.nameTh
+                                        : formatSignalEnglishName(d.label)}{" "}
+                                      · {meta.pct}%
                                     </span>
                                   );
                                 })
