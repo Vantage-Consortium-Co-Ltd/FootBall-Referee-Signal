@@ -9,19 +9,19 @@ Train/mlruns/
 mlruns/
 runs/
 .venv/
-# docs (allow superpowers plans and figcraft designs)
-docs/*
-!docs/superpowers/
-!docs/figcraft/
 *.log
 *.db
 *.joblib
 mlartifacts/
 .ipynb_checkpoints/
 Evaluate/output/
-results/
+model_output_version/
 output_classcut/
 Data_Pipeline/output*/
+.claude/
+*.pdf
+kaggle/
+config_kaggle.yaml
 
 # Graphify
 graphify-out/

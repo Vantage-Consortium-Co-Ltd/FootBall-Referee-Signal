@@ -25,12 +25,12 @@ from Process import GESTURES, build_dataset, fetch_export, load_env, make_fetche
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--config", default=str(HERE / "config" / "config.yaml"))
+    ap.add_argument("--config", default=str(ROOT / "config" / "config.yaml"))
     ap.add_argument("--export-json", nargs="+", help="saved Label Studio JSON export(s); skips the API")
     ap.add_argument("--project-ids", nargs="+", type=int, help="override LS_PROJECT_IDS / config")
     args = ap.parse_args()
 
-    cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+    cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))["data_pipeline"]
     assert abs(sum(cfg["split"].values()) - 1) < 1e-6, "split ratios must sum to 1"
     assert set(cfg["flip_classes"]) <= set(GESTURES), "unknown class in flip_classes"
     out = Path(cfg["output_dir"])

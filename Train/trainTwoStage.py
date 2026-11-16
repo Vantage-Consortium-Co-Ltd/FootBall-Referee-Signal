@@ -1,6 +1,6 @@
 """Two-stage: keypoints.csv -> normalized features -> sklearn classifier. Picks best by val macro-F1.
 
-  python Train/train_two_stage.py [--csv ...keypoints.csv] [--out Train/models/two_stage] [--mlruns Train/mlruns] [--config Train/config.yaml]
+  python Train/trainTwoStage.py [--csv ...keypoints.csv] [--out Train/models/two_stage] [--mlruns Train/mlruns] [--config config/config.yaml]
 
 Every model's parameter lists in config.yaml are expanded to all combinations; the best one overall is saved.
 
@@ -45,6 +45,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED = 42
+DEFAULT_CONFIG = ROOT / "config" / "config.yaml"  # section: train
 MODELS = {  # fixed settings live here, tunable ones come from config.yaml; MLP has no class_weight option
     "logreg": lambda **p: LogisticRegression(max_iter=3000, class_weight="balanced", random_state=SEED, **p),
     "random_forest": lambda **p: RandomForestClassifier(class_weight="balanced", random_state=SEED, n_jobs=-1, **p),
@@ -71,7 +72,7 @@ def _fit_data(d, aug):
 
 
 def train(csv, out_dir, mlruns=None, cfg=None):
-    cfg = cfg or yaml.safe_load(Path(__file__).with_name("config.yaml").read_text(encoding="utf-8"))
+    cfg = cfg or yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))["train"]
     grids, folds, aug = cfg["two_stage"], cfg["cv"]["folds"], {**cfg["augment"], "seed": SEED}
     unknown = set(grids) - set(MODELS)
     if unknown:
@@ -159,6 +160,6 @@ if __name__ == "__main__":
     ap.add_argument("--csv", default=str(ROOT / "Data_Pipeline/output/dataset/keypoints.csv"))
     ap.add_argument("--out", default=str(ROOT / "Train/models/two_stage"))
     ap.add_argument("--mlruns", default=None)
-    ap.add_argument("--config", default=str(Path(__file__).with_name("config.yaml")))
+    ap.add_argument("--config", default=str(DEFAULT_CONFIG))
     a = ap.parse_args()
-    train(a.csv, a.out, a.mlruns, yaml.safe_load(Path(a.config).read_text(encoding="utf-8")))
+    train(a.csv, a.out, a.mlruns, yaml.safe_load(Path(a.config).read_text(encoding="utf-8"))["train"])

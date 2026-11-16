@@ -1,10 +1,10 @@
 """Evaluate the one-stage YOLO-pose model on the TEST split and log it to the same MLflow experiment as training.
 
-  python Evaluate/evaluate_one_stage.py [--weights Train/results/runs/one_stage/best_overall.pt] [--data ...data.yaml]
+  python Evaluate/evaluateOneStage.py [--weights Train/results/runs/one_stage/best_overall.pt] [--data ...data.yaml]
 
 Two views of the same test set:
   * Ultralytics val: box / pose mAP (detection quality, plots saved under <out>/val).
-  * Per-person classification, the same metrics as evaluate_two_stage.py, so the two models are comparable:
+  * Per-person classification, the same metrics as evaluateTwoStage.py, so the two models are comparable:
     each ground-truth person takes the class of the best-confidence prediction with box IoU >= --iou;
     no matching prediction counts as "missed" (always wrong).
 
@@ -43,6 +43,7 @@ def main():
     cfg = yaml.safe_load(Path(a.data).read_text(encoding="utf-8"))
     names = cfg["names"]
     out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
     model = YOLO(a.weights)
 
     v = model.val(data=a.data, split="test", imgsz=a.imgsz, device=a.device, workers=0,

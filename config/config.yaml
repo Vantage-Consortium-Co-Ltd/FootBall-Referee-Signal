@@ -1,0 +1,119 @@
+# ONE config for the whole project. Edit values here, never in the code.
+# Sections: data_pipeline | train | log_model | inference.   Secrets (LS_TOKEN, HF_TOKEN, ...) stay in .env, never here.
+# Relative paths start at the repo root.
+
+
+# ============================================================ 1. DATA PIPELINE (Data_Pipeline/main.py)
+data_pipeline:
+  project_ids: [7]                              # Label Studio projects. Precedence: --project-ids > LS_PROJECT_IDS in .env > this
+  output_dir: Data_Pipeline/output_notflip
+  split: {train: 0.8, val: 0.1, test: 0.1}
+  seed: 42
+  burst_seconds: 5                              # photos <= this many seconds apart (chained) AND of the same class set share a group
+  flip_classes: []                              # offline horizontal flip, train only, for these classes
+
+
+# ============================================================ 2. TRAIN (Train/*.py)
+# Every hyper-parameter is a LIST: all combinations are tried, the best one (val macro-F1 / YOLO fitness) is kept.
+train:
+  # ---- two-stage (keypoints -> sklearn), CPU
+  two_stage:
+    logreg:
+      C: [0.1, 1, 10]
+    random_forest:
+      n_estimators: [100, 300]
+      max_depth: [null, 10, 20]
+    mlp:
+      hidden_layer_sizes: [[128, 64], [256, 128]]
+      alpha: [0.0001, 0.001]
+  cv:                                           # grouped by photo burst, stratified by class; test is never used here
+    folds: 5
+  augment:                                      # keypoint augmentation, TRAINING part of each fold only
+    copies: 3
+    rotate_deg: 10
+    scale: [0.9, 1.1]                           # independent x / y stretch
+    jitter: 0.005                               # std of noise, normalized image coords
+
+  # ---- one-stage (YOLO-pose), GPU. Select a grid with: trainOneStage.py --grid <name>
+  one_stage:                                    # default grid
+    epochs: [300]
+    patience: [30]                              # early stop after 30 epochs w/o fitness gain; val is small so <20 stops too early
+    imgsz: [960, 1280]
+    batch: [16]
+    optimizer: [AdamW]                          # must be explicit: with 'auto' Ultralytics IGNORES lr0
+    lr0: [0.0004, 0.001]
+    cos_lr: [true]
+    freeze: [null, 10]                          # null = train all layers, 10 = freeze backbone layers 0-9
+    close_mosaic: [10]
+    weight_decay: [0.0005, 0.001]
+  one_stage_kaggle:                             # Kaggle run, once per dataset (dataset-notflip, dataset-cutbyclass); embedded by Train/kaggle/makeCell.py
+    epochs: [200]                               # capped so 2 datasets x 4 trials fit one 12 h session
+    patience: [30]
+    imgsz: [960]
+    batch: [16]
+    optimizer: [AdamW]
+    lr0: [0.0004, 0.001]
+    cos_lr: [true]
+    close_mosaic: [15]
+    cls: [1.0, 1.5]                             # default 0.5; errors are class confusions, not keypoint placement
+
+
+# ============================================================ 3. LOG MODEL (Log_Model/*.py)
+log_model:
+  mlflow:
+    uri: http://127.0.0.1:5000
+    experiment_one_stage: referee-one-stage
+    experiment_two_stage: referee-two-stage
+    registry_one_stage: referee-one-stage
+    registry_two_stage: referee-two-stage
+  one_stage:
+    runs_dir: Train/model_output_version/results_c2/runs/one_stage   # trial*/ + best_overall.pt
+    eval_dir: Evaluate/output/one_stage_c2                          # metrics.json, classification_report.csv, confusion_matrix.png, val/
+    weights: best_overall.pt                                        # file inside runs_dir that goes to the registry
+    trial_artifacts: [results.csv, args.yaml, results.png, confusion_matrix.png, confusion_matrix_normalized.png,
+                      BoxF1_curve.png, PoseF1_curve.png, weights/best.pt]
+  two_stage:
+    model_dir: Train/models/two_stage                               # model.joblib + meta.json
+    local_store: Train/mlruns/mlflow.db                             # sqlite store the training runs were written to
+  huggingface:                                                      # logToHf.py; token = HF_TOKEN in .env
+    repo_id: Kitkhachon/Football-Acting-Detection-v1.0
+    repo_type: model
+    private: true                                                   # false = publish
+    files:                                                          # local path -> path inside the repo
+      Train/model_output_version/results_c2/runs/one_stage/best_overall.pt: best.pt
+      docs/log_model/hfModelCard.md: README.md
+      Train/model_output_version/results_c2/data.yaml: data.yaml
+      Train/model_output_version/results_c2/runs/one_stage/trial0/args.yaml: training/args.yaml
+      Train/model_output_version/results_c2/runs/one_stage/trial0/results.csv: training/results.csv
+      Train/model_output_version/results_c2/runs/one_stage/trial0/results.png: training/results.png
+      Train/model_output_version/results_c2/runs/one_stage/trial0/confusion_matrix_normalized.png: training/confusion_matrix_normalized.png
+      Evaluate/output/one_stage_c2/metrics.json: evaluation/metrics.json
+      Evaluate/output/one_stage_c2/classification_report.csv: evaluation/classification_report.csv
+      Evaluate/output/one_stage_c2/confusion_matrix.png: evaluation/confusion_matrix.png
+
+
+# ============================================================ 4. INFERENCE (python Inference/main.py -> FastAPI service)
+inference:
+  host: 127.0.0.1
+  port: 8000
+  model_path: Train/model_output_version/results_c2/runs/one_stage/best_overall.pt
+  device: cpu                                   # "0" = first GPU (needs CUDA). cpu runs anywhere, incl. Modal free tier
+  imgsz: 640
+  conf: 0.25
+  fp16: true                                    # FP16 on GPU: faster, less memory (ignored on cpu)
+  max_upload_mb: 100
+  api_key_env: FOOTBALL_API_KEY                 # env var holding the API key; unset = no auth (local). Locally: put it in .env
+  ws_idle_seconds: 30                           # webcam WebSocket closes when no frame arrives for this long
+  video:
+    stride: 5                                   # run the model on every Nth frame
+    max_seconds: 30                             # longer videos are cut
+
+
+# ============================================================ 5. MODAL (python -m modal deploy Inference/modalApp.py)
+modal:
+  app_name: football-signal                     # environment = the workspace default (main)
+  gpu: null                                     # T4 | L4 | ... ; null = CPU (Modal requires a payment method for GPUs)
+  scaledown_window: 60                          # seconds a container stays up after the last request (billed while idle!)
+  max_containers: 1                             # hard cap so a burst of requests cannot burn the free credits
+  secret_name: football-signal-api-key          # Modal Secret that provides FOOTBALL_API_KEY
+  python_version: "3.12"

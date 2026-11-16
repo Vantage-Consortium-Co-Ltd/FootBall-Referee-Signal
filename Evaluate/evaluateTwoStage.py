@@ -1,6 +1,6 @@
 """Evaluate the saved two-stage model on the TEST split and log it to the same MLflow experiment as training.
 
-  python Evaluate/evaluate_two_stage.py [--model Train/models/two_stage] [--csv ...keypoints.csv] [--mlruns Train/mlruns]
+  python Evaluate/evaluateTwoStage.py [--model Train/models/two_stage] [--csv ...keypoints.csv] [--mlruns Train/mlruns]
 
 Writes Evaluate/output/two_stage/{classification_report.csv,confusion_matrix.png,metrics.json}.
 """

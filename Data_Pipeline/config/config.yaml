@@ -1,7 +1,0 @@
-# Data_Pipeline settings. Precedence for project ids: --project-ids > LS_PROJECT_IDS in .env > this file.
-project_ids: [7]
-output_dir: Data_Pipeline/output_notflip      # relative to repo root
-split: {train: 0.75, val: 0.15, test: 0.10}
-seed: 42
-burst_seconds: 5                      # photos <= this many seconds apart (chained) AND of the same class set share a group
-flip_classes: []

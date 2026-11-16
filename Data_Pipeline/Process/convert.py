@@ -6,7 +6,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from Data_Preprocess.src.export_to_label_studio import COCO_KEYPOINTS, GESTURES
+from Data_Preprocess.src.exportToLabelStudio import COCO_KEYPOINTS, GESTURES
 
 
 def latest_annotation(task):

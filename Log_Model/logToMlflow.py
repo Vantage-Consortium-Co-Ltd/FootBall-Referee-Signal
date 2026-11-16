@@ -1,6 +1,8 @@
 """Log one-stage + two-stage results (hyperparameters, train/val, test, models) to an MLflow server as one VERSION.
 
-  python Evaluate/log_to_mlflow.py --version v1 --data-note "burst-5s split, 885/182/153" [--uri http://127.0.0.1:5000]
+  python Log_Model/logToMlflow.py --version v1 --data-note "burst-5s split, 885/182/153" [--config config/config.yaml]
+
+All paths, experiment and registry names live in the log_model: section of config.yaml.
 
 Layout on the server (one experiment per approach, so versions compare side by side):
   experiment referee-one-stage / referee-two-stage
@@ -9,29 +11,36 @@ Layout on the server (one experiment per approach, so versions compare side by s
                     + test_eval (test metrics, classification report, confusion matrix)
   model registry referee-one-stage / referee-two-stage -> a new model version per run of this script
 
-Sources: one-stage = Train/results/runs/one_stage + Evaluate/output/one_stage; two-stage = Train/mlruns (sqlite)
-+ Train/models/two_stage. Refuses to log a version that already exists in an experiment: pick a new --version.
+Sources (see config.yaml): one-stage trial folders + eval folder; two-stage sqlite store + model folder. Refuses to log a version that already exists in an experiment: pick a new --version.
 """
 import argparse
 import json
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import mlflow
 import mlflow.pyfunc
 import mlflow.sklearn
 import pandas as pd
 import yaml
-from mlflow.entities import Metric, Param, RunTag
+from mlflow.entities import Metric, Param
 from mlflow.tracking import MlflowClient
 
 ROOT = Path(__file__).resolve().parents[1]
-ONE_RUNS = ROOT / "Train/results/runs/one_stage"
-ONE_EVAL = ROOT / "Evaluate/output/one_stage"
-TWO_MODEL = ROOT / "Train/models/two_stage"
-LOCAL_STORE = f"sqlite:///{(ROOT / 'Train/mlruns/mlflow.db').as_posix()}"
-CURVES = ["results.csv", "args.yaml", "results.png", "confusion_matrix.png", "confusion_matrix_normalized.png",
-          "BoxF1_curve.png", "PoseF1_curve.png", "weights/best.pt"]
+DEFAULT_CONFIG = ROOT / "config" / "config.yaml"  # section: log_model
+
+
+def load_config(path):
+    """YAML -> namespace; every path resolved against the repo root, so nothing is hard-coded in this file."""
+    c = yaml.safe_load(Path(path).read_text(encoding="utf-8"))["log_model"]
+    rel = lambda p: ROOT / p if not Path(p).is_absolute() else Path(p)
+    o, t = c["one_stage"], c["two_stage"]
+    return SimpleNamespace(
+        uri=c["mlflow"]["uri"], exp_one=c["mlflow"]["experiment_one_stage"], exp_two=c["mlflow"]["experiment_two_stage"],
+        reg_one=c["mlflow"]["registry_one_stage"], reg_two=c["mlflow"]["registry_two_stage"],
+        one_runs=rel(o["runs_dir"]), one_eval=rel(o["eval_dir"]), weights=o["weights"], curves=o["trial_artifacts"],
+        two_model=rel(t["model_dir"]), local_store=f"sqlite:///{rel(t['local_store']).as_posix()}")
 
 
 def mname(k):
@@ -85,11 +94,11 @@ def register(c, name, model_uri, version, summary):
     print(f"registered {name} v{mv.version}")
 
 
-def log_one_stage(c, version, data_note):
-    exp = experiment(c, "referee-one-stage")
+def log_one_stage(c, cfg, version, data_note):
+    exp = experiment(c, cfg.exp_one)
     parent = parent_run(c, exp, version, data_note, "one_stage")
     best = None  # (fitness, run_id, best_epoch, row)
-    for d in sorted(ONE_RUNS.glob("trial*")):
+    for d in sorted(cfg.one_runs.glob("trial*")):
         args = yaml.safe_load((d / "args.yaml").read_text(encoding="utf-8"))
         df = pd.read_csv(d / "results.csv")
         df.columns = [x.strip() for x in df.columns]
@@ -102,7 +111,7 @@ def log_one_stage(c, version, data_note):
                    **{f"best/{mname(k)}": float(v) for k, v in df.iloc[i].items() if k.startswith("metrics/")},
                    "last/val_cls_loss": float(df["val/cls_loss"].iloc[-1])}
         log_all(c, rid, [Param(k, str(v)[:500]) for k, v in args.items()], step_metrics + [Metric(k, v, 0, 0) for k, v in summary.items()])
-        for a in CURVES:
+        for a in cfg.curves:
             if (d / a).exists():
                 c.log_artifact(rid, str(d / a), str(Path(a).parent) if "/" in a else None)
         c.set_terminated(rid)
@@ -110,15 +119,15 @@ def log_one_stage(c, version, data_note):
         if best is None or fit[i] > best[0]:
             best = (float(fit[i]), rid, int(df.epoch[i]), d)
 
-    # test evaluation (files written by Evaluate/evaluate_one_stage.py)
-    test = json.loads((ONE_EVAL / "metrics.json").read_text(encoding="utf-8"))
+    # test evaluation (files written by Evaluate/evaluateOneStage.py)
+    test = json.loads((cfg.one_eval / "metrics.json").read_text(encoding="utf-8"))
     rid = new_run(c, exp, "test_eval", {"version": version, "kind": "test", "stage": "one_stage"}, parent)
     log_all(c, rid, [Param(k, str(test[k])) for k in ("weights", "conf", "iou", "n_test") if k in test],
             [Metric(k, float(v), 0, 0) for k, v in test.items() if isinstance(v, (int, float)) and k != "n_test"])
     for f in ("metrics.json", "classification_report.csv", "confusion_matrix.png"):
-        c.log_artifact(rid, str(ONE_EVAL / f))
-    if (ONE_EVAL / "val").exists():
-        c.log_artifacts(rid, str(ONE_EVAL / "val"), "ultralytics_val")
+        c.log_artifact(rid, str(cfg.one_eval / f))
+    if (cfg.one_eval / "val").exists():
+        c.log_artifacts(rid, str(cfg.one_eval / "val"), "ultralytics_val")
     c.set_terminated(rid)
 
     # parent: best trial's val + test summary, and the model for the registry
@@ -127,9 +136,9 @@ def log_one_stage(c, version, data_note):
                                                            for k, v in test.items() if isinstance(v, (int, float)) and k != "n_test"])
     with mlflow.start_run(run_id=parent):
         info = mlflow.pyfunc.log_model(name="model", python_model=YoloPose(), pip_requirements=["ultralytics"],
-                                       artifacts={"weights": str(ONE_RUNS / "best_overall.pt")})
+                                       artifacts={"weights": str(cfg.one_runs / cfg.weights)})
     c.set_terminated(parent)
-    register(c, "referee-one-stage", info.model_uri, version, {"val_best_fitness": round(best[0], 4),
+    register(c, cfg.reg_one, info.model_uri, version, {"val_best_fitness": round(best[0], 4),
                                                         "test_macro_f1": round(test["test_macro_f1"], 4), "data_note": data_note})
 
 
@@ -145,10 +154,10 @@ def copy_run(src, dst, r, exp, parent, tags):
     return rid
 
 
-def log_two_stage(c, version, data_note):
-    exp = experiment(c, "referee-two-stage")
+def log_two_stage(c, cfg, version, data_note):
+    exp = experiment(c, cfg.exp_two)
     parent = parent_run(c, exp, version, data_note, "two_stage")
-    src = MlflowClient(LOCAL_STORE)
+    src = MlflowClient(cfg.local_store)
     runs = [r for e in src.search_experiments() for r in src.search_runs([e.experiment_id], max_results=1000)]
     test = None
     for r in sorted(runs, key=lambda x: x.info.start_time):
@@ -160,18 +169,18 @@ def log_two_stage(c, version, data_note):
         copy_run(src, c, r, exp, parent, {"version": version, "kind": kind, "stage": "two_stage"})
         if kind == "test":
             test = m
-    meta = json.loads((TWO_MODEL / "meta.json").read_text(encoding="utf-8"))
+    meta = json.loads((cfg.two_model / "meta.json").read_text(encoding="utf-8"))
     log_all(c, parent, [Param("model", meta["model"]), *[Param(f"p_{k}", str(v)) for k, v in meta["params"].items()],
                         Param("folds", str(meta["folds"])), Param("n_trials", str(meta["n_trials"]))],
             [Metric(k, float(v), 0, 0) for k, v in meta.items() if k.startswith("cv_")] +
             [Metric(k, float(v), 0, 0) for k, v in (test or {}).items()])
     import joblib
     with mlflow.start_run(run_id=parent):
-        info = mlflow.sklearn.log_model(joblib.load(TWO_MODEL / "model.joblib"), name="model",
+        info = mlflow.sklearn.log_model(joblib.load(cfg.two_model / "model.joblib"), name="model",
                                         serialization_format="cloudpickle")
-        mlflow.log_artifact(str(TWO_MODEL / "meta.json"))
+        mlflow.log_artifact(str(cfg.two_model / "meta.json"))
     c.set_terminated(parent)
-    register(c, "referee-two-stage", info.model_uri, version, {"cv_macro_f1": round(meta["cv_macro_f1"], 4),
+    register(c, cfg.reg_two, info.model_uri, version, {"cv_macro_f1": round(meta["cv_macro_f1"], 4),
                                                         "test_macro_f1": round((test or {}).get("test_macro_f1", float("nan")), 4),
                                                         "data_note": data_note})
 
@@ -180,16 +189,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True, help="e.g. v1; one per (data split + training config) generation")
     ap.add_argument("--data-note", required=True, help="what data / split this version used")
-    ap.add_argument("--uri", default="http://127.0.0.1:5000")
+    ap.add_argument("--config", default=str(DEFAULT_CONFIG))
+    ap.add_argument("--uri", help="override mlflow.uri from the config")
     ap.add_argument("--stages", nargs="+", default=["one", "two"], choices=["one", "two"])
     a = ap.parse_args()
-    mlflow.set_tracking_uri(a.uri)
-    c = MlflowClient(a.uri)
+    cfg = load_config(a.config)
+    uri = a.uri or cfg.uri
+    mlflow.set_tracking_uri(uri)
+    c = MlflowClient(uri)
     if "one" in a.stages:
-        log_one_stage(c, a.version, a.data_note)
+        log_one_stage(c, cfg, a.version, a.data_note)
     if "two" in a.stages:
-        log_two_stage(c, a.version, a.data_note)
-    print(f"done -> {a.uri}  (experiments referee-one-stage / referee-two-stage, version {a.version})")
+        log_two_stage(c, cfg, a.version, a.data_note)
+    print(f"done -> {uri}  (experiments {cfg.exp_one} / {cfg.exp_two}, version {a.version})")
 
 
 if __name__ == "__main__":
