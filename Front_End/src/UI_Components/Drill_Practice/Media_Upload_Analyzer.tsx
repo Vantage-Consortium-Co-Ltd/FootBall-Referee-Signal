@@ -59,6 +59,16 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
 
   const handleAnalyzeFile = async (file: File) => {
     setErrorMsg(null);
+    const maxBytes = MODEL_SPEC_INFO.maxUploadMb * 1024 * 1024;
+    if (file.size > maxBytes) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setErrorMsg(
+        `ไฟล์มีขนาด ${sizeMb} MB เกินขีดจำกัดของ Backend (${MODEL_SPEC_INFO.maxUploadMb} MB)`
+      );
+      triggerCausalFeedback("warning");
+      return;
+    }
+
     setFileName(file.name);
     setIsLoading(true);
     triggerCausalFeedback("tap");

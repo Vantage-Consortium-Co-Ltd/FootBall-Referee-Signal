@@ -87,14 +87,23 @@ export async function predictImageBoth(
   file: Blob,
   filename = "frame.jpg"
 ): Promise<{ detections: ModalDetection[]; annotatedImageUrl: string }> {
-  const [jsonRes, annotatedImageUrl] = await Promise.all([
+  const [jsonSettled, annotatedSettled] = await Promise.allSettled([
     predictImageJson(file, filename),
     predictImageAnnotatedUrl(file, filename),
   ]);
 
+  if (jsonSettled.status === "rejected" && annotatedSettled.status === "fulfilled") {
+    URL.revokeObjectURL(annotatedSettled.value);
+  }
+
+  if (jsonSettled.status === "rejected") throw jsonSettled.reason;
+  if (annotatedSettled.status === "rejected") throw annotatedSettled.reason;
+
   return {
-    detections: Array.isArray(jsonRes.detections) ? jsonRes.detections : [],
-    annotatedImageUrl,
+    detections: Array.isArray(jsonSettled.value.detections)
+      ? jsonSettled.value.detections
+      : [],
+    annotatedImageUrl: annotatedSettled.value,
   };
 }
 

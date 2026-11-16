@@ -33,7 +33,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       headers,
       body: upstreamForm,
       cache: "no-store",
-      signal: AbortSignal.timeout(120000),
+      signal: AbortSignal.timeout(180000),
     });
 
     if (!upstream.ok) {

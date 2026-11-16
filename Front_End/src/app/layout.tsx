@@ -3,9 +3,9 @@ import "./globals.css";
 import { Nav_Bar } from "../UI_Components/App_Layout/Nav_Bar";
 
 export const metadata: Metadata = {
-  title: "IFAB Referee Academy AI | สื่อการเรียนการสอนและประเมินผู้ตัดสินฟุตบอล",
+  title: "Football Referee Signal Service | YOLO26n-pose API Console",
   description:
-    "Interactive Educational & Trainee Evaluation Media Platform for Football Referee Signals based on IFAB Laws of the Game",
+    "Next.js client aligned with the Football Referee Signal FastAPI service (GET /health, POST /predict/image, POST /predict/video, WS /ws/webcam)",
 };
 
 export default function RootLayout({

@@ -112,8 +112,9 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   }, [startCamera, stopCamera]);
 
   // Lock-step WebSocket streaming to Modal WS /ws/webcam (apiSpec.md Section 2.4)
+  // Paused automatically when serverAnnotatedMode streams /predict/image?annotated=true to avoid doubling Modal CPU load
   useEffect(() => {
-    if (!cameraActive) {
+    if (!cameraActive || serverAnnotatedMode) {
       if (pumpTimerRef.current !== null) {
         window.clearTimeout(pumpTimerRef.current);
         pumpTimerRef.current = null;
@@ -275,7 +276,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
       }
       awaitingReplyRef.current = false;
     };
-  }, [cameraActive, wsReconnectNonce]);
+  }, [cameraActive, serverAnnotatedMode, wsReconnectNonce]);
 
   // Continuous YOLO Annotated Skeleton Stream via POST /predict/image?annotated=true
   useEffect(() => {
@@ -408,7 +409,9 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
 
           {latestDetections.length === 0 ? (
             <span className="text-[11px] text-[#6E6E73]">
-              {isLiveAiStreaming
+              {serverAnnotatedMode
+                ? "กำลังสตรีมภาพวาดโครงกระดูก YOLO (?annotated=true)"
+                : isLiveAiStreaming
                 ? "[] — ไม่พบคลาสที่ confidence ≥ 0.25"
                 : "เปิดกล้องเพื่อส่งเฟรม JPEG เข้า WS /ws/webcam"}
             </span>
@@ -520,7 +523,7 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
             <div className="apple-material-dark rounded-xl px-3 py-1.5 text-xs flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isLiveAiStreaming
+                  serverAnnotatedMode || isLiveAiStreaming
                     ? "bg-[#30D158] animate-ping"
                     : wsStatus === "warming" || wsStatus === "connecting"
                     ? "bg-[#FF9F0A] animate-pulse"
@@ -528,7 +531,9 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
                 }`}
               />
               <span className="font-mono text-[#F5F5F7]">
-                {isLiveAiStreaming
+                {serverAnnotatedMode
+                  ? "STREAMING ?annotated=true"
+                  : isLiveAiStreaming
                   ? "WS /ws/webcam CONNECTED"
                   : wsStatus === "warming"
                   ? "WARMING MODAL CPU (อาจใช้เวลา 10-30s รอบแรก)..."

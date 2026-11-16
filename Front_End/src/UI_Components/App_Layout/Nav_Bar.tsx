@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 import { checkModalHealth } from "../../Core_Lib/Api_Client";
@@ -10,7 +9,6 @@ import { MODEL_SPEC_INFO } from "../../Core_Lib/Ifab_Rules_Catalog";
 import type { ModalHealthResponse } from "../../Data_Types/Referee_Types";
 
 export const Nav_Bar: React.FC = () => {
-  const pathname = usePathname();
   const [healthState, setHealthState] = useState<"warming" | "online" | "offline">("warming");
   const [healthInfo, setHealthInfo] = useState<ModalHealthResponse | null>(null);
 
@@ -102,11 +100,7 @@ export const Nav_Bar: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             onPointerDown={() => triggerCausalFeedback("tap")}
-            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 apple-pressable ${
-              pathname === "/docs"
-                ? "bg-[#0A84FF] border-[#0A84FF] text-white"
-                : "bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#F5F5F7]"
-            }`}
+            className="px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 apple-pressable bg-[#1C1C1E] border-white/[0.1] hover:bg-[#2C2C2E] text-[#F5F5F7]"
           >
             <Google_Icon name="menu_book" size={14} className="text-[#0A84FF]" />
             <span>FastAPI Docs</span>
