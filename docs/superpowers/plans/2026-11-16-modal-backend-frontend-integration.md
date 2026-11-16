@@ -78,3 +78,13 @@
 - [x] **Step 1: Create and run `Front_End/scripts/verify-modal-api.mjs`**
 - [x] **Step 2: Run `npm run typecheck` and `npm run build` in `Front_End/`**
 - [x] **Step 3: Commit verification script and update plan checkboxes**
+
+---
+
+### Follow-up Phase: Remove All Mockups & Convert to 100% Real System
+- [x] **Task A: Delete `Microservices_Mock.ts` & Create `Ifab_Rules_Catalog.ts` + `Session_Store.ts`**
+- [x] **Task B: Update `Api_Client.ts` (`evaluateRealDetections`) & `Canvas_Utils.ts` (`getReferencePostureForRule`)**
+- [x] **Task C: Convert `/drills` (`Live_Drill_Feed.tsx`, `Coaching_HUD.tsx`, `Drill_Selector.tsx`, `Media_Upload_Analyzer.tsx`, `drills/page.tsx`) to 100% real Modal detection + session recording**
+- [x] **Task D: Convert `/examination` (`Exam_Live_Detector.tsx`, `Exam_Result_Inspector.tsx`, `examination/page.tsx`) to 100% real Modal detection + session recording**
+- [x] **Task E: Convert `/gradebook`, `/handbook`, `Nav_Bar.tsx`, and Home (`page.tsx`, `Educational_Hero.tsx`, `Curriculum_Quick_Launch.tsx`) to 100% real system**
+- [x] **Task F: Verify zero mock references, `tsc --noEmit`, `next build`, and commit**

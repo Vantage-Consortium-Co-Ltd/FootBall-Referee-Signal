@@ -5,7 +5,7 @@ import {
   PostureAngles,
   TaggedPerson,
 } from "../../Data_Types/Referee_Types";
-import { generateMockKeypoints } from "../../Core_Lib/Microservices_Mock";
+import { getReferencePostureForRule } from "../../Core_Lib/Ifab_Rules_Catalog";
 
 export interface DrawOptions {
   showGhost?: boolean;
@@ -128,7 +128,7 @@ export function drawGhostSkeleton(
   height: number,
   mirror: boolean = false
 ): void {
-  const { keypoints: ghostKps } = generateMockKeypoints(targetRule.id, 0);
+  const { keypoints: ghostKps } = getReferencePostureForRule(targetRule.id);
 
   ctx.save();
   ctx.lineWidth = 4;

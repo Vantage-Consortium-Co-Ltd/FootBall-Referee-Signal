@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { GestureRule } from "../../Data_Types/Referee_Types";
-import { MOCK_IFAB_RULES } from "../../Core_Lib/Microservices_Mock";
+import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
 import {
   Curriculum_Filter_Tabs,
   Curriculum_Header,
@@ -16,18 +16,18 @@ import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 export default function HandbookPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [category, setCategory] = useState<HandbookCategoryFilter>("all");
-  const [selectedRule, setSelectedRule] = useState<GestureRule>(MOCK_IFAB_RULES[1]);
+  const [selectedRule, setSelectedRule] = useState<GestureRule>(IFAB_RULES[1]);
   const [isLightMode, setIsLightMode] = useState<boolean>(true);
 
   const counts = useMemo(() => {
     const result: Record<HandbookCategoryFilter, number> = {
-      all: MOCK_IFAB_RULES.length,
+      all: IFAB_RULES.length,
       restarts: 0,
       fouls: 0,
       match_control: 0,
       offside: 0,
     };
-    for (const rule of MOCK_IFAB_RULES) {
+    for (const rule of IFAB_RULES) {
       result[rule.category] = (result[rule.category] ?? 0) + 1;
     }
     return result;
@@ -35,7 +35,7 @@ export default function HandbookPage() {
 
   const filteredRules = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return MOCK_IFAB_RULES.filter((rule) => {
+    return IFAB_RULES.filter((rule) => {
       const matchCategory = category === "all" || rule.category === category;
       if (!matchCategory) return false;
       if (!q) return true;
@@ -58,7 +58,7 @@ export default function HandbookPage() {
         <Curriculum_Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          totalCount={MOCK_IFAB_RULES.length}
+          totalCount={IFAB_RULES.length}
           filteredCount={filteredRules.length}
           isLightMode={isLightMode}
           onToggleTheme={() => setIsLightMode((prev) => !prev)}
@@ -100,7 +100,7 @@ export default function HandbookPage() {
                       : "bg-[#0A84FF] hover:bg-[#3395FF]"
                   }`}
                 >
-                  แสดงทั้งหมด {MOCK_IFAB_RULES.length} ท่า
+                  แสดงทั้งหมด {IFAB_RULES.length} ท่า
                 </button>
               </div>
             ) : (

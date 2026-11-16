@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { GestureCategory, GestureRule } from "../../Data_Types/Referee_Types";
-import { MOCK_IFAB_RULES } from "../../Core_Lib/Microservices_Mock";
+import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
@@ -26,7 +26,7 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
   const [activeCategory, setActiveCategory] = useState<GestureCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const filteredRules = MOCK_IFAB_RULES.filter((rule) => {
+  const filteredRules = IFAB_RULES.filter((rule) => {
     const matchesCategory =
       activeCategory === "all" || rule.category === activeCategory;
     const matchesSearch =

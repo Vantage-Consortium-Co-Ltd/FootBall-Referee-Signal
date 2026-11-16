@@ -7,10 +7,9 @@ import {
   FrameFeedbackPayload,
   GestureRule,
 } from "../../Data_Types/Referee_Types";
-import {
-  MOCK_IFAB_RULES,
-  evaluateMockPosture,
-} from "../../Core_Lib/Microservices_Mock";
+import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
+import { evaluateRealDetections } from "../../Core_Lib/Api_Client";
+import { recordDrillSession } from "../../Core_Lib/Session_Store";
 import {
   Coaching_HUD,
   Drill_Selector,
@@ -27,16 +26,16 @@ function DrillsStudioContent() {
   const [selectedRule, setSelectedRule] = useState<GestureRule>(() => {
     if (initialSignalIdParam !== null) {
       const parsed = Number(initialSignalIdParam);
-      const matched = MOCK_IFAB_RULES.find((r) => r.id === parsed);
+      const matched = IFAB_RULES.find((r) => r.id === parsed);
       if (matched) return matched;
     }
-    return MOCK_IFAB_RULES[1];
+    return IFAB_RULES[1];
   });
 
   useEffect(() => {
     if (initialSignalIdParam !== null) {
       const parsed = Number(initialSignalIdParam);
-      const matched = MOCK_IFAB_RULES.find((r) => r.id === parsed);
+      const matched = IFAB_RULES.find((r) => r.id === parsed);
       if (matched) setSelectedRule(matched);
     }
   }, [initialSignalIdParam]);
@@ -44,11 +43,17 @@ function DrillsStudioContent() {
   const [activeMode, setActiveMode] = useState<"webcam" | "image" | "video">("webcam");
   const [streakCount, setStreakCount] = useState<number>(0);
   const [totalAttempts, setTotalAttempts] = useState<number>(0);
-  const [feedback, setFeedback] = useState<FrameFeedbackPayload>(() =>
-    evaluateMockPosture(MOCK_IFAB_RULES[1], 0, 0)
+  const [feedback, setFeedback] = useState<FrameFeedbackPayload>(
+    () => evaluateRealDetections([], IFAB_RULES[1], 0).feedback
   );
 
-  const handleDrillSuccess = () => {
+  const handleDrillSuccess = (completedFeedback: FrameFeedbackPayload) => {
+    recordDrillSession({
+      rule: selectedRule,
+      confidenceScore: completedFeedback.score,
+      holdDurationSeconds: completedFeedback.holdDuration,
+      mode: "webcam",
+    });
     setStreakCount((prev) => prev + 1);
     setTotalAttempts((prev) => prev + 1);
   };
@@ -155,6 +160,8 @@ function DrillsStudioContent() {
               mode={activeMode}
               targetRule={selectedRule}
               onSelectRule={handleSelectDrill}
+              onFeedbackUpdate={setFeedback}
+              onRecorded={() => setTotalAttempts((prev) => prev + 1)}
             />
           )}
 

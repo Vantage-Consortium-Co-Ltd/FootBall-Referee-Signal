@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 import { checkModalHealth } from "../../Core_Lib/Api_Client";
+import {
+  SESSIONS_UPDATED_EVENT,
+  getSessionHistory,
+} from "../../Core_Lib/Session_Store";
 import type { ModalHealthResponse } from "../../Data_Types/Referee_Types";
 
 const NAV_ITEMS = [
@@ -22,6 +26,7 @@ export const Nav_Bar: React.FC = () => {
 
   const [healthState, setHealthState] = useState<"warming" | "online" | "offline">("warming");
   const [healthInfo, setHealthInfo] = useState<ModalHealthResponse | null>(null);
+  const [sessionCount, setSessionCount] = useState<number>(0);
 
   const refreshHealth = useCallback(async () => {
     setHealthState("warming");
@@ -38,9 +43,16 @@ export const Nav_Bar: React.FC = () => {
       setHealthInfo(res);
       setHealthState(res.status === "ok" ? "online" : "offline");
     };
-    init();
+    void init();
+
+    const syncSessions = () => setSessionCount(getSessionHistory().length);
+    syncSessions();
+    window.addEventListener(SESSIONS_UPDATED_EVENT, syncSessions);
+    window.addEventListener("storage", syncSessions);
     return () => {
       active = false;
+      window.removeEventListener(SESSIONS_UPDATED_EVENT, syncSessions);
+      window.removeEventListener("storage", syncSessions);
     };
   }, []);
 
@@ -75,7 +87,7 @@ export const Nav_Bar: React.FC = () => {
         }`
       : healthState === "warming"
       ? "Warming Modal CPU..."
-      : "Simulation Fallback";
+      : "Modal API Offline";
 
   return (
     <nav
@@ -190,9 +202,11 @@ export const Nav_Bar: React.FC = () => {
                   : "bg-[#0A84FF] text-white"
               }`}
             >
-              IR
+              GB
             </span>
-            <span className="hidden md:inline">อัศวิน · Level 2</span>
+            <span className="hidden md:inline apple-tabular">
+              Gradebook · {sessionCount} รอบ
+            </span>
           </Link>
         </div>
       </div>

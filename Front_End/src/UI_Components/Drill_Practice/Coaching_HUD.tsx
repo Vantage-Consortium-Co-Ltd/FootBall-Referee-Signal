@@ -24,17 +24,24 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
   streakCount,
   totalAttempts,
 }) => {
-  const { score, state, holdProgress, holdDuration, angles, feedbackTip } = feedback;
+  const { score, state, holdProgress, holdDuration, feedbackTip, detected, gestureNameTh } =
+    feedback;
 
   const isCompleted = state === "COMPLETED";
   const isHolding = state === "HOLDING";
-  const isLost = state === "LOST_POSTURE";
+  const isLost = state === "LOST_POSTURE" || (state === "DETECTED" && !feedback.isAcceptable);
 
-  // Apple critically damped springs driven from live presentation values
-  const scoreSpring = useAppleSpring(score, { dampingRatio: 1.0, response: 0.36, precision: 0.25 });
-  const holdSpring = useAppleSpring(holdProgress, { dampingRatio: 1.0, response: 0.22, precision: 0.002 });
-  const elevationSpring = useAppleSpring(angles.rElevationAngle, { dampingRatio: 1.0, response: 0.3, precision: 0.25 });
-  const elbowSpring = useAppleSpring(angles.rElbowAngle, { dampingRatio: 1.0, response: 0.3, precision: 0.25 });
+  // Apple critically damped springs driven from live model values
+  const scoreSpring = useAppleSpring(score, {
+    dampingRatio: 1.0,
+    response: 0.36,
+    precision: 0.25,
+  });
+  const holdSpring = useAppleSpring(holdProgress, {
+    dampingRatio: 1.0,
+    response: 0.22,
+    precision: 0.002,
+  });
 
   // Edge-triggered causal audio-haptic feedback on state transitions
   const prevStateRef = useRef(state);
@@ -43,10 +50,10 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
     prevStateRef.current = state;
     if (state === "COMPLETED" && prev !== "COMPLETED") {
       triggerCausalFeedback("success");
-    } else if (state === "LOST_POSTURE" && prev === "HOLDING") {
+    } else if (isLost && prev === "HOLDING") {
       triggerCausalFeedback("warning");
     }
-  }, [state]);
+  }, [state, isLost]);
 
   // Circular timer calculations driven by spring hold progress
   const radius = 38;
@@ -55,8 +62,6 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
   const strokeDashoffset = circumference - clampedHold * circumference;
 
   const displayedScore = Math.round(scoreSpring.value);
-  const displayedElevation = Math.round(elevationSpring.value);
-  const displayedElbow = Math.round(elbowSpring.value);
 
   const statusColor = isCompleted
     ? "text-[#30D158] border-[#30D158]/45 bg-[#30D158]/15"
@@ -68,25 +73,25 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
 
   return (
     <div className="apple-material-dark rounded-[22px] p-5 flex flex-col gap-4">
-      {/* Header: Score & Hold Circular Timer */}
+      {/* Header: Model Confidence Score & Hold Circular Timer */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
         <div>
           <span className="text-xs text-[#A1A1A6] uppercase tracking-wider font-semibold">
-            คะแนนความถูกต้อง (Posture Score)
+            ความมั่นใจโมเดล (YOLO26n-pose)
           </span>
           <div className="flex items-baseline gap-2 mt-0.5 apple-tabular">
             <span
               className={`text-3xl font-bold font-mono apple-display ${
-                displayedScore >= 85
+                displayedScore >= 75
                   ? "text-[#30D158]"
-                  : displayedScore >= 70
+                  : displayedScore >= 40
                   ? "text-[#0A84FF]"
                   : "text-[#FF9F0A]"
               }`}
             >
-              {displayedScore}
+              {displayedScore}%
             </span>
-            <span className="text-xs text-[#6E6E73]">/ 100</span>
+            <span className="text-xs text-[#6E6E73]">/ 100%</span>
           </div>
         </div>
 
@@ -138,10 +143,8 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
         </div>
       </div>
 
-      {/* Live Coaching Toast Feedback Banner */}
-      <div
-        className={`px-4 py-3 rounded-2xl border flex items-center gap-3 ${statusColor}`}
-      >
+      {/* Live Coaching Feedback Banner */}
+      <div className={`px-4 py-3 rounded-2xl border flex items-center gap-3 ${statusColor}`}>
         {isCompleted ? (
           <Google_Icon name="check_circle" size={20} className="text-[#30D158]" filled />
         ) : isLost ? (
@@ -149,68 +152,75 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
         ) : (
           <Google_Icon name="monitoring" size={20} className="text-[#0A84FF]" />
         )}
-        <div className="text-xs font-medium leading-relaxed">
-          {feedbackTip}
-        </div>
+        <div className="text-xs font-medium leading-relaxed">{feedbackTip}</div>
       </div>
 
-      {/* Joint Angle Telemetry Gauges */}
+      {/* Real Model Telemetry & IFAB Criteria */}
       <div className="space-y-3">
         <div className="text-xs font-semibold text-[#F5F5F7] flex items-center gap-1.5">
           <Google_Icon name="explore" size={16} className="text-[#0A84FF]" />
-          การวัดองศาข้อต่อตามกติกา IFAB
+          ผลการวิเคราะห์จาก Modal AI และเกณฑ์ IFAB
         </div>
 
-        {/* Right Arm Elevation */}
+        {/* Confidence vs Threshold Gauge */}
         <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3">
           <div className="flex justify-between items-center text-xs mb-1.5 apple-tabular">
-            <span className="text-[#A1A1A6]">องศาการยกแขน (Arm Elevation)</span>
+            <span className="text-[#A1A1A6]">ความมั่นใจโมเดล (Threshold ≥ 25%)</span>
             <span className="font-mono font-bold text-[#0A84FF]">
-              {displayedElevation}° / {targetRule.targetElevationDeg}°
-            </span>
-          </div>
-          <div className="w-full bg-[#2C2C2E] rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-[#0A84FF] to-[#64D2FF] h-2 rounded-full"
-              style={{
-                width: `${Math.min(
-                  100,
-                  Math.max(0, (elevationSpring.value / targetRule.targetElevationDeg) * 100)
-                )}%`,
-              }}
-            />
-          </div>
-          <div className="flex justify-between text-[10px] text-[#6E6E73] mt-1 apple-tabular">
-            <span>0° (แนบลำตัว)</span>
-            <span>เกณฑ์ผ่าน: {targetRule.minElevationDeg}°+</span>
-            <span>180° (ชูตรง)</span>
-          </div>
-        </div>
-
-        {/* Elbow Straightness */}
-        <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3">
-          <div className="flex justify-between items-center text-xs mb-1.5 apple-tabular">
-            <span className="text-[#A1A1A6]">ความเหยียดตรงของข้อศอก</span>
-            <span className="font-mono font-bold text-[#30D158]">
-              {displayedElbow}° / 180°
+              {displayedScore}%
             </span>
           </div>
           <div className="w-full bg-[#2C2C2E] rounded-full h-2 overflow-hidden">
             <div
               className={`h-2 rounded-full ${
-                displayedElbow >= targetRule.minStraightnessDeg
-                  ? "bg-[#30D158]"
-                  : "bg-[#FF9F0A]"
+                feedback.isAcceptable ? "bg-[#30D158]" : "bg-[#0A84FF]"
               }`}
-              style={{
-                width: `${Math.min(100, Math.max(0, (elbowSpring.value / 180) * 100))}%`,
-              }}
+              style={{ width: `${Math.min(100, Math.max(0, displayedScore))}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-[#6E6E73] mt-1 apple-tabular">
-            <span>90° (งอศอก)</span>
-            <span>เกณฑ์ตรง: {targetRule.minStraightnessDeg}°+</span>
-            <span>180° (เหยียดตรง)</span>
+        </div>
+
+        {/* Detected Class vs Target Class */}
+        <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3 space-y-1.5 text-xs">
+          <div className="flex justify-between items-center">
+            <span className="text-[#A1A1A6]">ท่าที่ตรวจพบจริง:</span>
+            <span
+              className={`font-semibold ${
+                feedback.isAcceptable
+                  ? "text-[#30D158]"
+                  : detected
+                  ? "text-[#FF9F0A]"
+                  : "text-[#6E6E73]"
+              }`}
+            >
+              {detected ? gestureNameTh : "ยังไม่พบสัญญาณในเฟรม"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#A1A1A6]">ท่าเป้าหมาย:</span>
+            <span className="font-semibold text-[#F5F5F7]">{targetRule.nameTh}</span>
+          </div>
+        </div>
+
+        {/* IFAB Target Reference Criteria */}
+        <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3 grid grid-cols-3 gap-2 text-center text-[11px] apple-tabular">
+          <div>
+            <div className="text-[#6E6E73]">มุมยกแขน IFAB</div>
+            <div className="font-mono font-bold text-[#0A84FF] mt-0.5">
+              {targetRule.targetElevationDeg}°
+            </div>
+          </div>
+          <div>
+            <div className="text-[#6E6E73]">ข้อศอกตรง</div>
+            <div className="font-mono font-bold text-[#30D158] mt-0.5">
+              {targetRule.targetStraightnessDeg}°
+            </div>
+          </div>
+          <div>
+            <div className="text-[#6E6E73]">เวลาค้างท่า</div>
+            <div className="font-mono font-bold text-[#FF9F0A] mt-0.5">
+              {targetRule.minHoldSeconds}s
+            </div>
           </div>
         </div>
       </div>
@@ -219,10 +229,14 @@ export const Coaching_HUD: React.FC<CoachingHUDProps> = ({
       <div className="pt-3 border-t border-white/[0.08] flex justify-between items-center text-xs text-[#A1A1A6] apple-tabular">
         <div className="flex items-center gap-1.5">
           <Google_Icon name="bolt" size={16} className="text-[#FF9F0A]" filled />
-          <span>ต่อเนื่อง: <b className="text-[#F5F5F7]">{streakCount} ครั้ง</b></span>
+          <span>
+            ต่อเนื่อง: <b className="text-[#F5F5F7]">{streakCount} ครั้ง</b>
+          </span>
         </div>
         <div>
-          <span>ฝึกไปแล้ว: <b className="text-[#F5F5F7]">{totalAttempts} รอบ</b></span>
+          <span>
+            บันทึกแล้ว: <b className="text-[#F5F5F7]">{totalAttempts} รอบ</b>
+          </span>
         </div>
       </div>
     </div>

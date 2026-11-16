@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ExamSessionHistoryItem } from "../../Data_Types/Referee_Types";
-import { generateMockTraineeEvaluationReport } from "../../Core_Lib/Microservices_Mock";
+import {
+  ExamSessionHistoryItem,
+  TraineeEvaluationReport,
+} from "../../Data_Types/Referee_Types";
+import {
+  SESSIONS_UPDATED_EVENT,
+  clearAllSessions,
+  computeTraineeEvaluationReport,
+} from "../../Core_Lib/Session_Store";
 import {
   Certificate_Preview_Modal,
   Competency_Radar_Chart,
@@ -14,12 +21,48 @@ import {
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
+const EMPTY_REPORT_SSR: TraineeEvaluationReport = {
+  reportId: "GRD-LIVE-INIT",
+  traineeName: "ผู้ตัดสินฝึกหัด (Active Session)",
+  traineeCode: "LIVE-MODEL-2026",
+  classTierTh: "YOLO26n-pose Real Assessment",
+  evaluationDate: "-",
+  overallPostureAccuracy: 0,
+  accuracyTrendDelta: "กำลังโหลดข้อมูลเซสชัน...",
+  completedPacks: 0,
+  passedPacks: 0,
+  averageReactionSeconds: 0,
+  overallGrade: "D",
+  categoryCompetency: {
+    restarts: 0,
+    fouls: 0,
+    match_control: 0,
+    offside: 0,
+  },
+  weaknessDiagnostics: [],
+  examHistory: [],
+  instructorNotes: [],
+};
+
 export default function GradebookPage() {
-  const report = useMemo(() => generateMockTraineeEvaluationReport(), []);
+  const [report, setReport] = useState<TraineeEvaluationReport>(EMPTY_REPORT_SSR);
   const [isLightMode, setIsLightMode] = useState<boolean>(true);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [focusedSession, setFocusedSession] =
     useState<ExamSessionHistoryItem | null>(null);
+
+  useEffect(() => {
+    const sync = () => {
+      setReport(computeTraineeEvaluationReport());
+    };
+    sync();
+    window.addEventListener(SESSIONS_UPDATED_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(SESSIONS_UPDATED_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   const openFullCertificate = () => {
     setFocusedSession(null);
@@ -31,6 +74,12 @@ export default function GradebookPage() {
     setModalOpen(true);
   };
 
+  const handleClearHistory = () => {
+    triggerCausalFeedback("warning");
+    clearAllSessions();
+    setReport(computeTraineeEvaluationReport());
+  };
+
   return (
     <div
       className={`min-h-screen transition-colors duration-200 p-4 md:p-8 ${
@@ -38,7 +87,7 @@ export default function GradebookPage() {
       }`}
     >
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Top Page Header Bar matching FigCraft Screen 4 */}
+        {/* Top Page Header Bar */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-start md:items-center gap-3">
             <Link
@@ -65,7 +114,7 @@ export default function GradebookPage() {
                   isLightMode ? "text-[#6E6E73]" : "text-[#A1A1A6]"
                 }`}
               >
-                สถิติการฝึกภาคปฏิบัติและผลสอบสถานการณ์จำลองตามเกณฑ์ IFAB ·{" "}
+                สถิติการฝึกภาคปฏิบัติและผลสอบจริงตามเกณฑ์ IFAB ·{" "}
                 {report.traineeName} ({report.traineeCode}) · {report.classTierTh}
               </p>
             </div>
@@ -73,6 +122,21 @@ export default function GradebookPage() {
 
           {/* Right Header Controls */}
           <div className="flex flex-wrap items-center gap-2.5">
+            {report.completedPacks > 0 && (
+              <button
+                type="button"
+                onClick={handleClearHistory}
+                className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors duration-150 apple-pressable ${
+                  isLightMode
+                    ? "bg-white border-[#FF3B30]/30 hover:bg-[#FF3B30]/10 text-[#FF3B30] shadow-xs"
+                    : "bg-[#1C1C1E] border-[#FF453A]/35 hover:bg-[#FF453A]/15 text-[#FF453A]"
+                }`}
+              >
+                <Google_Icon name="close" size={15} />
+                <span>ล้างประวัติการฝึก/สอบ</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {

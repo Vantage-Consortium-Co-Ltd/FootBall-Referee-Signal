@@ -1,15 +1,14 @@
 import {
   FrameFeedbackPayload,
   GestureRule,
-  Keypoint,
   ModalDetection,
   ModalHealthResponse,
   ModalImagePredictResponse,
   ModalVideoPredictResponse,
   ModalWsConfigResponse,
-  TaggedPerson,
+  PostureAngles,
 } from "../Data_Types/Referee_Types";
-import { MOCK_IFAB_RULES, generateMockKeypoints } from "./Microservices_Mock";
+import { IFAB_RULES } from "./Ifab_Rules_Catalog";
 
 async function extractErrorDetail(res: Response, fallback: string): Promise<string> {
   try {
@@ -32,8 +31,7 @@ export async function checkModalHealth(): Promise<ModalHealthResponse> {
       method: "GET",
       cache: "no-store",
     });
-    const data = (await res.json()) as ModalHealthResponse;
-    return data;
+    return (await res.json()) as ModalHealthResponse;
   } catch (err: unknown) {
     return {
       status: "error",
@@ -170,29 +168,24 @@ export function captureVideoFrameAsJpeg(
 export function findRuleByLabel(label: string): GestureRule | undefined {
   const normalized = label.trim().toLowerCase();
   if (!normalized) return undefined;
-  return MOCK_IFAB_RULES.find((r) => r.name.toLowerCase() === normalized);
+  return IFAB_RULES.find((r) => r.name.toLowerCase() === normalized);
 }
 
-function buildBboxFromKeypoints(kps: Keypoint[]): [number, number, number, number] {
-  const xs = kps.map((k) => k.x);
-  const ys = kps.map((k) => k.y);
-  const minX = Math.max(0.04, Math.min(...xs) - 0.08);
-  const maxX = Math.min(0.96, Math.max(...xs) + 0.08);
-  const minY = Math.max(0.04, Math.min(...ys) - 0.06);
-  const maxY = Math.min(0.98, Math.max(...ys) + 0.06);
-  return [minX, minY, maxX - minX, maxY - minY];
-}
+const EMPTY_ANGLES: PostureAngles = {
+  rElbowAngle: 0,
+  lElbowAngle: 0,
+  rElevationAngle: 0,
+  lElevationAngle: 0,
+};
 
-export function evaluateHybridPostureFromDetections(
+export function evaluateRealDetections(
   detections: ModalDetection[],
   targetRule: GestureRule,
-  frameTick: number,
   holdDurationSeconds: number
 ): {
   feedback: FrameFeedbackPayload;
   matchedRule: GestureRule | null;
   topDetection: ModalDetection | null;
-  persons: TaggedPerson[];
   isHoldActive: boolean;
 } {
   const safeDetections = Array.isArray(detections) ? detections : [];
@@ -200,80 +193,50 @@ export function evaluateHybridPostureFromDetections(
   const topDetection = sorted[0] ?? null;
 
   if (!topDetection) {
-    const neutralPose = generateMockKeypoints(0, frameTick);
     return {
       feedback: {
         detected: false,
         timestamp: Date.now(),
-        keypoints: neutralPose.keypoints,
+        keypoints: [],
         activeArm: targetRule.activeArm,
-        angles: neutralPose.angles,
+        angles: EMPTY_ANGLES,
         score: 0,
         state: "WAITING",
         holdProgress: 0,
         holdDuration: 0,
-        feedbackTip: "กำลังรอตรวจจับบุคคลและท่าสัญญาณจากกล้อง (Confidence ≥ 25%)...",
+        feedbackTip: "กำลังรอโมเดล YOLO26n-pose ตรวจจับท่าสัญญาณจากกล้อง (Confidence ≥ 25%)...",
         gestureName: targetRule.name,
         gestureNameTh: targetRule.nameTh,
         isAcceptable: false,
       },
       matchedRule: null,
       topDetection: null,
-      persons: [],
       isHoldActive: false,
     };
   }
 
   const matchedTargetDet =
     sorted.find((d) => d.label.toLowerCase() === targetRule.name.toLowerCase()) ?? null;
-  const primaryDet = matchedTargetDet ?? topDetection;
-  const matchedRule = findRuleByLabel(primaryDet.label) ?? null;
 
-  const isTargetMatch = Boolean(matchedTargetDet);
-  const pose = generateMockKeypoints(matchedRule?.id ?? 0, frameTick);
-
-  const persons: TaggedPerson[] = sorted.map((det, idx) => {
-    const rule = findRuleByLabel(det.label) ?? null;
-    const basePose = generateMockKeypoints(rule?.id ?? 0, frameTick);
-    const xOffset = idx === 0 ? 0 : (idx % 2 === 1 ? 0.24 : -0.24);
-    const shiftedKps = basePose.keypoints.map((kp) => ({
-      ...kp,
-      x: Math.min(0.95, Math.max(0.05, kp.x + xOffset)),
-    }));
-    const isPrimary = det === primaryDet;
-
-    return {
-      id: `person-${idx + 1}`,
-      label: det.label === "Referee" ? "Referee" : "Referee",
-      labelTh: `${rule?.nameTh || det.label} (#${idx + 1})`,
-      bbox: buildBboxFromKeypoints(shiftedKps),
-      confidence: det.confidence,
-      isTagged: isPrimary,
-      keypoints: shiftedKps,
-      angles: basePose.angles,
-    };
-  });
-
-  if (isTargetMatch && matchedTargetDet) {
+  if (matchedTargetDet) {
     const confPct = Math.round(matchedTargetDet.confidence * 100);
-    const score = Math.min(100, Math.max(75, confPct));
     const minHold = Math.max(0.1, targetRule.minHoldSeconds);
     const holdProgress = Math.min(1.0, holdDurationSeconds / minHold);
     const state: FrameFeedbackPayload["state"] =
       holdProgress >= 1.0 ? "COMPLETED" : "HOLDING";
     const feedbackTip =
       state === "COMPLETED"
-        ? `ยอดเยี่ยม! โมเดล YOLO26-Pose ยืนยันท่า ${targetRule.nameTh} (${confPct}%)`
+        ? `ยอดเยี่ยม! โมเดล YOLO26n-pose ยืนยันท่า ${targetRule.nameTh} (${confPct}%)`
         : `ตรวจพบท่า ${targetRule.nameTh} (${confPct}%) · ค้างท่าไว้ ${holdDurationSeconds.toFixed(1)}s / ${targetRule.minHoldSeconds.toFixed(1)}s`;
 
     return {
       feedback: {
         detected: true,
         timestamp: Date.now(),
-        keypoints: pose.keypoints,
+        keypoints: [],
         activeArm: targetRule.activeArm,
-        angles: pose.angles,
-        score,
+        angles: EMPTY_ANGLES,
+        score: confPct,
         state,
         holdProgress,
         holdDuration: holdDurationSeconds,
@@ -284,34 +247,32 @@ export function evaluateHybridPostureFromDetections(
       },
       matchedRule: targetRule,
       topDetection,
-      persons,
       isHoldActive: true,
     };
   }
 
+  const topRule = findRuleByLabel(topDetection.label) ?? null;
   const confPct = Math.round(topDetection.confidence * 100);
-  const score = Math.round(topDetection.confidence * 60);
-  const detectedNameTh = matchedRule?.nameTh || topDetection.label;
+  const detectedNameTh = topRule?.nameTh || topDetection.label;
 
   return {
     feedback: {
       detected: true,
       timestamp: Date.now(),
-      keypoints: pose.keypoints,
-      activeArm: matchedRule?.activeArm ?? targetRule.activeArm,
-      angles: pose.angles,
-      score,
+      keypoints: [],
+      activeArm: topRule?.activeArm ?? targetRule.activeArm,
+      angles: EMPTY_ANGLES,
+      score: confPct,
       state: "DETECTED",
       holdProgress: 0,
       holdDuration: 0,
       feedbackTip: `โมเดลตรวจพบท่า: ${detectedNameTh} (${confPct}%) · เป้าหมายคือ ${targetRule.nameTh}`,
-      gestureName: matchedRule?.name ?? topDetection.label,
+      gestureName: topRule?.name ?? topDetection.label,
       gestureNameTh: detectedNameTh,
       isAcceptable: false,
     },
-    matchedRule,
+    matchedRule: topRule,
     topDetection,
-    persons,
     isHoldActive: false,
   };
 }

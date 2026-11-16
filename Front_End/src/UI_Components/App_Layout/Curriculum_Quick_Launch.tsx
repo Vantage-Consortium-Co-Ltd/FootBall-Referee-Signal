@@ -11,9 +11,9 @@ const MODULE_CARDS = [
     title: "Live Practice Drill Studio",
     subtitleTh: "ห้องเรียนฝึกปฏิบัติสัญญาณสด",
     description:
-      "เปิดกล้อง Webcam หรือโหมดจำลองเพื่อฝึกซ้อม 20 ท่าทาง พร้อม Ghost Target Guide, Person Tagging Reticle และ Coaching HUD แบบเรียลไทม์",
+      "เปิดกล้อง Webcam (/ws/webcam) หรืออัปโหลดรูปภาพและคลิปวิดีโอเพื่อวิเคราะห์ 20 ท่าทางด้วยโมเดล YOLO26n-pose จริง",
     icon: "videocam",
-    badge: "Module 1 · 60 FPS Canvas",
+    badge: "Module 1 · Live Modal AI",
     accentText: "text-[#30D158]",
     accentBorder: "hover:border-[#30D158]/45",
     iconBox: "bg-[#30D158]/15 border-[#30D158]/30 text-[#30D158]",
@@ -21,9 +21,9 @@ const MODULE_CARDS = [
   {
     href: "/examination",
     title: "Scenario Examination Studio",
-    subtitleTh: "ห้องสอบสถานการณ์จำลอง",
+    subtitleTh: "ห้องสอบสถานการณ์ภาคปฏิบัติ",
     description:
-      "ชมคลิปสถานการณ์จำลองสั้น 8 วินาที ตัดสินใจเลือกกติกาภายใน 5 วินาที และแสดงท่าทางหน้ากล้องเพื่อวัดคะแนน 3 มิติ",
+      "อ่านสถานการณ์การแข่งขัน ตัดสินใจเลือกกติกาภายใน 5 วินาที และแสดงท่าทางหน้ากล้องหรืออัปโหลดภาพเพื่อวัดคะแนนจริง",
     icon: "quiz",
     badge: "Module 2 · 5 Scenarios",
     accentText: "text-[#0A84FF]",

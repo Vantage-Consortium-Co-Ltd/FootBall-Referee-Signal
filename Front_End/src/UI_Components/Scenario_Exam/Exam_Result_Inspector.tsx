@@ -6,7 +6,7 @@ import {
   GestureRule,
   ScenarioExamQuestion,
 } from "../../Data_Types/Referee_Types";
-import { MOCK_IFAB_RULES } from "../../Core_Lib/Microservices_Mock";
+import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
 import { Google_Icon } from "../Common/Google_Icon";
 import {
   triggerCausalFeedback,
@@ -30,7 +30,7 @@ export const Exam_Result_Inspector: React.FC<ExamResultInspectorProps> = ({
   onReplayClip,
   onNextQuestion,
 }) => {
-  const targetRule: GestureRule | undefined = MOCK_IFAB_RULES.find(
+  const targetRule: GestureRule | undefined = IFAB_RULES.find(
     (r) => r.id === question.targetGestureId
   );
 
@@ -205,8 +205,8 @@ export const Exam_Result_Inspector: React.FC<ExamResultInspectorProps> = ({
             }
           />
           <span className="text-[#F5F5F7] apple-tabular">
-            สรีระมุมยกแขน {attemptResult.recordedAngles.rElevationAngle}° · ข้อศอกเหยียด{" "}
-            {attemptResult.recordedAngles.rElbowAngle}° (ความแม่นยำ {attemptResult.postureScore}/100)
+            ความมั่นใจท่าทางจากโมเดล YOLO26n-pose: {attemptResult.postureScore}/100 · ค้างสัญญาณ{" "}
+            {attemptResult.holdDurationSeconds.toFixed(1)}s
           </span>
         </div>
 

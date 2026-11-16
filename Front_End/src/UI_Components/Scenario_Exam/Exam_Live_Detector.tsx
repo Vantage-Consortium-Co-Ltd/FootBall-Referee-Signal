@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ExamAttemptResult,
   GestureRule,
   ModalDetection,
+  PostureAngles,
   ScenarioExamQuestion,
 } from "../../Data_Types/Referee_Types";
 import { Skeleton_Canvas } from "../Canvas_Engine/Skeleton_Canvas";
-import {
-  MOCK_IFAB_RULES,
-  evaluateMockPosture,
-  generateMockKeypoints,
-} from "../../Core_Lib/Microservices_Mock";
+import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
 import {
   captureVideoFrameAsJpeg,
   checkModalHealth,
@@ -35,6 +32,13 @@ export interface ExamLiveDetectorProps {
   onSubmitAttempt: (result: ExamAttemptResult) => void;
 }
 
+const ZERO_ANGLES: PostureAngles = {
+  rElbowAngle: 0,
+  lElbowAngle: 0,
+  rElevationAngle: 0,
+  lElevationAngle: 0,
+};
+
 export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
   question,
   selectedOptionId,
@@ -51,8 +55,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
   const pumpTimerRef = useRef<number | null>(null);
 
   const [cameraActive, setCameraActive] = useState<boolean>(false);
-  const [simFormQuality, setSimFormQuality] = useState<"optimal" | "weak">("optimal");
-  const [frameTick, setFrameTick] = useState<number>(0);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [holdDuration, setHoldDuration] = useState<number>(0);
 
   // Modal AI WebSocket & Image Upload States
@@ -66,18 +69,13 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
   const [examAiError, setExamAiError] = useState<string | null>(null);
 
   const targetRule: GestureRule =
-    MOCK_IFAB_RULES.find((r) => r.id === question.targetGestureId) ||
-    MOCK_IFAB_RULES[5];
+    IFAB_RULES.find((r) => r.id === question.targetGestureId) || IFAB_RULES[5];
 
   const selectedOption = question.options.find((o) => o.id === selectedOptionId);
   const performedGestureId =
     isDecisionLocked && selectedOption ? selectedOption.linkedGestureId : 0;
   const performedRule: GestureRule =
-    MOCK_IFAB_RULES.find((r) => r.id === performedGestureId) || targetRule;
-
-  // Refs for RAF loop stability
-  const frameTickRef = useRef<number>(0);
-  const isHoldMatchedRef = useRef<boolean>(false);
+    IFAB_RULES.find((r) => r.id === performedGestureId) || targetRule;
 
   const matchedWsDet =
     liveDetections.find((d) => d.label.toLowerCase() === performedRule.name.toLowerCase()) ||
@@ -89,9 +87,8 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     uploadedDetections.find((d) => d.label.toLowerCase() === targetRule.name.toLowerCase()) ||
     null;
 
-  isHoldMatchedRef.current = Boolean(
-    !cameraActive || !wsConnected || uploadedExamImageUrl || matchedWsDet
-  );
+  const isHoldMatchedRef = useRef<boolean>(false);
+  isHoldMatchedRef.current = Boolean(cameraActive && wsConnected && matchedWsDet);
 
   // Revoke photo object URL on change/unmount
   useEffect(() => {
@@ -102,42 +99,37 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     };
   }, [uploadedExamImageUrl]);
 
-  // Attempt webcam startup with seamless Simulation fallback
-  useEffect(() => {
-    let mounted = true;
-    const initCam = async () => {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
-          audio: false,
-        });
-        if (!mounted) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraActive(true);
-        }
-      } catch {
-        if (mounted) setCameraActive(false);
+  const startCamera = useCallback(async () => {
+    try {
+      setCameraError(null);
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("เบราว์เซอร์ไม่รองรับกล้องเว็บแคม");
       }
-    };
-    void initCam();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+        audio: false,
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        setCameraActive(true);
+      }
+    } catch {
+      setCameraError("ไม่สามารถเปิดกล้องได้ — สามารถอัปโหลดภาพถ่ายจริงด้านล่างเพื่อตรวจแทน");
+      setCameraActive(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    void startCamera();
     return () => {
-      mounted = false;
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach((t) => t.stop());
         videoRef.current.srcObject = null;
       }
     };
-  }, []);
+  }, [startCamera]);
 
   // Reset hold duration and uploaded photo on question change or unlock
   useEffect(() => {
@@ -226,6 +218,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
         if (health.status !== "ok") {
           setWsWarming(false);
           setWsConnected(false);
+          setExamAiError(health.detail || "Modal API ไม่ตอบสนอง");
           return;
         }
 
@@ -265,6 +258,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
           awaitingReplyRef.current = false;
           setWsWarming(false);
           setWsConnected(false);
+          setExamAiError("เกิดข้อผิดพลาดระหว่างเชื่อมต่อ /ws/webcam");
         };
 
         ws.onclose = () => {
@@ -274,10 +268,13 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
           setWsWarming(false);
           setWsConnected(false);
         };
-      } catch {
+      } catch (err: unknown) {
         if (!cancelled) {
           setWsWarming(false);
           setWsConnected(false);
+          setExamAiError(
+            err instanceof Error ? err.message : "เชื่อมต่อ /ws/webcam ไม่สำเร็จ"
+          );
         }
       }
     };
@@ -298,25 +295,19 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     };
   }, [cameraActive, isDecisionLocked, hasCompletedResult, uploadedExamImageUrl]);
 
-  // Accurate FPS-independent RAF timer via performance.now()
+  // Hold timer loop driven strictly by live WebSocket matches
   useEffect(() => {
-    if (hasCompletedResult) return;
+    if (hasCompletedResult || !isDecisionLocked) return;
     let animId: number;
     let lastTime = performance.now();
 
     const loop = (now: number) => {
       const dt = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
-      const nextTick = (frameTickRef.current + 1) % 1000;
-      frameTickRef.current = nextTick;
-      setFrameTick(nextTick);
-
-      if (isDecisionLocked) {
-        if (isHoldMatchedRef.current) {
-          setHoldDuration((prev) => Math.min(3.0, prev + dt));
-        } else {
-          setHoldDuration(0);
-        }
+      if (isHoldMatchedRef.current) {
+        setHoldDuration((prev) => Math.min(3.0, prev + dt));
+      } else {
+        setHoldDuration(0);
       }
       animId = requestAnimationFrame(loop);
     };
@@ -353,50 +344,27 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     }
   };
 
-  // Compute keypoints & posture metrics (Hybrid Live AI / Photo AI / Simulation)
   const activeDetections = uploadedExamImageUrl ? uploadedDetections : liveDetections;
   const topActiveDet = activeDetections[0] ?? null;
   const topActiveRule = topActiveDet ? findRuleByLabel(topActiveDet.label) : undefined;
-  const displayedGestureId =
-    (uploadedExamImageUrl || wsConnected) && topActiveRule
-      ? topActiveRule.id
-      : performedGestureId;
 
-  const rawPose = generateMockKeypoints(displayedGestureId, frameTick);
-  const weakOffset = simFormQuality === "weak" ? 24 : 0;
-  const adjustedAngles = {
-    ...rawPose.angles,
-    rElevationAngle: Math.max(12, rawPose.angles.rElevationAngle - weakOffset),
-    rElbowAngle: Math.max(
-      115,
-      rawPose.angles.rElbowAngle - (simFormQuality === "weak" ? 28 : 0)
-    ),
-  };
-
-  const baseEval = evaluateMockPosture(performedRule, frameTick, holdDuration);
-
-  let livePostureScore: number;
+  let livePostureScore = 0;
   if (uploadedExamImageUrl) {
     if (matchedPhotoDet) {
-      livePostureScore = Math.min(100, Math.max(75, Math.round(matchedPhotoDet.confidence * 100)));
+      livePostureScore = Math.round(matchedPhotoDet.confidence * 100);
     } else if (topActiveDet) {
-      livePostureScore = Math.round(topActiveDet.confidence * 55);
-    } else {
-      livePostureScore = 30;
-    }
-  } else if (cameraActive && wsConnected) {
-    if (matchedWsDet) {
-      livePostureScore = Math.min(100, Math.max(75, Math.round(matchedWsDet.confidence * 100)));
-    } else if (topActiveDet) {
-      livePostureScore = Math.round(topActiveDet.confidence * 55);
+      livePostureScore = Math.round(topActiveDet.confidence * 50);
     } else {
       livePostureScore = 0;
     }
-  } else {
-    livePostureScore =
-      simFormQuality === "weak"
-        ? Math.max(48, Math.min(68, baseEval.score - 28))
-        : baseEval.score;
+  } else if (cameraActive && wsConnected) {
+    if (matchedWsDet) {
+      livePostureScore = Math.round(matchedWsDet.confidence * 100);
+    } else if (topActiveDet) {
+      livePostureScore = Math.round(topActiveDet.confidence * 50);
+    } else {
+      livePostureScore = 0;
+    }
   }
 
   const holdTarget = targetRule.minHoldSeconds || 1.5;
@@ -412,8 +380,12 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
     precision: 0.25,
   });
 
+  const canSubmit = Boolean(
+    uploadedExamImageUrl || (cameraActive && wsConnected && liveDetections.length > 0)
+  );
+
   const handleRecordAndGrade = () => {
-    if (!selectedOptionId) return;
+    if (!selectedOptionId || !canSubmit) return;
     const isDecisionCorrect = selectedOptionId === question.correctOptionId;
     const gestureMatched =
       selectedOption?.linkedGestureId === question.targetGestureId;
@@ -423,17 +395,10 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
       : Math.min(55, Math.round(livePostureScore * 0.55));
 
     const finalHoldDuration = Number(
-      Math.max(
-        holdDuration,
-        uploadedExamImageUrl && matchedPhotoDet
-          ? holdTarget + 0.1
-          : isDecisionLocked && !wsConnected
-          ? holdTarget + 0.25
-          : 0.8
-      ).toFixed(1)
+      (uploadedExamImageUrl && matchedPhotoDet ? holdTarget : holdDuration).toFixed(1)
     );
 
-    // 3D Grading Rubric: Decision (40) + Posture (40) + Reaction Speed (20)
+    // 3D Grading Rubric: Decision (40) + Model Posture Confidence (40) + Reaction Speed (20)
     const decisionPoints = isDecisionCorrect ? 40 : 0;
     const posturePoints = Math.round(finalPostureScore * 0.4);
     const maxWindow = question.decisionWindowSeconds || 5;
@@ -461,7 +426,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
       holdDurationSeconds: finalHoldDuration,
       totalQuestionScore,
       passed,
-      recordedAngles: adjustedAngles,
+      recordedAngles: ZERO_ANGLES,
     });
   };
 
@@ -472,7 +437,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
         <div className="flex items-center gap-2">
           <Google_Icon name="person" size={18} className="text-[#0A84FF]" />
           <h2 className="text-sm font-bold apple-title text-[#F5F5F7]">
-            ท่าทางผู้เรียนสด (Live Trainee Posture)
+            ตรวจจับท่าทางผู้เรียนจริง (Modal YOLO26n-pose)
           </h2>
         </div>
 
@@ -484,7 +449,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
               ? "bg-[#30D158]/15 border-[#30D158]/40 text-[#30D158]"
               : wsWarming
               ? "bg-[#FF9F0A]/15 border-[#FF9F0A]/40 text-[#FF9F0A]"
-              : "bg-[#0A84FF]/15 border-[#0A84FF]/40 text-[#64D2FF]"
+              : "bg-[#141416] border-white/[0.12] text-[#A1A1A6]"
           }`}
         >
           <span
@@ -493,7 +458,7 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
                 ? "bg-[#30D158] animate-pulse"
                 : wsWarming
                 ? "bg-[#FF9F0A] animate-pulse"
-                : "bg-[#64D2FF]"
+                : "bg-[#6E6E73]"
             }`}
           />
           {uploadedExamImageUrl
@@ -503,12 +468,12 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
             : wsWarming
             ? "Warming Modal CPU..."
             : cameraActive
-            ? "Webcam Simulation Fallback"
-            : "Interactive Simulation Mode"}
+            ? "Webcam Ready"
+            : "No Camera (Use Photo Upload)"}
         </span>
       </div>
 
-      {/* Camera / Skeleton Canvas / Uploaded Photo Area */}
+      {/* Camera / Ghost Guide / Uploaded Photo Area */}
       <div className="p-4">
         <div className="relative h-[260px] bg-[#060608] rounded-2xl border border-white/[0.08] overflow-hidden flex items-center justify-center">
           <video
@@ -517,12 +482,28 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
             playsInline
             muted
             className={`absolute inset-0 w-full h-full object-cover z-0 scale-x-[-1] transition-opacity ${
-              cameraActive && !uploadedExamImageUrl ? "opacity-70" : "opacity-0"
+              cameraActive && !uploadedExamImageUrl ? "opacity-80" : "opacity-0"
             }`}
           />
 
           {!cameraActive && !uploadedExamImageUrl && (
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#2C2C2E33_1px,transparent_1px),linear-gradient(to_bottom,#2C2C2E33_1px,transparent_1px)] bg-[size:28px_28px]" />
+            <div className="relative z-10 px-6 text-center space-y-2">
+              <Google_Icon name="videocam_off" size={26} className="mx-auto text-[#6E6E73]" />
+              <div className="text-xs font-semibold text-[#F5F5F7]">
+                ยังไม่ได้เชื่อมต่อกล้องเว็บแคม
+              </div>
+              <p className="text-[11px] text-[#A1A1A6]">
+                {cameraError ||
+                  "เปิดกล้องเว็บแคมเพื่อสตรีมเข้า /ws/webcam หรืออัปโหลดภาพถ่ายจริงด้านล่าง"}
+              </p>
+              <button
+                type="button"
+                onClick={() => void startCamera()}
+                className="px-3 py-1 rounded-xl bg-[#0A84FF] text-white text-[11px] font-semibold apple-pressable"
+              >
+                ลองเปิดกล้องอีกครั้ง
+              </button>
+            </div>
           )}
 
           {uploadedExamImageUrl ? (
@@ -548,19 +529,21 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
               </button>
             </div>
           ) : (
-            <div className="relative z-10 flex items-center justify-center">
-              <Skeleton_Canvas
-                keypoints={rawPose.keypoints}
-                targetRule={isDecisionLocked ? targetRule : undefined}
-                angles={adjustedAngles}
-                width={440}
-                height={250}
-                mirror={true}
-                showGhost={isDecisionLocked}
-                showAngles={isDecisionLocked}
-                showBBoxes={false}
-              />
-            </div>
+            cameraActive &&
+            isDecisionLocked && (
+              <div className="relative z-10 flex items-center justify-center pointer-events-none">
+                <Skeleton_Canvas
+                  keypoints={[]}
+                  targetRule={targetRule}
+                  width={440}
+                  height={250}
+                  mirror={true}
+                  showGhost={true}
+                  showAngles={false}
+                  showBBoxes={false}
+                />
+              </div>
+            )
           )}
 
           {/* Floating Status Badges */}
@@ -585,23 +568,21 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
                   ? `Modal AI ตรวจพบ: ${topActiveRule?.nameTh || topActiveDet.label} (${Math.round(
                       topActiveDet.confidence * 100
                     )}%) · ${Math.round(animatedScoreSpring.value)}%`
-                  : "ไม่พบท่าสัญญาณในภาพที่อัปโหลด (30%)"
+                  : "ไม่พบท่าสัญญาณในภาพที่อัปโหลด (0%)"
                 : isDecisionLocked
                 ? wsConnected
                   ? topActiveDet
-                    ? `Live WS: ${topActiveDet.label.replace(/_/g, " ")} · ${Math.round(
+                    ? `Live WS: ${topActiveRule?.nameTh || topActiveDet.label} · ${Math.round(
                         animatedScoreSpring.value
                       )}%`
                     : "กำลังรอตรวจจับสัญญาณจากกล้อง..."
-                  : `ตรวจพบ: ${performedRule.name.replace(/_/g, " ")} · ${Math.round(
-                      animatedScoreSpring.value
-                    )}%`
+                  : "กำลังเชื่อมต่อ Modal /ws/webcam..."
                 : "เลือกข้อ A–D แล้วกดยืนยันคำตัดสิน"}
             </span>
           </div>
         </div>
 
-        {/* Hold Progress & Modal AI Photo Upload Fallback */}
+        {/* Hold Progress & Modal AI Photo Upload */}
         {isDecisionLocked && !hasCompletedResult && (
           <div className="mt-3 space-y-3">
             {/* Hold bar */}
@@ -658,46 +639,22 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
               </div>
             )}
 
-            {/* Simulation Quality Toggle when testing without physical camera pose or uploaded photo */}
-            {!cameraActive && !uploadedExamImageUrl && (
-              <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-[#141416] border border-white/[0.08] text-[11px]">
-                <span className="text-[#A1A1A6]">จำลองสรีระในการทดสอบ:</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onPointerDown={() => triggerCausalFeedback("tap")}
-                    onClick={() => setSimFormQuality("optimal")}
-                    className={`px-2.5 py-1 rounded-xl border font-medium apple-pressable ${
-                      simFormQuality === "optimal"
-                        ? "bg-[#30D158]/15 border-[#30D158]/55 text-[#30D158]"
-                        : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
-                    }`}
-                  >
-                    ท่าตรงมาตรฐาน (95%+)
-                  </button>
-                  <button
-                    type="button"
-                    onPointerDown={() => triggerCausalFeedback("tap")}
-                    onClick={() => setSimFormQuality("weak")}
-                    className={`px-2.5 py-1 rounded-xl border font-medium apple-pressable ${
-                      simFormQuality === "weak"
-                        ? "bg-[#FF9F0A]/15 border-[#FF9F0A]/55 text-[#FF9F0A]"
-                        : "bg-[#1C1C1E] border-white/[0.08] text-[#A1A1A6]"
-                    }`}
-                  >
-                    แขนงอ/ต่ำกว่าเกณฑ์
-                  </button>
-                </div>
-              </div>
-            )}
-
             <button
               type="button"
+              disabled={!canSubmit}
               onClick={handleRecordAndGrade}
-              className="w-full py-2.5 px-4 rounded-2xl bg-[#30D158] hover:bg-[#42DF69] text-black font-bold text-xs flex items-center justify-center gap-2 apple-pressable shadow-lg shadow-[#30D158]/20"
+              className={`w-full py-2.5 px-4 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 apple-pressable ${
+                canSubmit
+                  ? "bg-[#30D158] hover:bg-[#42DF69] text-black shadow-lg shadow-[#30D158]/20"
+                  : "bg-[#2C2C2E] text-[#6E6E73] cursor-not-allowed"
+              }`}
             >
               <Google_Icon name="check_circle" size={18} />
-              <span>บันทึกท่าสัญญาณและตรวจผลคะแนนข้อนี้</span>
+              <span>
+                {canSubmit
+                  ? "บันทึกท่าสัญญาณและตรวจผลคะแนนข้อนี้"
+                  : "รอผลตรวจจับจากกล้อง /ws/webcam หรืออัปโหลดภาพถ่ายจริงก่อนบันทึกผล"}
+              </span>
             </button>
           </div>
         )}

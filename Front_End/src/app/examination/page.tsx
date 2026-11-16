@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ExamAttemptResult } from "../../Data_Types/Referee_Types";
-import { MOCK_SCENARIO_EXAM_PACK } from "../../Core_Lib/Microservices_Mock";
+import { SCENARIO_EXAM_PACK } from "../../Core_Lib/Ifab_Rules_Catalog";
+import { recordExamPackSession } from "../../Core_Lib/Session_Store";
 import {
   Exam_Live_Detector,
   Exam_Question_Prompt,
@@ -14,7 +15,7 @@ import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export default function ExaminationPage() {
-  const examPack = MOCK_SCENARIO_EXAM_PACK;
+  const examPack = SCENARIO_EXAM_PACK;
   const totalQuestions = examPack.questions.length;
 
   const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -58,6 +59,7 @@ export default function ExaminationPage() {
 
   const handleNextQuestion = () => {
     if (questionIndex + 1 >= totalQuestions) {
+      recordExamPackSession({ pack: examPack, results });
       setIsExamFinished(true);
       return;
     }
@@ -111,7 +113,7 @@ export default function ExaminationPage() {
             <div className="flex items-center gap-2">
               <Google_Icon name="quiz" size={22} className="text-[#0A84FF]" />
               <h1 className="text-xl md:text-2xl font-bold apple-title text-[#F5F5F7]">
-                ห้องสอบสถานการณ์จำลอง (Scenario Examination)
+                ห้องสอบสถานการณ์ (Scenario Examination)
               </h1>
             </div>
             <p className="text-xs text-[#A1A1A6] mt-0.5">

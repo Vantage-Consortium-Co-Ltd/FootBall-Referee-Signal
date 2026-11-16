@@ -20,8 +20,8 @@ const LEARNING_STEPS = [
   },
   {
     step: "03",
-    title: "สอบสถานการณ์จำลอง",
-    desc: "อ่านเกมจากคลิปสั้นแล้วตอบสนองให้สัญญาณจริง",
+    title: "สอบสถานการณ์ภาคสนาม",
+    desc: "อ่านเกมจากโจทย์เหตุการณ์แล้วให้สัญญาณหน้ากล้องจริง",
     href: "/examination",
   },
   {
@@ -51,7 +51,7 @@ export const Educational_Hero: React.FC = () => {
 
           <p className="text-sm text-[#A1A1A6] apple-body">
             ระบบห้องเรียนอัจฉริยะสำหรับฝึกทักษะการให้สัญญาณ 20 ท่าทางตามมาตรฐาน IFAB
-            Laws of the Game ผ่านกล้องตรวจจับโครงกระดูก 17 จุดแบบเรียลไทม์ พร้อมชุดข้อสอบสถานการณ์จำลองและสมุดบันทึกผลการประเมินผู้เรียนรายบุคคล
+            Laws of the Game ผ่านโมเดล YOLO26n-pose บน Modal Cloud แบบเรียลไทม์ พร้อมชุดข้อสอบสถานการณ์และสมุดบันทึกผลการประเมินจริง
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -70,7 +70,7 @@ export const Educational_Hero: React.FC = () => {
               className="px-5 py-2.5 rounded-2xl bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-white/[0.12] text-[#F5F5F7] text-xs font-bold flex items-center gap-2 apple-pressable"
             >
               <Google_Icon name="quiz" size={17} className="text-[#0A84FF]" />
-              <span>เริ่มสอบสถานการณ์จำลอง</span>
+              <span>เริ่มสอบภาคปฏิบัติ</span>
             </Link>
 
             <Link
@@ -92,7 +92,7 @@ export const Educational_Hero: React.FC = () => {
               <span>สถานะระบบสื่อการสอน</span>
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/35 text-[#30D158] text-[10px] font-bold">
-              STANDALONE
+              MODAL FASTAPI
             </span>
           </div>
 
@@ -108,7 +108,7 @@ export const Educational_Hero: React.FC = () => {
           </div>
 
           <div className="text-[11px] text-[#A1A1A6] leading-relaxed">
-            รองรับการทำงานแบบ Standalone Offline Simulation และเชื่อมต่อเว็บแคมได้ทันทีในห้องเรียน
+            เชื่อมต่อ Modal FastAPI YOLO26n-pose สำหรับตรวจจับสัญญาณผ่านเว็บแคม รูปภาพ และคลิปวิดีโอจริง
           </div>
         </div>
       </div>
