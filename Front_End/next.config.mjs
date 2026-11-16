@@ -1,5 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
+
+/** @type {(phase: string) => import('next').NextConfig} */
+const nextConfig = (phase) => ({
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next" : ".next-prod",
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: false,
@@ -13,6 +16,6 @@ const nextConfig = {
     }
     return config;
   },
-};
+});
 
 export default nextConfig;
