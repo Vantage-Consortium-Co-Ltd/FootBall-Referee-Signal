@@ -23,23 +23,60 @@ async function extractErrorDetail(res: Response, fallback: string): Promise<stri
   }
 }
 
-export async function checkModalHealth(): Promise<ModalHealthResponse> {
-  try {
-    const res = await fetch("/api/inference/health", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return (await res.json()) as ModalHealthResponse;
-  } catch (err: unknown) {
-    return {
-      status: "error",
-      model: "unavailable",
-      device: "cpu",
-      conf: 0.25,
-      imgsz: 640,
-      detail: err instanceof Error ? err.message : "Network error checking health",
-    };
+const HEALTH_CACHE_TTL_MS = 15000;
+let cachedHealth: { data: ModalHealthResponse; expiresAt: number } | null = null;
+let inFlightHealthPromise: Promise<ModalHealthResponse> | null = null;
+
+export async function checkModalHealth(force = false): Promise<ModalHealthResponse> {
+  if (!force && cachedHealth && Date.now() < cachedHealth.expiresAt) {
+    return cachedHealth.data;
   }
+
+  if (!force && inFlightHealthPromise) {
+    return inFlightHealthPromise;
+  }
+
+  const run = (async (): Promise<ModalHealthResponse> => {
+    try {
+      const res = await fetch("/api/inference/health", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return {
+          status: "error",
+          model: "unavailable",
+          device: "cpu",
+          conf: 0.25,
+          imgsz: 640,
+          detail: `Health endpoint returned HTTP ${res.status}`,
+        };
+      }
+      const data = (await res.json()) as ModalHealthResponse;
+      if (res.ok && data.status === "ok") {
+        cachedHealth = {
+          data,
+          expiresAt: Date.now() + HEALTH_CACHE_TTL_MS,
+        };
+      }
+      return data;
+    } catch (err: unknown) {
+      return {
+        status: "error",
+        model: "unavailable",
+        device: "cpu",
+        conf: 0.25,
+        imgsz: 640,
+        detail: err instanceof Error ? err.message : "Network error checking health",
+      };
+    } finally {
+      inFlightHealthPromise = null;
+    }
+  })();
+
+  inFlightHealthPromise = run;
+  return run;
 }
 
 export async function predictImageJson(

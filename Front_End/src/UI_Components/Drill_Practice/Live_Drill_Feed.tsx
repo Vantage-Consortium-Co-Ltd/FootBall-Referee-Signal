@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ModalDetection, SignalClassInfo } from "../../Data_Types/Referee_Types";
 import {
   captureVideoFrameAsJpeg,
-  checkModalHealth,
   fetchWebcamWsConfig,
   findRuleByLabel,
   predictImageAnnotatedUrl,
@@ -178,16 +177,6 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
     const connectStream = async () => {
       try {
         setStreamError(null);
-        setStreamState("warming");
-
-        const health = await checkModalHealth();
-        if (cancelled) return;
-        if (health.status !== "ok") {
-          setStreamState("error");
-          setStreamError("ระบบ AI ไม่พร้อมใช้งาน");
-          return;
-        }
-
         setStreamState("connecting");
         const config = await fetchWebcamWsConfig();
         if (cancelled) return;

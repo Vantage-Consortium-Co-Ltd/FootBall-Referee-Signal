@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic";
 
 const DEFAULT_BASE_URL = "https://kitkhachon-xx--web.us-east.modal.run";
 
+const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
+
 export async function GET(): Promise<NextResponse<ModalHealthResponse>> {
   const baseUrl = (process.env.MODAL_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
   const start = Date.now();
@@ -30,7 +32,7 @@ export async function GET(): Promise<NextResponse<ModalHealthResponse>> {
           latencyMs,
           detail: errText || `Upstream returned HTTP ${upstream.status}`,
         },
-        { status: 503 }
+        { status: 503, headers: NO_STORE_HEADERS }
       );
     }
 
@@ -41,7 +43,7 @@ export async function GET(): Promise<NextResponse<ModalHealthResponse>> {
         status: data.status === "ok" ? "ok" : "error",
         latencyMs,
       },
-      { status: 200 }
+      { status: 200, headers: NO_STORE_HEADERS }
     );
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to reach Modal health endpoint";
@@ -55,7 +57,7 @@ export async function GET(): Promise<NextResponse<ModalHealthResponse>> {
         latencyMs: Date.now() - start,
         detail: message,
       },
-      { status: 503 }
+      { status: 503, headers: NO_STORE_HEADERS }
     );
   }
 }
