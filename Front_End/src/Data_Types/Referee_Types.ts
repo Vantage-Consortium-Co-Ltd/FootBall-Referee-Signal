@@ -238,3 +238,49 @@ export interface TraineeEvaluationReport {
   instructorNotes: string[];
 }
 
+// ==============================================================================
+// MODAL FASTAPI INFERENCE SERVICE TYPES (docs/api_spce/apiSpec.md)
+// ==============================================================================
+
+export interface ModalDetection {
+  label: string;
+  confidence: number;
+}
+
+export interface ModalHealthResponse {
+  status: "ok" | "error";
+  model: string;
+  device: string;
+  fp16?: boolean;
+  cuda?: boolean;
+  conf: number;
+  imgsz: number;
+  latencyMs?: number;
+  detail?: string;
+}
+
+export interface ModalImagePredictResponse {
+  detections: ModalDetection[];
+}
+
+export interface ModalVideoFrameResult {
+  frame: number;
+  time: number;
+  detections: ModalDetection[];
+}
+
+export interface ModalVideoPredictResponse {
+  fps: number;
+  frames_read: number;
+  results: ModalVideoFrameResult[];
+}
+
+export interface ModalWsConfigResponse {
+  wsUrl: string;
+  baseUrl: string;
+  hasApiKey: boolean;
+}
+
+export const F1_ZERO_LIMITED_CLASSES = ["Offside", "Goal", "Elbowing"] as const;
+
+
