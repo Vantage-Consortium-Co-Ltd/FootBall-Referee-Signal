@@ -2,7 +2,7 @@
 import torch
 from ultralytics import YOLO
 
-from utils.load_utils import resolve
+from utils.loadUtils import resolve
 
 
 class Detector:

@@ -1,6 +1,6 @@
 """Create the HF model repo (if needed) and upload the files listed in config.yaml. Settings: log_model.huggingface in config.yaml, token: HF_TOKEN in .env.
 
-  python Log_Model/log_to_hf.py [--config config/config.yaml]
+  python Log_Model/logToHf.py [--config config/config.yaml]
 """
 import argparse
 import os

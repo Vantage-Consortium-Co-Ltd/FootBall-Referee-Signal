@@ -5,9 +5,9 @@ Deadline: ~2 weeks. Team builds the frontend. Target: test macro-F1 >= 0.80.
 
 ## Decisions (user)
 - Source: Label Studio **project 7** via API (`LS_URL`, `LS_TOKEN`, `LS_PROJECT_IDS=7` in `.env`). Only tasks with a submitted (non-cancelled) annotation.
-- Classes: the 20 in `GESTURES` (`Data_Preprocess/src/export_to_label_studio.py`), id order fixed. Class 0 `Referee` = "no gesture", kept as a real class.
+- Classes: the 20 in `GESTURES` (`Data_Preprocess/src/exportToLabelStudio.py`), id order fixed. Class 0 `Referee` = "no gesture", kept as a real class.
 - Split: 70/15/15, stratified by class, **grouped by burst** (photos whose filename timestamps are within a few seconds), fixed seed.
-- Augmentation: **offline horizontal flip, train split only**, mirror image + swap L/R keypoints (`FLIP_IDX` in `pre_Label.py`). **Not flipped:** `Corner_Kick`, `Direct_Free_Kick`, `Indirect_Free_Kick`, `Offside_Location`. Ultralytics `fliplr=0`.
+- Augmentation: **offline horizontal flip, train split only**, mirror image + swap L/R keypoints (`FLIP_IDX` in `preLabel.py`). **Not flipped:** `Corner_Kick`, `Direct_Free_Kick`, `Indirect_Free_Kick`, `Offside_Location`. Ultralytics `fliplr=0`.
 - Approaches (both, compared):
   - **Two-stage** (local CPU): keypoints -> normalize (center on mid-hip, scale by torso length) -> compare LogisticRegression, RandomForest, MLP (sklearn); pick best val macro-F1.
   - **One-stage** (Colab GPU): fine-tune `yolo26n-pose`, gesture = box class.

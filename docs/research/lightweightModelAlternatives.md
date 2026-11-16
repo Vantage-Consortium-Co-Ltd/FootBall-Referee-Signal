@@ -17,7 +17,7 @@
 
 ## ข้อเสนอ [J]
 1. **อย่าเปลี่ยนเพราะ "ขนาด"** YOLO26n-pose เบาพออยู่แล้ว คอขวดผลลัพธ์คือข้อมูล (ประมาณ 3 burst ต่อคลาส, Offside/Goal/Elbowing F1 = 0 บน split เก่า) ไม่ใช่ความจุโมเดล
-2. ถ้าต้องการทางเลือกที่ต่างจริง ลอง **MediaPipe Pose 33 landmarks → ตัวจำแนกเดิม (RF/MLP)** ก่อน เพราะใช้โค้ด `Train/features.py` และ `train_two_stage.py` ซ้ำได้เกือบทั้งหมด ต้องแก้ตัวดึงฟีเจอร์ให้รองรับ 33 จุด
+2. ถ้าต้องการทางเลือกที่ต่างจริง ลอง **MediaPipe Pose 33 landmarks → ตัวจำแนกเดิม (RF/MLP)** ก่อน เพราะใช้โค้ด `Train/features.py` และ `trainTwoStage.py` ซ้ำได้เกือบทั้งหมด ต้องแก้ตัวดึงฟีเจอร์ให้รองรับ 33 จุด
 3. ถ้าต้องการ latency ต่ำบนมือถือ/CPU ให้ดู **RTMPose-s + detector เล็ก** แต่ต้องวัด latency จริงรวม detector บนเครื่องปลายทาง
 4. เทียบโมเดลบน test split เดียวกัน (macro-F1 รายคน ตามที่ `Evaluate/` ใช้) ไม่ใช่เทียบ mAP/AP ข้าม benchmark
 

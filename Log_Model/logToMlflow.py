@@ -1,6 +1,6 @@
 """Log one-stage + two-stage results (hyperparameters, train/val, test, models) to an MLflow server as one VERSION.
 
-  python Log_Model/log_to_mlflow.py --version v1 --data-note "burst-5s split, 885/182/153" [--config config/config.yaml]
+  python Log_Model/logToMlflow.py --version v1 --data-note "burst-5s split, 885/182/153" [--config config/config.yaml]
 
 All paths, experiment and registry names live in the log_model: section of config.yaml.
 
@@ -119,7 +119,7 @@ def log_one_stage(c, cfg, version, data_note):
         if best is None or fit[i] > best[0]:
             best = (float(fit[i]), rid, int(df.epoch[i]), d)
 
-    # test evaluation (files written by Evaluate/evaluate_one_stage.py)
+    # test evaluation (files written by Evaluate/evaluateOneStage.py)
     test = json.loads((cfg.one_eval / "metrics.json").read_text(encoding="utf-8"))
     rid = new_run(c, exp, "test_eval", {"version": version, "kind": "test", "stage": "one_stage"}, parent)
     log_all(c, rid, [Param(k, str(test[k])) for k in ("weights", "conf", "iou", "n_test") if k in test],

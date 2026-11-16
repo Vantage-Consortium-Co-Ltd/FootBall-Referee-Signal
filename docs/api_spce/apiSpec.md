@@ -1,13 +1,13 @@
 # API Spec — Football Referee Signal Service
 
 FastAPI service ที่ห่อโมเดล YOLO26n-pose (ส่งออกเฉพาะชื่อท่า + confidence ต่อคน, 20 ท่า) · เวอร์ชัน API `0.1.0`
-โค้ด: `Inference/app/Service.py` (endpoint), `Inference/app/Predict.py` (โมเดล) · เอกสารอัตโนมัติ: `GET /docs`, `GET /openapi.json`
+โค้ด: `Inference/app/service.py` (endpoint), `Inference/app/predict.py` (โมเดล) · เอกสารอัตโนมัติ: `GET /docs`, `GET /openapi.json`
 
 ## 1. รันและตั้งค่า
 
 ```bash
 python Inference/main.py          # -> http://127.0.0.1:8000
-python Inference/test_service.py  # self-check กับโมเดลจริง
+python Inference/testService.py  # self-check กับโมเดลจริง
 ```
 
 ค่าทั้งหมดอยู่ในหมวด `inference:` ของ `config.yaml` (ไม่ฝังในโค้ด)

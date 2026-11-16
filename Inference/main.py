@@ -9,8 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # so `app` and `utils`
 
 import uvicorn  # noqa: E402
 
-from app.Service import create_app  # noqa: E402
-from utils.load_utils import load_config  # noqa: E402
+from app.service import create_app  # noqa: E402
+from utils.loadUtils import load_config  # noqa: E402
 
 if __name__ == "__main__":
     cfg = load_config()

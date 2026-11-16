@@ -2,7 +2,7 @@
 
   modal setup                                                  # once: log in (browser)
   modal secret create football-signal-api-key FOOTBALL_API_KEY=<key>
-  modal deploy Inference/modal_app.py                          # -> https://<workspace>--football-signal-web.modal.run
+  modal deploy Inference/modalApp.py                          # -> https://<workspace>--football-signal-web.modal.run
 """
 from pathlib import Path
 
@@ -17,7 +17,7 @@ image = (
     modal.Image.debian_slim(python_version=M["python_version"])
     .apt_install("libgl1", "libglib2.0-0")  # opencv
     .pip_install("torch", "torchvision", "ultralytics", "fastapi", "python-multipart", "pyyaml")
-    .add_local_dir(str(ROOT / "Inference"), "/app/Inference", ignore=["**/__pycache__", "test_service.py", "modal_app.py"])
+    .add_local_dir(str(ROOT / "Inference"), "/app/Inference", ignore=["**/__pycache__", "testService.py", "modalApp.py"])
     .add_local_dir(str(ROOT / "config"), "/app/config")
     .add_local_file(str(ROOT / INF["model_path"]), f"/app/{INF['model_path']}")  # weights baked into the image
 )
@@ -31,7 +31,7 @@ def web():
     import sys
 
     sys.path.insert(0, "/app/Inference")
-    from app.Service import create_app
-    from utils.load_utils import load_config
+    from app.service import create_app
+    from utils.loadUtils import load_config
 
     return create_app(load_config())

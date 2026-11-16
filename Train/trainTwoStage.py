@@ -1,6 +1,6 @@
 """Two-stage: keypoints.csv -> normalized features -> sklearn classifier. Picks best by val macro-F1.
 
-  python Train/train_two_stage.py [--csv ...keypoints.csv] [--out Train/models/two_stage] [--mlruns Train/mlruns] [--config config/config.yaml]
+  python Train/trainTwoStage.py [--csv ...keypoints.csv] [--out Train/models/two_stage] [--mlruns Train/mlruns] [--config config/config.yaml]
 
 Every model's parameter lists in config.yaml are expanded to all combinations; the best one overall is saved.
 

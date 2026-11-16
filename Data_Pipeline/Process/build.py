@@ -6,13 +6,13 @@ from pathlib import Path
 
 import cv2
 
-from Data_Preprocess.src.export_to_label_studio import GESTURES
+from Data_Preprocess.src.exportToLabelStudio import GESTURES
 
 from .convert import collect
-from .labelstudio import make_fetcher
+from .labelStudio import make_fetcher
 from .split import SPLITS, burst_groups, split_groups
 
-# Same as Data_Preprocess/src/pre_Label.py FLIP_IDX; copied because pre_Label imports ultralytics at module level.
+# Same as Data_Preprocess/src/preLabel.py FLIP_IDX; copied because preLabel imports ultralytics at module level.
 FLIP_IDX = [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15]
 
 

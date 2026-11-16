@@ -12,8 +12,8 @@ Outputs (under --out):
 
 Usage (one command does pre-label AND the Label Studio export):
   pip install ultralytics pillow-heif
-  python pre_Label.py --src ./photos --out ./prelabel
-  python pre_Label.py --src ./photos --out ./prelabel --fall-heuristic --device 0
+  python preLabel.py --src ./photos --out ./prelabel
+  python preLabel.py --src ./photos --out ./prelabel --fall-heuristic --device 0
 
 Label Studio: create project -> Labeling Interface -> Code -> paste label_config.xml
 -> Import -> drop label_studio_tasks.json. Review/fix, and only after that split train/val.
@@ -28,7 +28,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-from Data_Preprocess.src.export_to_label_studio import GESTURES, convert_to_label_studio, write_label_config
+from Data_Preprocess.src.exportToLabelStudio import GESTURES, convert_to_label_studio, write_label_config
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 HEIC_EXT = {".heic", ".heif"}  # phone photos; cv2 cannot decode these

@@ -19,7 +19,7 @@
 | ไฟล์ | เปลี่ยน |
 |---|---|
 | `Train/config.yaml` `one_stage:` | เพิ่ม `optimizer: [AdamW]` (บังคับให้ `lr0` มีผล), `patience: [30]`, `cos_lr: [true]`, `freeze: [null, 10]` และ `lr0: [0.0004, 0.001]`; ลด `epochs` เป็น `[80]` (บล็อกเต็มใน §6) |
-| `Train/train_one_stage.py` | **ไม่ต้องแก้เพื่อให้ใช้ได้**: ทุก key ใน config ถูกส่งตรงเข้า `model.train(**p)` ผ่าน `ParameterGrid` อยู่แล้ว. ที่แนะนำเพิ่ม (ไม่บังคับ): log `best_epoch`/`epochs_run` ลง MLflow (อ่านจาก `results.csv`) และเปลี่ยน `--project` ทุกครั้งที่รัน round ใหม่ เพราะ `exist_ok=True` + ชื่อ `trial{k}` จะเขียนทับผลเดิม |
+| `Train/trainOneStage.py` | **ไม่ต้องแก้เพื่อให้ใช้ได้**: ทุก key ใน config ถูกส่งตรงเข้า `model.train(**p)` ผ่าน `ParameterGrid` อยู่แล้ว. ที่แนะนำเพิ่ม (ไม่บังคับ): log `best_epoch`/`epochs_run` ลง MLflow (อ่านจาก `results.csv`) และเปลี่ยน `--project` ทุกครั้งที่รัน round ใหม่ เพราะ `exist_ok=True` + ชื่อ `trial{k}` จะเขียนทับผลเดิม |
 | วิธีจูน | ใช้ **ParameterGrid ที่มีอยู่ แบบเป็นรอบ ๆ (ครั้งละ ≤4 run)** มากกว่า `model.tune()` สำหรับงบ 2–3 ชม. (เหตุผล §5) |
 
 ---
@@ -31,7 +31,7 @@
 - **สร้าง stopper**: `engine/trainer.py` L467 `EarlyStopping(patience=self.args.patience)`; **เรียกใช้หลัง validate ทุก epoch** L665–678 (`self.stop |= self.stopper(epoch + 1, self.fitness) or final_epoch`). `possible_stop` บังคับให้ validate แม้ `val=False` (L665).
 - **`fitness` สำหรับ pose** [V]: `utils/metrics.py` `PoseMetrics.fitness` L1547–1549 = `pose.fitness() + DetMetrics.fitness`; แต่ละอันคือ `Metric.fitness` L1015–1018 ที่ใช้น้ำหนัก `[P,R,mAP50,mAP50-95] = [0,0,0,1]`. สรุป **fitness = mAP50-95(P) + mAP50-95(B)** (ช่วง 0–2, ไม่ใช่สูตร 0.1·mAP50+0.9·mAP50-95 แบบเวอร์ชันเก่า). ตรวจกับ results.csv: epoch 37 → 0.87266 + 0.86190 = **1.73456**.
   - ข้อควรระวัง [J]: box mAP ของเราสูงเกินจริง (GT box มาจาก YOLO pre-label) และ mAP นี้ไม่ใช่ macro-F1 ที่ใช้รายงานผล test, จึงเป็นเพียง proxy.
-- **เซฟ checkpoint** [V] `trainer.py` L851–854: เขียน `last.pt` ทุก epoch; เขียน `best.pt` เมื่อ `best_fitness == fitness`; `save_period>0` เซฟ `epoch{N}.pt` เพิ่ม (default `-1` = ปิด). เมื่อจบ `final_eval()` (L1053) ตรวจ `best.pt` ซ้ำบน val → ค่านี้คือ `res.results_dict["fitness"]` ที่ `train_one_stage.py` ใช้เลือก trial (จึงเป็น fitness ของ epoch ที่ดีที่สุด ไม่ใช่ epoch สุดท้าย) [V] `engine/model.py` L911 (`self.metrics = trainer.validator.metrics`).
+- **เซฟ checkpoint** [V] `trainer.py` L851–854: เขียน `last.pt` ทุก epoch; เขียน `best.pt` เมื่อ `best_fitness == fitness`; `save_period>0` เซฟ `epoch{N}.pt` เพิ่ม (default `-1` = ปิด). เมื่อจบ `final_eval()` (L1053) ตรวจ `best.pt` ซ้ำบน val → ค่านี้คือ `res.results_dict["fitness"]` ที่ `trainOneStage.py` ใช้เลือก trial (จึงเป็น fitness ของ epoch ที่ดีที่สุด ไม่ใช่ epoch สุดท้าย) [V] `engine/model.py` L911 (`self.metrics = trainer.validator.metrics`).
 - **ผลข้างเคียงที่ต้องรู้**
   - `close_mosaic=N` ปิด mosaic เมื่อ `epoch >= epochs - N` [V] `trainer.py` L512. ถ้า early stop ก่อนถึงช่วงนั้น **mosaic จะไม่เคยถูกปิด** เลย.
   - LR schedule ผูกกับ `epochs` (ไม่ใช่กับ patience): linear `lf = (1 - x/epochs)(1-lrf)+lrf` หรือ cosine ถ้า `cos_lr=True` [V] `trainer.py` L270–276. หยุดเร็ว = LR ยังสูง; ถ้าอยากให้ LR ตกถึงปลายทางทัน ให้ลด `epochs` ไม่ใช่พึ่ง patience.
@@ -120,7 +120,7 @@ if name == "auto":
 - **ข้อจำกัดกับงบเรา**: 1 trial ≈ 15–20 นาที → 2–3 ชม. ≈ **6–10 trial เท่านั้น** (≈18 s/epoch ที่เห็นบน Kaggle GPU; Colab อาจต่างกัน **[U]**). จำนวนนี้น้อยกว่ามากกับที่ genetic search ต้องการเพื่อเรียนรู้จากประวัติ (การ mutate เริ่มเป็นการสุ่มรอบค่าตั้งต้น และ covariance model ใช้เมื่อ history ≥ 30 [V] `_mutate`) ⇒ ผลจะไม่ต่างจาก random search 8 จุด และผลลัพธ์ต่อ trial ถูกรบกวนด้วย noise ของ val 182 ภาพ.
 - ผลของ `tune()` **ไม่ถูก log เข้า MLflow ตามโครงสร้างเดิมของเรา** (เรา `settings.update({"mlflow": False})` และ log เองต่อ trial) → ต้องอ่าน `tune_results.ndjson` แล้ว log เอง **[J]**.
 
-**ParameterGrid ปัจจุบัน** (`Train/train_one_stage.py`): ควบคุมเต็มที่ (บังคับ `fliplr=0`, `seed`, log MLflow ต่อ trial, เก็บ `best_overall.pt`), ไม่ต้องเขียนโค้ดเพิ่ม, แต่เป็น full-factorial — จำนวน run = ผลคูณของความยาวทุก list.
+**ParameterGrid ปัจจุบัน** (`Train/trainOneStage.py`): ควบคุมเต็มที่ (บังคับ `fliplr=0`, `seed`, log MLflow ต่อ trial, เก็บ `best_overall.pt`), ไม่ต้องเขียนโค้ดเพิ่ม, แต่เป็น full-factorial — จำนวน run = ผลคูณของความยาวทุก list.
 
 **คำแนะนำ**: ใช้ **ParameterGrid แบบ 3 รอบ ๆ ละ ≤4 run (รวม ≤ ~10 run ≈ 2–3 ชม.)** เพราะ (1) งบ 6–10 trial เล็กเกินไปสำหรับ genetic search; (2) ต้อง exclude `fliplr`/จำกัด `degrees` — ใน grid ทำได้โดยปริยาย; (3) MLflow เดิมใช้ได้ทันที; (4) ตีความผลได้ (ทีละปัจจัย) ซึ่งสำคัญเมื่อ val noisy. ใช้ `model.tune()` ต่อเมื่อมีงบ ≥ 30 trial (เช่น หลายคืน/หลาย GPU) และกำหนด `space` เองตามด้านบน.
 
@@ -179,12 +179,12 @@ YOLO("yolo26n-pose.pt").tune(
 
 ## 7. ข้อควรระวัง
 
-- **เลือกบน val, รายงานบน test**: ทุกการตัดสินใจ (best trial, patience, epoch ที่เลือก, threshold) ใช้ val เท่านั้น; **ห้ามแตะ test (153 ภาพ) ระหว่างจูน** และรัน `Evaluate/evaluate_one_stage.py` บน test **ครั้งเดียวต่อ config สุดท้าย**. Early stopping + เลือก `best.pt` จาก val เป็น selection bias ที่ทำให้ val fitness (1.7346) สูงกว่าความจริง — ผล test ที่ macro-F1 0.72 จึงควรเป็นตัวเลขที่เชื่อถือ ไม่ใช่ val.
-- **Val เล็กมาก (182 ภาพ, 5–14 instance/คลาส)** ⇒ fitness สั่นระหว่าง epoch ±0.05–0.10 (§3) และความต่างระหว่าง config ที่ <~0.02–0.03 อาจเป็น noise **[J]** (ไม่ได้วัดความแปรปรวนข้าม seed **[U]**). ให้รัน config ที่ดีที่สุด 2 อันซ้ำ ≥3 seed ก่อนสรุป. `seed=42` ตายตัวใน train_one_stage ทำให้ทุก trial ได้ลำดับข้อมูลเดียวกัน ซึ่งช่วยเทียบแต่ซ่อนความแปรปรวน.
+- **เลือกบน val, รายงานบน test**: ทุกการตัดสินใจ (best trial, patience, epoch ที่เลือก, threshold) ใช้ val เท่านั้น; **ห้ามแตะ test (153 ภาพ) ระหว่างจูน** และรัน `Evaluate/evaluateOneStage.py` บน test **ครั้งเดียวต่อ config สุดท้าย**. Early stopping + เลือก `best.pt` จาก val เป็น selection bias ที่ทำให้ val fitness (1.7346) สูงกว่าความจริง — ผล test ที่ macro-F1 0.72 จึงควรเป็นตัวเลขที่เชื่อถือ ไม่ใช่ val.
+- **Val เล็กมาก (182 ภาพ, 5–14 instance/คลาส)** ⇒ fitness สั่นระหว่าง epoch ±0.05–0.10 (§3) และความต่างระหว่าง config ที่ <~0.02–0.03 อาจเป็น noise **[J]** (ไม่ได้วัดความแปรปรวนข้าม seed **[U]**). ให้รัน config ที่ดีที่สุด 2 อันซ้ำ ≥3 seed ก่อนสรุป. `seed=42` ตายตัวใน trainOneStage ทำให้ทุก trial ได้ลำดับข้อมูลเดียวกัน ซึ่งช่วยเทียบแต่ซ่อนความแปรปรวน.
 - **fitness ≠ macro-F1**: fitness ของ Ultralytics = mAP50-95 รวม box+pose; box mAP ถูกเป่าด้วย GT จาก pre-label. ถ้ามีเวลา ให้คำนวณ per-person macro-F1 บน val ของ `best.pt` ของ top-2 trial เพื่อ tie-break **[J]**.
 - **ภาพ near-duplicate (burst)** ทำให้ val กับ train ใกล้กันกว่าที่ดูจาก 182 ภาพ ถ้า val แยกตาม burst แล้ว (test แยกแล้วตามข้อมูลที่ให้มา) การเลือกบน val จึงยังโอเค แต่ภาพใน train ที่เหมือนกันเองทำให้ overfit เร็ว — เป็นเหตุผลสนับสนุน `freeze`/`weight_decay`/patience (**[J]**).
 - **`close_mosaic` กับ early stop**: ถ้า run หยุดก่อน `epochs - close_mosaic` mosaic ไม่เคยปิด; best.pt จะมาจากช่วงที่ mosaic ยังเปิด. ตัดสินว่ายอมรับหรือไม่ผ่านรอบ 2.
-- **MLflow**: `train_one_stage.py` `mlflow.log_params({**args,...})` จะบันทึก `optimizer`, `patience`, ฯลฯ อัตโนมัติ (มาจาก `p`). ข้อควรระวัง: ถ้าเป็น `optimizer=auto` args ที่ส่งเข้าไปยังเป็น "auto" ใน MLflow ขณะที่ค่าจริงถูกเขียนทับภายใน (`self.args.optimizer/lr0` ใน build_optimizer) — อ่านค่าจริงจาก `args.yaml` ของ run. แนะนำ log เพิ่ม: `best_epoch`, จำนวน epoch ที่รันจริง, และ `results.csv` เป็น artifact. อย่าทับผล: เปลี่ยน `--project` ต่อรอบ.
+- **MLflow**: `trainOneStage.py` `mlflow.log_params({**args,...})` จะบันทึก `optimizer`, `patience`, ฯลฯ อัตโนมัติ (มาจาก `p`). ข้อควรระวัง: ถ้าเป็น `optimizer=auto` args ที่ส่งเข้าไปยังเป็น "auto" ใน MLflow ขณะที่ค่าจริงถูกเขียนทับภายใน (`self.args.optimizer/lr0` ใน build_optimizer) — อ่านค่าจริงจาก `args.yaml` ของ run. แนะนำ log เพิ่ม: `best_epoch`, จำนวน epoch ที่รันจริง, และ `results.csv` เป็น artifact. อย่าทับผล: เปลี่ยน `--project` ต่อรอบ.
 - **พฤติกรรมของ `time`/`epochs`**: ถ้าใช้ `time=` ค่า `epochs` ถูกคำนวณใหม่หลัง epoch แรก และ schedule เปลี่ยนตาม [V] trainer.py L690–697 — อย่าผสมกับ grid ของ `epochs`.
 - **ไม่ได้ตรวจ**: ความเร็วจริงบน Colab (ใช้ตัวเลข Kaggle), ผลเชิงปริมาณของ `freeze`/`nbs`/`cos_lr`/`mosaic` กับชุดนี้ (ทั้งหมดเป็นสมมติฐานที่ต้องทดลอง), และ log เชิงลึกของ MLflow integration ภายใน Ultralytics ระหว่าง `tune()` **[U]**.
 
@@ -208,7 +208,7 @@ Source ที่ติดตั้ง (Ultralytics 8.4.212, `C:\Users\jack2\anac
 - `cfg/models/26/yolo26-pose.yaml` (backbone 0–10, head layer 23 `Pose26`)
 
 ไฟล์ในรีโป (`C:\Users\jack2\OneDrive - Panyapiwat Institute of Management\E - Learning - 1.2 - 69\Automate_Evaluate_Billing\Machine-Learning\Mini-Project\`)
-- `Train/train_one_stage.py`, `Train/config.yaml`, `Train/README.md`
+- `Train/trainOneStage.py`, `Train/config.yaml`, `Train/README.md`
 - `Train/results/runs/one_stage/trial0/{args.yaml,results.csv}`, `trial1/{args.yaml,results.csv}` (diff: `args.yaml` ต่างแค่ name/lr0/save_dir; `results.csv` ต่างกัน 0.0 ทุกคอลัมน์ ยกเว้น `time` ที่ไม่ได้เทียบ)
 - `Data_Pipeline/output/dataset/data.yaml` และ `labels/{train,val,test}` (นับ instance/ภาพ; train 885 ภาพ รวม `_flip` 154)
 - `Data_Pipeline/config/config.yaml` (`flip_classes`)

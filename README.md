@@ -9,12 +9,12 @@ Pipeline: **pre-label with YOLO26-pose → review/relabel in Label Studio → tr
 ## Layout
 
 ```
-Data_Preprocess/src/     pre_Label.py (YOLO26-pose pre-labeling) + export_to_label_studio.py
-Data_Pipeline/           main.py (entry) + Process/ (labelstudio, convert, split, build)
-Train/                   train_two_stage.py, train_one_stage.py, features.py, augment.py
-Evaluate/                evaluate_one_stage.py, evaluate_two_stage.py (test split)
-Log_Model/               log_to_mlflow.py (versioned MLflow logging + registry), log_to_hf.py (upload to Hugging Face)
-Inference/               main.py (run), app/ (Service.py FastAPI, Predict.py YOLO), modal_app.py (Modal deploy), test_service.py
+Data_Preprocess/src/     preLabel.py (YOLO26-pose pre-labeling) + exportToLabelStudio.py
+Data_Pipeline/           main.py (entry) + Process/ (labelStudio, convert, split, build)
+Train/                   trainTwoStage.py, trainOneStage.py, features.py, augment.py
+Evaluate/                evaluateOneStage.py, evaluateTwoStage.py (test split)
+Log_Model/               logToMlflow.py (versioned MLflow logging + registry), logToHf.py (upload to Hugging Face)
+Inference/               main.py (run), app/ (service.py FastAPI, predict.py YOLO), modalApp.py (Modal deploy), testService.py
 config/config.yaml       the ONE config: data_pipeline | train | log_model | inference sections
 .env.example             copy to .env (git-ignored) and fill in secrets
 ```
@@ -25,7 +25,7 @@ config/config.yaml       the ONE config: data_pipeline | train | log_model | inf
 pip install -r requirements.txt
 ```
 
-`yolo26n-pose.pt` is not in the repo; Ultralytics downloads it on first use, or put it next to `pre_Label.py`.
+`yolo26n-pose.pt` is not in the repo; Ultralytics downloads it on first use, or put it next to `preLabel.py`.
 
 ## 1. Pre-label
 
@@ -33,7 +33,7 @@ Accepts JPG/PNG/WebP, HEIC (phone photos) and video (every Nth frame).
 
 ```bash
 cd Data_Preprocess/src
-python pre_Label.py --src Dataset/<folder> --out ../output/prelabel
+python preLabel.py --src Dataset/<folder> --out ../output/prelabel
 ```
 
 Output in `--out`: `images/`, `labels/` (YOLO-pose txt), `preview/` (frames flagged for review),
@@ -86,6 +86,6 @@ See `Train/README.md`. Two approaches are compared: a two-stage keypoint classif
 - Raw photos, generated datasets, model weights, `.env` and MLflow runs are intentionally not committed (size, privacy, secrets).
 - The raw Label Studio export cache can contain base64 photos; it lives under the git-ignored `Data_Pipeline/output/`.
 - Do not reorder classes once labeling has started; class ids depend on the order.
-- Inference: `python Inference/main.py` -> http://127.0.0.1:8000 (`/docs`; `POST /predict/image`, `POST /predict/video`, `WS /ws/webcam`). Model path and thresholds: `inference:` in `config.yaml`. Check: `python Inference/test_service.py`. Auth: header `X-API-Key` when `FOOTBALL_API_KEY` is set (in `.env` locally, as a Modal Secret in the cloud).
-- Deploy on Modal (free tier): `modal setup`; `modal secret create football-signal-api-key FOOTBALL_API_KEY=<key>`; `modal deploy Inference/modal_app.py` (settings: `modal:` in `config/config.yaml`).
-- Results are logged per version with `python Log_Model/log_to_mlflow.py --version vN --data-note "..."` (paths in `log_model:` of `config/config.yaml`; `log_to_hf.py` uploads the weights to the Hub) (experiments `referee-one-stage` / `referee-two-stage`, models in the registry). Test numbers are only comparable within the same data split.
+- Inference: `python Inference/main.py` -> http://127.0.0.1:8000 (`/docs`; `POST /predict/image`, `POST /predict/video`, `WS /ws/webcam`). Model path and thresholds: `inference:` in `config.yaml`. Check: `python Inference/testService.py`. Auth: header `X-API-Key` when `FOOTBALL_API_KEY` is set (in `.env` locally, as a Modal Secret in the cloud).
+- Deploy on Modal (free tier): `modal setup`; `modal secret create football-signal-api-key FOOTBALL_API_KEY=<key>`; `modal deploy Inference/modalApp.py` (settings: `modal:` in `config/config.yaml`).
+- Results are logged per version with `python Log_Model/logToMlflow.py --version vN --data-note "..."` (paths in `log_model:` of `config/config.yaml`; `logToHf.py` uploads the weights to the Hub) (experiments `referee-one-stage` / `referee-two-stage`, models in the registry). Test numbers are only comparable within the same data split.

@@ -21,7 +21,7 @@ from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, W
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 
-from app.Predict import Detector
+from app.predict import Detector
 
 def create_app(cfg):
     @asynccontextmanager

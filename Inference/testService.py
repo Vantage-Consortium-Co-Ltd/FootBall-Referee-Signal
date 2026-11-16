@@ -1,4 +1,4 @@
-"""Self-check of the API with the real model: python Inference/test_service.py"""
+"""Self-check of the API with the real model: python Inference/testService.py"""
 import os
 import sys
 from pathlib import Path
@@ -9,8 +9,8 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from app.Service import create_app  # noqa: E402
-from utils.load_utils import ROOT, load_config  # noqa: E402
+from app.service import create_app  # noqa: E402
+from utils.loadUtils import ROOT, load_config  # noqa: E402
 
 os.environ.pop(load_config().api_key_env, None)  # first part runs without auth
 cfg = load_config()

@@ -34,7 +34,7 @@ train:
     scale: [0.9, 1.1]                           # independent x / y stretch
     jitter: 0.005                               # std of noise, normalized image coords
 
-  # ---- one-stage (YOLO-pose), GPU. Select a grid with: train_one_stage.py --grid <name>
+  # ---- one-stage (YOLO-pose), GPU. Select a grid with: trainOneStage.py --grid <name>
   one_stage:                                    # default grid
     epochs: [300]
     patience: [30]                              # early stop after 30 epochs w/o fitness gain; val is small so <20 stops too early
@@ -46,7 +46,7 @@ train:
     freeze: [null, 10]                          # null = train all layers, 10 = freeze backbone layers 0-9
     close_mosaic: [10]
     weight_decay: [0.0005, 0.001]
-  one_stage_kaggle:                             # Kaggle run, once per dataset (dataset-notflip, dataset-cutbyclass); embedded by Train/kaggle/make_cell.py
+  one_stage_kaggle:                             # Kaggle run, once per dataset (dataset-notflip, dataset-cutbyclass); embedded by Train/kaggle/makeCell.py
     epochs: [200]                               # capped so 2 datasets x 4 trials fit one 12 h session
     patience: [30]
     imgsz: [960]
@@ -75,13 +75,13 @@ log_model:
   two_stage:
     model_dir: Train/models/two_stage                               # model.joblib + meta.json
     local_store: Train/mlruns/mlflow.db                             # sqlite store the training runs were written to
-  huggingface:                                                      # log_to_hf.py; token = HF_TOKEN in .env
+  huggingface:                                                      # logToHf.py; token = HF_TOKEN in .env
     repo_id: Kitkhachon/Football-Acting-Detection-v1.0
     repo_type: model
     private: true                                                   # false = publish
     files:                                                          # local path -> path inside the repo
       Train/model_output_version/results_c2/runs/one_stage/best_overall.pt: best.pt
-      docs/log_model/hf_model_card.md: README.md
+      docs/log_model/hfModelCard.md: README.md
       Train/model_output_version/results_c2/data.yaml: data.yaml
       Train/model_output_version/results_c2/runs/one_stage/trial0/args.yaml: training/args.yaml
       Train/model_output_version/results_c2/runs/one_stage/trial0/results.csv: training/results.csv
@@ -109,7 +109,7 @@ inference:
     max_seconds: 30                             # longer videos are cut
 
 
-# ============================================================ 5. MODAL (python -m modal deploy Inference/modal_app.py)
+# ============================================================ 5. MODAL (python -m modal deploy Inference/modalApp.py)
 modal:
   app_name: football-signal                     # environment = the workspace default (main)
   gpu: null                                     # T4 | L4 | ... ; null = CPU (Modal requires a payment method for GPUs)

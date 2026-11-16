@@ -1,6 +1,6 @@
 """One-stage: fine-tune yolo26n-pose on the dataset (gesture = box class). Meant for a Colab GPU.
 
-  python Train/train_one_stage.py --data /content/dataset/data.yaml --device 0 [--config config/config.yaml] [--grid one_stage|one_stage_kaggle]
+  python Train/trainOneStage.py --data /content/dataset/data.yaml --device 0 [--config config/config.yaml] [--grid one_stage|one_stage_kaggle]
 
 epochs / imgsz / batch / lr0 are lists in config.yaml; every combination is trained and the best (fitness) is
 kept as <project>/best_overall.pt.
