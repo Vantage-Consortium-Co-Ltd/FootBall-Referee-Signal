@@ -96,7 +96,7 @@ def build_dataset(tasks, cfg, out_dir: Path, fetch=None):
         f"path: {ds.resolve().as_posix()}\ntrain: images/train\nval: images/val\ntest: images/test\n"
         f"kpt_shape: [17, 3]\nflip_idx: {FLIP_IDX}\n"
         "# Train with fliplr=0: horizontal flips are already baked into train (images ending _flip), only for\n"
-        "# classes listed in flip_classes (see Data_Pipeline/config/config.yaml).\n"
+        "# classes listed in flip_classes (see data_pipeline.flip_classes in config.yaml).\n"
         f"names:\n{names}\n", encoding="utf-8")
 
     print_summary(per_split, n_flip, stats, len(items))

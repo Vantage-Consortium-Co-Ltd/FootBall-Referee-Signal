@@ -1,6 +1,6 @@
 """One-stage: fine-tune yolo26n-pose on the dataset (gesture = box class). Meant for a Colab GPU.
 
-  python Train/train_one_stage.py --data /content/dataset/data.yaml --device 0 [--config Train/config.yaml]
+  python Train/train_one_stage.py --data /content/dataset/data.yaml --device 0 [--config config/config.yaml] [--grid one_stage|one_stage_kaggle]
 
 epochs / imgsz / batch / lr0 are lists in config.yaml; every combination is trained and the best (fitness) is
 kept as <project>/best_overall.pt.
@@ -29,11 +29,12 @@ def main():
     ap.add_argument("--device", default="0")
     ap.add_argument("--project", default="runs/one_stage")
     ap.add_argument("--mlruns", default="mlruns")
-    ap.add_argument("--config", default=str(Path(__file__).with_name("config.yaml")))
+    ap.add_argument("--config", default=str(Path(__file__).resolve().parents[1] / "config" / "config.yaml"))
+    ap.add_argument("--grid", default="one_stage", help="section under train: in config.yaml")
     a = ap.parse_args()
 
     settings.update({"mlflow": False})  # we log ourselves; avoids two competing runs
-    grid = yaml.safe_load(Path(a.config).read_text(encoding="utf-8"))["one_stage"]
+    grid = yaml.safe_load(Path(a.config).read_text(encoding="utf-8"))["train"][a.grid]
     if mlflow:
         root = Path(a.mlruns).resolve()
         root.mkdir(parents=True, exist_ok=True)

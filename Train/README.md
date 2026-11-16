@@ -2,7 +2,7 @@
 
 Consumes `Data_Pipeline/output/dataset/` only (`keypoints.csv`, `data.yaml`, `images/`, `labels/`). The test split is never used here.
 
-**Tuning:** every hyper-parameter in `config.yaml` is a list; all combinations are tried and the best (cross-validated macro-F1 for two-stage, YOLO fitness for one-stage) is kept.
+**Tuning:** every hyper-parameter in the `train:` section of the root `config.yaml` is a list; all combinations are tried and the best (cross-validated macro-F1 for two-stage, YOLO fitness for one-stage) is kept.
 
 **Two-stage** (CPU): keypoints -> normalized features (`features.py`) -> LogisticRegression / RandomForest / MLP.
 - Train+val are pooled and scored with grouped, stratified K-fold CV (`cv.folds`); a photo, its flip and its burst-mates always share a fold.
@@ -14,7 +14,7 @@ mlflow ui --backend-store-uri sqlite:///Train/mlruns/mlflow.db  # compare runs (
 ```
 MLflow and the confusion-matrix PNG are skipped with a warning if `mlflow` / `matplotlib` can't be imported.
 
-**One-stage** (Kaggle/Colab GPU): upload `Data_Pipeline/output/dataset/` as a dataset, copy `train_one_stage.py` and `config.yaml`, then:
+**One-stage** (Kaggle/Colab GPU): upload `Data_Pipeline/output/dataset/` as a dataset, copy `train_one_stage.py` and `config.yaml` (use `--grid one_stage_kaggle` for the Kaggle grid), then:
 ```
 python Train/train_one_stage.py --data path/to/data.yaml --device 0
 ```
