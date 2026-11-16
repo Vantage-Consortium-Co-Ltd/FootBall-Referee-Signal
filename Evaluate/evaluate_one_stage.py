@@ -43,6 +43,7 @@ def main():
     cfg = yaml.safe_load(Path(a.data).read_text(encoding="utf-8"))
     names = cfg["names"]
     out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
     model = YOLO(a.weights)
 
     v = model.val(data=a.data, split="test", imgsz=a.imgsz, device=a.device, workers=0,
