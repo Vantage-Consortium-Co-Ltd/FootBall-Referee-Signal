@@ -1,15 +1,12 @@
 import {
-  FrameFeedbackPayload,
-  GestureRule,
   ModalDetection,
   ModalHealthResponse,
   ModalImagePredictResponse,
   ModalVideoPredictResponse,
   ModalWsConfigResponse,
-  PostureAngles,
-  TaggedPerson,
+  SignalClassInfo,
 } from "../Data_Types/Referee_Types";
-import { IFAB_RULES } from "./Ifab_Rules_Catalog";
+import { IFAB_SIGNAL_CLASSES } from "./Ifab_Rules_Catalog";
 
 async function extractErrorDetail(res: Response, fallback: string): Promise<string> {
   try {
@@ -166,196 +163,8 @@ export function captureVideoFrameAsJpeg(
   });
 }
 
-export function findRuleByLabel(label: string): GestureRule | undefined {
+export function findRuleByLabel(label: string): SignalClassInfo | undefined {
   const normalized = label.trim().toLowerCase();
   if (!normalized) return undefined;
-  return IFAB_RULES.find((r) => r.name.toLowerCase() === normalized);
-}
-
-const EMPTY_ANGLES: PostureAngles = {
-  rElbowAngle: 0,
-  lElbowAngle: 0,
-  rElevationAngle: 0,
-  lElevationAngle: 0,
-};
-
-function evaluateBiomechAngles(
-  angles: PostureAngles,
-  targetRule: GestureRule
-): { biomechScore: number; angleTip: string | null } {
-  let elev = angles.rElevationAngle;
-  let straight = angles.rElbowAngle;
-
-  if (targetRule.activeArm === "left") {
-    elev = angles.lElevationAngle;
-    straight = angles.lElbowAngle;
-  } else if (targetRule.activeArm === "either") {
-    const rDiff = Math.abs(angles.rElevationAngle - targetRule.targetElevationDeg);
-    const lDiff = Math.abs(angles.lElevationAngle - targetRule.targetElevationDeg);
-    if (lDiff < rDiff && angles.lElevationAngle > 0) {
-      elev = angles.lElevationAngle;
-      straight = angles.lElbowAngle;
-    }
-  } else if (targetRule.activeArm === "both") {
-    elev = Math.round((angles.rElevationAngle + angles.lElevationAngle) / 2);
-    straight = Math.round((angles.rElbowAngle + angles.lElbowAngle) / 2);
-  }
-
-  if (elev === 0 && straight === 0) {
-    return { biomechScore: 0, angleTip: null };
-  }
-
-  const elevDiff = Math.abs(elev - targetRule.targetElevationDeg);
-  const straightDiff = Math.abs(straight - targetRule.targetStraightnessDeg);
-  const elevScore = Math.max(0, 50 - elevDiff * 0.7);
-  const straightScore = Math.max(0, 50 - straightDiff * 0.7);
-  const biomechScore = Math.min(100, Math.round(elevScore + straightScore));
-
-  let angleTip: string | null = null;
-  if (elev < targetRule.minElevationDeg) {
-    angleTip = `ยกแขนเพิ่มอีก ${Math.round(
-      targetRule.minElevationDeg - elev
-    )}° (ปัจจุบัน ${elev}°)`;
-  } else if (straight > 0 && straight < targetRule.minStraightnessDeg) {
-    angleTip = `เหยียดข้อศอกให้ตรงขึ้น (ปัจจุบัน ${straight}°)`;
-  }
-
-  return { biomechScore, angleTip };
-}
-
-export function evaluateRealDetections(
-  detections: ModalDetection[],
-  targetRule: GestureRule,
-  holdDurationSeconds: number,
-  realPerson?: TaggedPerson | null
-): {
-  feedback: FrameFeedbackPayload;
-  matchedRule: GestureRule | null;
-  topDetection: ModalDetection | null;
-  isHoldActive: boolean;
-} {
-  const safeDetections = Array.isArray(detections) ? detections : [];
-  const sorted = [...safeDetections].sort((a, b) => b.confidence - a.confidence);
-  const topDetection = sorted[0] ?? null;
-
-  const keypoints = realPerson?.keypoints ?? [];
-  const angles = realPerson?.angles ?? EMPTY_ANGLES;
-  const hasRealPose = keypoints.length >= 17;
-  const { biomechScore, angleTip } = hasRealPose
-    ? evaluateBiomechAngles(angles, targetRule)
-    : { biomechScore: 0, angleTip: null };
-
-  if (!topDetection) {
-    if (hasRealPose) {
-      return {
-        feedback: {
-          detected: true,
-          timestamp: Date.now(),
-          keypoints,
-          activeArm: targetRule.activeArm,
-          angles,
-          score: Math.min(70, biomechScore),
-          state: "DETECTED",
-          holdProgress: 0,
-          holdDuration: 0,
-          feedbackTip: angleTip
-            ? `${angleTip} · กำลังรอ Modal AI ยืนยันท่า ${targetRule.nameTh}`
-            : `ตรวจพบโครงกระดูก 17 จุดจริง · กำลังรอ Modal YOLO26n-pose ยืนยันท่า ${targetRule.nameTh}`,
-          gestureName: targetRule.name,
-          gestureNameTh: targetRule.nameTh,
-          isAcceptable: false,
-        },
-        matchedRule: null,
-        topDetection: null,
-        isHoldActive: false,
-      };
-    }
-
-    return {
-      feedback: {
-        detected: false,
-        timestamp: Date.now(),
-        keypoints: [],
-        activeArm: targetRule.activeArm,
-        angles: EMPTY_ANGLES,
-        score: 0,
-        state: "WAITING",
-        holdProgress: 0,
-        holdDuration: 0,
-        feedbackTip: "กำลังรอตรวจจับโครงกระดูกและท่าสัญญาณจากกล้อง...",
-        gestureName: targetRule.name,
-        gestureNameTh: targetRule.nameTh,
-        isAcceptable: false,
-      },
-      matchedRule: null,
-      topDetection: null,
-      isHoldActive: false,
-    };
-  }
-
-  const matchedTargetDet =
-    sorted.find((d) => d.label.toLowerCase() === targetRule.name.toLowerCase()) ?? null;
-
-  if (matchedTargetDet) {
-    const confPct = Math.round(matchedTargetDet.confidence * 100);
-    const combinedScore = hasRealPose
-      ? Math.min(100, Math.round(confPct * 0.65 + biomechScore * 0.35))
-      : confPct;
-    const minHold = Math.max(0.1, targetRule.minHoldSeconds);
-    const holdProgress = Math.min(1.0, holdDurationSeconds / minHold);
-    const state: FrameFeedbackPayload["state"] =
-      holdProgress >= 1.0 ? "COMPLETED" : "HOLDING";
-    const feedbackTip =
-      state === "COMPLETED"
-        ? `ยอดเยี่ยม! ยืนยันท่า ${targetRule.nameTh} (Modal ${confPct}%)`
-        : angleTip
-        ? `ตรวจพบ ${targetRule.nameTh} (${confPct}%) · ${angleTip}`
-        : `ตรวจพบท่า ${targetRule.nameTh} (${confPct}%) · ค้างท่าไว้ ${holdDurationSeconds.toFixed(1)}s / ${targetRule.minHoldSeconds.toFixed(1)}s`;
-
-    return {
-      feedback: {
-        detected: true,
-        timestamp: Date.now(),
-        keypoints,
-        activeArm: targetRule.activeArm,
-        angles,
-        score: combinedScore,
-        state,
-        holdProgress,
-        holdDuration: holdDurationSeconds,
-        feedbackTip,
-        gestureName: targetRule.name,
-        gestureNameTh: targetRule.nameTh,
-        isAcceptable: true,
-      },
-      matchedRule: targetRule,
-      topDetection,
-      isHoldActive: true,
-    };
-  }
-
-  const topRule = findRuleByLabel(topDetection.label) ?? null;
-  const confPct = Math.round(topDetection.confidence * 100);
-  const detectedNameTh = topRule?.nameTh || topDetection.label;
-
-  return {
-    feedback: {
-      detected: true,
-      timestamp: Date.now(),
-      keypoints,
-      activeArm: topRule?.activeArm ?? targetRule.activeArm,
-      angles,
-      score: confPct,
-      state: "DETECTED",
-      holdProgress: 0,
-      holdDuration: 0,
-      feedbackTip: `โมเดลตรวจพบท่า: ${detectedNameTh} (${confPct}%) · เป้าหมายคือ ${targetRule.nameTh}`,
-      gestureName: topRule?.name ?? topDetection.label,
-      gestureNameTh: detectedNameTh,
-      isAcceptable: false,
-    },
-    matchedRule: topRule,
-    topDetection,
-    isHoldActive: false,
-  };
+  return IFAB_SIGNAL_CLASSES.find((r) => r.name.toLowerCase() === normalized);
 }

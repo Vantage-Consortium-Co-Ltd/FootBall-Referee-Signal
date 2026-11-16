@@ -2,36 +2,24 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
-  F1_ZERO_LIMITED_CLASSES,
-  FrameFeedbackPayload,
-  GestureRule,
   ModalDetection,
   ModalVideoPredictResponse,
 } from "../../Data_Types/Referee_Types";
 import {
-  evaluateRealDetections,
   findRuleByLabel,
   predictImageBoth,
   predictVideoFile,
 } from "../../Core_Lib/Api_Client";
-import { recordDrillSession } from "../../Core_Lib/Session_Store";
+import { MODEL_SPEC_INFO } from "../../Core_Lib/Ifab_Rules_Catalog";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface MediaUploadAnalyzerProps {
   mode: "image" | "video";
-  targetRule: GestureRule;
-  onSelectRule?: (rule: GestureRule) => void;
-  onFeedbackUpdate?: (feedback: FrameFeedbackPayload) => void;
-  onRecorded?: () => void;
 }
 
 export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
   mode,
-  targetRule,
-  onSelectRule,
-  onFeedbackUpdate,
-  onRecorded,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
@@ -50,7 +38,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [videoResult, setVideoResult] = useState<ModalVideoPredictResponse | null>(null);
   const [activeFrameIdx, setActiveFrameIdx] = useState<number | null>(null);
-  const [savedToGradebook, setSavedToGradebook] = useState<boolean>(false);
 
   useEffect(() => {
     return () => {
@@ -74,7 +61,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
     setErrorMsg(null);
     setFileName(file.name);
     setIsLoading(true);
-    setSavedToGradebook(false);
     triggerCausalFeedback("tap");
 
     try {
@@ -91,10 +77,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           if (prev) URL.revokeObjectURL(prev);
           return res.annotatedImageUrl;
         });
-        onFeedbackUpdate?.(
-          evaluateRealDetections(res.detections, targetRule, targetRule.minHoldSeconds)
-            .feedback
-        );
         triggerCausalFeedback("success");
       } else {
         const nextVideoUrl = URL.createObjectURL(file);
@@ -106,10 +88,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
 
         const res = await predictVideoFile(file);
         setVideoResult(res);
-        const allDets = res.results.flatMap((r) => r.detections);
-        onFeedbackUpdate?.(
-          evaluateRealDetections(allDets, targetRule, targetRule.minHoldSeconds).feedback
-        );
         triggerCausalFeedback("success");
       }
     } catch (err: unknown) {
@@ -154,25 +132,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
     ? videoResult.results.reduce((sum, item) => sum + item.detections.length, 0)
     : 0;
 
-  const handleSaveAnalysisToGradebook = (dets: ModalDetection[]) => {
-    if (dets.length === 0 || savedToGradebook) return;
-    const sorted = [...dets].sort((a, b) => b.confidence - a.confidence);
-    const matchedTarget = sorted.find(
-      (d) => d.label.toLowerCase() === targetRule.name.toLowerCase()
-    );
-    const best = matchedTarget ?? sorted[0];
-    const ruleToRecord = findRuleByLabel(best.label) ?? targetRule;
-    recordDrillSession({
-      rule: ruleToRecord,
-      confidenceScore: Math.round(best.confidence * 100),
-      holdDurationSeconds: ruleToRecord.minHoldSeconds,
-      mode,
-    });
-    setSavedToGradebook(true);
-    onRecorded?.();
-    triggerCausalFeedback("success");
-  };
-
   return (
     <div className="apple-material-dark rounded-[22px] overflow-hidden flex flex-col">
       {/* Header */}
@@ -185,8 +144,8 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           />
           <span className="font-semibold text-[#F5F5F7]">
             {mode === "image"
-              ? "Image Signal Analyzer (POST /predict/image)"
-              : "Video Signal Timeline Analyzer (POST /predict/video)"}
+              ? "POST /predict/image (JSON + ?annotated=true)"
+              : "POST /predict/video (Frame-by-Frame JSON)"}
           </span>
         </div>
 
@@ -210,9 +169,8 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
         />
       </div>
 
-      {/* Dropzone & Main Body */}
+      {/* Dropzone & Results Body */}
       <div className="p-5 space-y-4">
-        {/* Drag & Drop Upload Box */}
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -234,34 +192,31 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
             <div className="text-xs font-semibold text-[#F5F5F7]">
               {isLoading
                 ? mode === "image"
-                  ? "กำลังประมวลผลด้วย YOLO26n-pose บน Modal CPU..."
-                  : "กำลังสแกนคลิปวิดีโอทุกๆ 5 เฟรม (สูงสุด 30 วินาที) บน Modal CPU..."
+                  ? "กำลังส่งภาพไปยัง YOLO26n-pose บน Modal CPU..."
+                  : `กำลังสแกนคลิปวิดีโอทุกๆ ${MODEL_SPEC_INFO.videoStride} เฟรม (สูงสุด ${MODEL_SPEC_INFO.videoMaxSeconds}s)...`
                 : fileName
-                ? `ไฟล์ล่าสุด: ${fileName} (คลิกหรือวางไฟล์ใหม่เพื่อวิเคราะห์)`
+                ? `ไฟล์ล่าสุด: ${fileName} (คลิกหรือวางไฟล์ใหม่เพื่อทดสอบ)`
                 : mode === "image"
-                ? "คลิกหรือลากรูปภาพ (JPG, PNG, WebP) มาวางที่นี่เพื่อตรวจจับท่าสัญญาณและโครงกระดูก"
-                : "คลิกหรือลากไฟล์วิดีโอ (MP4, MOV, AVI, WebM) มาวางที่นี่ (สูงสุด 100MB / 30s)"}
+                ? `คลิกหรือลากไฟล์ภาพ (JPG, PNG, WebP · สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB)`
+                : `คลิกหรือลากไฟล์วิดีโอ (MP4, MOV, AVI · สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB / ${MODEL_SPEC_INFO.videoMaxSeconds}s)`}
             </div>
             <div className="text-[11px] text-[#A1A1A6]">
-              เป้าหมายปัจจุบัน: {targetRule.nameTh} ({targetRule.name}) ·{" "}
-              {targetRule.ifabLaw}
+              {mode === "image"
+                ? "เรียกใช้ทั้ง JSON detections และ JPEG ที่วาดกล่อง+โครงกระดูก 17 จุดจาก Backend"
+                : `Backend อ่านวิดีโอสูงสุด ${MODEL_SPEC_INFO.videoMaxSeconds} วินาที และประมวลผลทุกๆ ${MODEL_SPEC_INFO.videoStride} เฟรม`}
             </div>
           </div>
         </div>
 
-        {/* Loading indicator */}
         {isLoading && (
           <div className="px-4 py-3 rounded-2xl bg-[#0A84FF]/15 border border-[#0A84FF]/40 text-xs text-[#64D2FF] flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#0A84FF] animate-ping shrink-0" />
             <span>
-              {mode === "image"
-                ? "กำลังส่งภาพไปยัง Modal CPU (หากเป็นรอบแรกหลัง Idle อาจใช้เวลา Warmup 10–30 วินาที)..."
-                : "กำลังถอดเฟรมวิดีโอและรัน YOLO26n-pose บน Modal CPU..."}
+              กำลังประมวลผลบน Modal CPU (หากเป็นคำขอแรกหลัง Idle อาจใช้เวลา Warmup 10–30 วินาที)...
             </span>
           </div>
         )}
 
-        {/* Error notice */}
         {errorMsg && (
           <div className="px-4 py-3 rounded-2xl bg-[#2B0B0D]/90 border border-[#FF453A]/50 text-xs text-[#FFD6D4] flex items-center gap-2">
             <Google_Icon name="warning" size={16} className="text-[#FF453A] shrink-0" />
@@ -275,9 +230,9 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-3 space-y-2">
                 <div className="text-[11px] font-semibold text-[#A1A1A6]">
-                  ภาพต้นฉบับ (Original Input)
+                  ภาพต้นฉบับ (Input Image)
                 </div>
-                <div className="h-[240px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
+                <div className="h-[260px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
                   {originalImageUrl && (
                     <img
                       src={originalImageUrl}
@@ -289,13 +244,19 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
               </div>
 
               <div className="bg-[#141416] border border-[#30D158]/30 rounded-2xl p-3 space-y-2">
-                <div className="text-[11px] font-semibold text-[#30D158] flex items-center justify-between">
-                  <span>ภาพจากโมเดล (?annotated=true)</span>
-                  <span className="font-mono text-[10px] text-[#A1A1A6]">
-                    BBox + 17 Keypoints
-                  </span>
+                <div className="text-[11px] font-semibold text-[#30D158] flex items-center justify-between gap-2">
+                  <span>ผลลัพธ์จาก YOLO (?annotated=true)</span>
+                  {annotatedImageUrl && (
+                    <a
+                      href={annotatedImageUrl}
+                      download={`annotated-${fileName || "result"}.jpg`}
+                      className="text-[10px] px-2 py-0.5 rounded bg-[#30D158]/15 border border-[#30D158]/40 text-[#30D158] hover:bg-[#30D158]/25"
+                    >
+                      ดาวน์โหลด JPEG
+                    </a>
+                  )}
                 </div>
-                <div className="h-[240px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
+                <div className="h-[260px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
                   {annotatedImageUrl ? (
                     <img
                       src={annotatedImageUrl}
@@ -313,66 +274,39 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
             <div className="bg-[#141416] border border-white/[0.08] rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between text-xs gap-2 flex-wrap">
                 <span className="font-semibold text-[#F5F5F7]">
-                  ผลทำนาย JSON Detections ({imageDetections.length} รายการ)
+                  JSON Detections ({imageDetections.length} รายการ)
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-[#A1A1A6]">
-                    conf threshold ≥ 0.25
-                  </span>
-                  {imageDetections.length > 0 && (
-                    <button
-                      type="button"
-                      disabled={savedToGradebook}
-                      onClick={() => handleSaveAnalysisToGradebook(imageDetections)}
-                      className={`px-3 py-1 rounded-xl text-[11px] font-semibold border apple-pressable ${
-                        savedToGradebook
-                          ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
-                          : "bg-[#0A84FF] border-[#0A84FF] text-white hover:bg-[#3B9CFF]"
-                      }`}
-                    >
-                      {savedToGradebook
-                        ? "บันทึกผลลง Gradebook แล้ว"
-                        : "บันทึกผลลง Gradebook"}
-                    </button>
-                  )}
-                </div>
+                <span className="text-[11px] text-[#A1A1A6]">
+                  conf threshold ≥ 0.25
+                </span>
               </div>
 
               {imageDetections.length === 0 ? (
-                <div className="text-xs text-[#A1A1A6] py-2">
-                  ไม่พบท่าสัญญาณผู้ตัดสินในภาพนี้ (detections: [])
+                <div className="text-xs text-[#A1A1A6] py-2 font-mono">
+                  {`{"detections": []}`} — ไม่พบบุคคลหรือสัญญาณที่ความมั่นใจ ≥ 0.25
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {imageDetections.map((det, idx) => {
-                    const rule = findRuleByLabel(det.label);
+                    const info = findRuleByLabel(det.label);
                     const pct = Math.round(det.confidence * 100);
-                    const isMatchedTarget =
-                      det.label.toLowerCase() === targetRule.name.toLowerCase();
-                    const isLimited = (F1_ZERO_LIMITED_CLASSES as readonly string[]).includes(
-                      det.label
-                    );
 
                     return (
                       <div
                         key={`${det.label}-${idx}`}
-                        className={`p-3 rounded-xl border space-y-2 ${
-                          isMatchedTarget
-                            ? "bg-[#30D158]/10 border-[#30D158]/50"
-                            : "bg-[#1C1C1E] border-white/[0.08]"
-                        }`}
+                        className="p-3 rounded-xl border bg-[#1C1C1E] border-white/[0.08] space-y-2"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="text-xs font-bold text-[#F5F5F7]">
-                              {rule ? rule.nameTh : det.label}
+                              {info ? info.nameTh : det.label}
                             </div>
                             <div className="text-[10px] font-mono text-[#A1A1A6]">
-                              {det.label} {rule ? `· ${rule.ifabLaw}` : ""}
+                              {det.label} {info ? `· ${info.ifabLaw}` : ""}
                             </div>
                           </div>
                           <span className="text-xs font-mono font-bold text-[#30D158] apple-tabular">
-                            {pct}%
+                            {det.confidence.toFixed(4)} ({pct}%)
                           </span>
                         </div>
 
@@ -383,26 +317,11 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                           />
                         </div>
 
-                        <div className="flex items-center justify-between gap-2">
-                          {isLimited ? (
-                            <span className="text-[10px] text-[#FF9F0A]">
-                              F1 = 0 ในโมเดลชุดนี้
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-[#6E6E73]">
-                              {isMatchedTarget ? "ตรงกับท่าเป้าหมาย" : "ตรวจพบท่าอื่น"}
-                            </span>
-                          )}
-                          {rule && onSelectRule && (
-                            <button
-                              type="button"
-                              onClick={() => onSelectRule(rule)}
-                              className="text-[10px] text-[#64D2FF] hover:underline font-medium"
-                            >
-                              เลือกฝึกท่านี้ →
-                            </button>
-                          )}
-                        </div>
+                        {info?.isF1ZeroLimited && (
+                          <div className="text-[10px] text-[#FF9F0A]">
+                            หมายเหตุ: คลาสนี้มี F1 = 0 ในชุดทดสอบของโมเดลปัจจุบัน
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -420,7 +339,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                 ref={videoPreviewRef}
                 src={videoPreviewUrl}
                 controls
-                className="w-full max-h-[300px] object-contain"
+                className="w-full max-h-[320px] object-contain"
               />
             </div>
 
@@ -434,7 +353,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                     </div>
                   </div>
                   <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3">
-                    <div className="text-[#A1A1A6] text-[10px]">Frames Read</div>
+                    <div className="text-[#A1A1A6] text-[10px]">frames_read</div>
                     <div className="text-base font-mono font-bold text-[#0A84FF] mt-0.5">
                       {videoResult.frames_read}
                     </div>
@@ -446,47 +365,25 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                     </div>
                   </div>
                   <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3">
-                    <div className="text-[#A1A1A6] text-[10px]">Detections Found</div>
+                    <div className="text-[#A1A1A6] text-[10px]">Total Detections</div>
                     <div className="text-base font-mono font-bold text-[#30D158] mt-0.5">
                       {totalVideoDetections}
                     </div>
                   </div>
                 </div>
 
-                {/* Clickable Frame Timeline Table */}
                 <div className="bg-[#141416] border border-white/[0.08] rounded-2xl overflow-hidden">
                   <div className="px-4 py-2.5 bg-[#1C1C1E] border-b border-white/[0.08] flex flex-wrap justify-between items-center gap-2 text-xs">
                     <span className="font-semibold text-[#F5F5F7]">
-                      ไทม์ไลน์ผลตรวจจับรายเฟรม (คลิกที่แถวเพื่อกระโดดไปยังช่วงเวลานั้น)
+                      ผลตรวจจับรายเฟรม (คลิกแถวเพื่อเลื่อนดูช่วงเวลานั้นในวิดีโอ)
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#A1A1A6]">
-                        Stride = 5 เฟรม · Max 30s
-                      </span>
-                      {totalVideoDetections > 0 && (
-                        <button
-                          type="button"
-                          disabled={savedToGradebook}
-                          onClick={() =>
-                            handleSaveAnalysisToGradebook(
-                              videoResult.results.flatMap((r) => r.detections)
-                            )
-                          }
-                          className={`px-3 py-1 rounded-xl text-[11px] font-semibold border apple-pressable ${
-                            savedToGradebook
-                              ? "bg-[#30D158]/15 border-[#30D158]/45 text-[#30D158]"
-                              : "bg-[#0A84FF] border-[#0A84FF] text-white hover:bg-[#3B9CFF]"
-                          }`}
-                        >
-                          {savedToGradebook
-                            ? "บันทึกผลลง Gradebook แล้ว"
-                            : "บันทึกผลลง Gradebook"}
-                        </button>
-                      )}
-                    </div>
+                    <span className="text-[11px] text-[#A1A1A6]">
+                      Stride = {MODEL_SPEC_INFO.videoStride} · Max{" "}
+                      {MODEL_SPEC_INFO.videoMaxSeconds}s
+                    </span>
                   </div>
 
-                  <div className="max-h-[260px] overflow-y-auto divide-y divide-white/[0.06] text-xs apple-tabular">
+                  <div className="max-h-[280px] overflow-y-auto divide-y divide-white/[0.06] text-xs apple-tabular">
                     {videoResult.results.map((row) => {
                       const isActive = activeFrameIdx === row.frame;
                       return (
@@ -502,7 +399,7 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                         >
                           <div className="flex items-center gap-3 shrink-0 font-mono">
                             <span className="text-[#0A84FF] font-semibold">
-                              #{row.frame}
+                              frame {row.frame}
                             </span>
                             <span className="text-[#F5F5F7]">{row.time.toFixed(2)}s</span>
                           </div>
@@ -510,18 +407,18 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
                           <div className="flex flex-wrap items-center justify-end gap-1.5">
                             {row.detections.length === 0 ? (
                               <span className="text-[11px] text-[#6E6E73]">
-                                ไม่พบสัญญาณ
+                                detections: []
                               </span>
                             ) : (
                               row.detections.map((d, idx) => {
-                                const rule = findRuleByLabel(d.label);
+                                const info = findRuleByLabel(d.label);
                                 return (
                                   <span
                                     key={`${row.frame}-${d.label}-${idx}`}
                                     className="px-2 py-0.5 rounded-full bg-[#30D158]/15 border border-[#30D158]/40 text-[#30D158] text-[11px] font-medium"
                                   >
-                                    {rule ? rule.nameTh : d.label} (
-                                    {Math.round(d.confidence * 100)}%)
+                                    {info ? `${info.nameTh} (${d.label})` : d.label} ·{" "}
+                                    {d.confidence.toFixed(4)}
                                   </span>
                                 );
                               })

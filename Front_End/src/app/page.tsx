@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { IFAB_RULES } from "../Core_Lib/Ifab_Rules_Catalog";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Curriculum_Quick_Launch,
-  Educational_Hero,
-} from "../UI_Components/App_Layout";
-import { Media_Upload_Analyzer } from "../UI_Components/Drill_Practice";
+  Drill_Selector,
+  Live_Drill_Feed,
+  Media_Upload_Analyzer,
+} from "../UI_Components/Drill_Practice";
 import { Google_Icon } from "../UI_Components/Common/Google_Icon";
 import { triggerCausalFeedback } from "../Core_Lib/Apple_Spring_Engine";
-import { checkModalHealth } from "../Core_Lib/Api_Client";
-import type { ModalHealthResponse } from "../Data_Types/Referee_Types";
+import { checkModalHealth, findRuleByLabel } from "../Core_Lib/Api_Client";
+import { MODEL_SPEC_INFO } from "../Core_Lib/Ifab_Rules_Catalog";
+import type {
+  ModalDetection,
+  ModalHealthResponse,
+} from "../Data_Types/Referee_Types";
 
 export default function Home() {
-  const [selectedRuleId, setSelectedRuleId] = useState<number>(1);
-  const [modalHealth, setModalHealth] = useState<ModalHealthResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<"webcam" | "image" | "video">("webcam");
+  const [health, setHealth] = useState<ModalHealthResponse | null>(null);
   const [isCheckingHealth, setIsCheckingHealth] = useState<boolean>(true);
-
-  const selectedRule =
-    IFAB_RULES.find((r) => r.id === selectedRuleId) || IFAB_RULES[1];
+  const [liveDetections, setLiveDetections] = useState<ModalDetection[]>([]);
+  const [liveLatencyMs, setLiveLatencyMs] = useState<number | null>(null);
 
   const refreshHealth = useCallback(async () => {
     setIsCheckingHealth(true);
     const res = await checkModalHealth();
-    setModalHealth(res);
+    setHealth(res);
     setIsCheckingHealth(false);
   }, []);
 
@@ -32,7 +33,7 @@ export default function Home() {
     let active = true;
     checkModalHealth().then((res) => {
       if (!active) return;
-      setModalHealth(res);
+      setHealth(res);
       setIsCheckingHealth(false);
     });
     return () => {
@@ -40,163 +41,212 @@ export default function Home() {
     };
   }, []);
 
+  const handleDetectionsUpdate = useCallback(
+    (detections: ModalDetection[], latencyMs: number | null) => {
+      setLiveDetections(detections);
+      setLiveLatencyMs(latencyMs);
+    },
+    []
+  );
+
   return (
-    <main className="min-h-screen bg-black text-[#F5F5F7] p-4 md:p-8 space-y-8">
-      {/* Section 1: Educational Hero & 4-Step Curriculum Flow */}
-      <Educational_Hero />
-
-      {/* Section 2: 4 Interactive Learning Module Quick-Launch Cards */}
-      <Curriculum_Quick_Launch />
-
-      {/* Section 3: Live Modal AI Quick Image Tester & IFAB Telemetry */}
+    <main className="min-h-screen bg-black text-[#F5F5F7] p-4 md:p-8 space-y-6">
+      {/* Header & Endpoint Switcher */}
       <section className="max-w-7xl mx-auto space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
           <div>
-            <h2 className="text-lg font-bold apple-title text-[#F5F5F7] flex items-center gap-2">
-              <Google_Icon name="monitoring" size={20} className="text-[#0A84FF]" />
-              <span>ทดสอบตรวจจับท่าสัญญาณจริงด้วย Modal AI (YOLO26n-pose)</span>
-            </h2>
-            <p className="text-xs text-[#A1A1A6] mt-0.5">
-              อัปโหลดภาพถ่ายเพื่อวิเคราะห์ท่าทางและวาดโครงกระดูกจริงจาก API หรือเข้าห้องฝึกซ้อมสดผ่านกล้องเว็บแคม
+            <h1 className="text-xl md:text-2xl font-bold apple-title text-[#F5F5F7] flex items-center gap-2.5">
+              <Google_Icon name="sports_soccer" size={24} className="text-[#0A84FF]" />
+              <span>Football Referee Signal — Modal Inference Console</span>
+            </h1>
+            <p className="text-xs text-[#A1A1A6] mt-1">
+              เชื่อมต่อตรงกับ FastAPI Backend ({MODEL_SPEC_INFO.baseModel}) ครบทั้ง 4 Endpoints:{" "}
+              <code className="font-mono text-[#64D2FF]">/health</code>,{" "}
+              <code className="font-mono text-[#64D2FF]">/ws/webcam</code>,{" "}
+              <code className="font-mono text-[#64D2FF]">/predict/image</code>,{" "}
+              <code className="font-mono text-[#64D2FF]">/predict/video</code>
             </p>
           </div>
 
-          <button
-            type="button"
+          <a
+            href={MODEL_SPEC_INFO.docsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             onPointerDown={() => triggerCausalFeedback("tap")}
-            onClick={refreshHealth}
-            title={
-              modalHealth?.status === "ok"
-                ? `Endpoint: ${modalHealth.model} — คลิกเพื่อตรวจสอบอีกครั้ง`
-                : "คลิกเพื่อ Warmup Modal API"
-            }
-            className="flex items-center gap-2 bg-[#1C1C1E] border border-white/[0.1] hover:border-white/[0.2] rounded-full px-3.5 py-1.5 text-xs apple-pressable"
+            className="px-4 py-2 rounded-xl bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/[0.1] text-xs font-semibold text-[#F5F5F7] inline-flex items-center gap-2 self-start apple-pressable"
           >
-            <span className="relative flex h-2 w-2">
-              <span
-                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isCheckingHealth
-                    ? "bg-[#FF9F0A]"
-                    : modalHealth?.status === "ok"
-                    ? "bg-[#30D158]"
-                    : "bg-[#FF453A]"
-                }`}
-              ></span>
-              <span
-                className={`relative inline-flex rounded-full h-2 w-2 ${
-                  isCheckingHealth
-                    ? "bg-[#FF9F0A]"
-                    : modalHealth?.status === "ok"
-                    ? "bg-[#30D158]"
-                    : "bg-[#FF453A]"
-                }`}
-              ></span>
-            </span>
-            <span className="text-[#F5F5F7] font-medium apple-tabular">
-              {isCheckingHealth
-                ? "Warming Modal CPU..."
-                : modalHealth?.status === "ok"
-                ? `Modal ${modalHealth.device.toUpperCase()} Online · ${
-                    modalHealth.model.split("/").pop() || "best_overall.pt"
-                  } · imgsz ${modalHealth.imgsz} · conf ${modalHealth.conf}`
-                : "Modal API Offline — คลิกเพื่อลองใหม่"}
-            </span>
-            <span className="text-[#6E6E73]">|</span>
-            <span className="text-[#0A84FF] font-mono apple-tabular">FastAPI</span>
-          </button>
+            <Google_Icon name="menu_book" size={15} className="text-[#0A84FF]" />
+            <span>เปิด Swagger /docs</span>
+          </a>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Real Image Inference Analyzer (lg: 8 cols) */}
-          <div className="lg:col-span-8 flex flex-col gap-4">
-            <Media_Upload_Analyzer
-              mode="image"
-              targetRule={selectedRule}
-              onSelectRule={(rule) => setSelectedRuleId(rule.id)}
-            />
-
-            <div className="flex justify-end">
-              <Link
-                href={`/drills?signalId=${selectedRule.id}`}
-                onPointerDown={() => triggerCausalFeedback("tap")}
-                className="px-4 py-2 rounded-xl bg-[#0A84FF] hover:bg-[#3B9CFF] text-white text-xs font-bold flex items-center gap-1.5 apple-pressable shadow-md shadow-[#0A84FF]/25"
+        {/* 3 Inference Endpoint Tabs */}
+        <div className="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-[#141416] border border-white/[0.08]">
+          {[
+            {
+              id: "webcam" as const,
+              label: "WS /ws/webcam · กล้องสด",
+              icon: "videocam",
+            },
+            {
+              id: "image" as const,
+              label: "POST /predict/image · รูปภาพ",
+              icon: "crop_free",
+            },
+            {
+              id: "video" as const,
+              label: "POST /predict/video · วิดีโอ",
+              icon: "play_arrow",
+            },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onPointerDown={() => triggerCausalFeedback("snap")}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 apple-pressable border ${
+                  isActive
+                    ? "bg-[#0A84FF] border-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/25"
+                    : "border-transparent text-[#A1A1A6] hover:text-[#F5F5F7] hover:bg-[#1C1C1E]"
+                }`}
               >
-                <Google_Icon name="videocam" size={14} />
-                <span>เปิดฝึกท่า {selectedRule.nameTh} ผ่านกล้องสด (/drills)</span>
-              </Link>
+                <Google_Icon name={tab.icon} size={15} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Main 2-Column Workspace */}
+      <section className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Active Inference Endpoint Panel (7 cols) */}
+        <div className="lg:col-span-7 flex flex-col gap-5">
+          {activeTab === "webcam" ? (
+            <Live_Drill_Feed onDetectionsUpdate={handleDetectionsUpdate} />
+          ) : (
+            <Media_Upload_Analyzer mode={activeTab} />
+          )}
+
+          {/* Live WebSocket JSON Output Inspector */}
+          {activeTab === "webcam" && (
+            <div className="apple-material-dark rounded-[22px] p-4 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-[#F5F5F7] flex items-center gap-1.5">
+                  <Google_Icon name="monitoring" size={15} className="text-[#30D158]" />
+                  <span>ผลลัพธ์ JSON ล่าสุดจาก WS /ws/webcam</span>
+                </span>
+                {liveLatencyMs !== null && (
+                  <span className="font-mono text-[11px] text-[#30D158] apple-tabular">
+                    RTT {liveLatencyMs}ms
+                  </span>
+                )}
+              </div>
+
+              {liveDetections.length === 0 ? (
+                <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-[#A1A1A6]">
+                  {`{"detections": []}`}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {liveDetections.map((det, idx) => {
+                    const info = findRuleByLabel(det.label);
+                    return (
+                      <div
+                        key={`${det.label}-${idx}`}
+                        className="bg-[#141416] border border-white/[0.08] rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs"
+                      >
+                        <div>
+                          <div className="font-bold text-[#F5F5F7]">
+                            {info ? info.nameTh : det.label}
+                          </div>
+                          <div className="font-mono text-[10px] text-[#A1A1A6]">
+                            {det.label} {info ? `· ${info.ifabLaw}` : ""}
+                          </div>
+                        </div>
+                        <span className="font-mono font-bold text-[#30D158] apple-tabular">
+                          {det.confidence.toFixed(4)} ({Math.round(det.confidence * 100)}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right: GET /health Config + 20 Model Classes (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col gap-5">
+          {/* GET /health & Backend Configuration Card */}
+          <div className="apple-material-dark rounded-[22px] p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold apple-title text-[#F5F5F7] flex items-center gap-2">
+                <Google_Icon name="speed" size={16} className="text-[#30D158]" />
+                สถานะเซิร์ฟเวอร์ (GET /health)
+              </h2>
+
+              <button
+                type="button"
+                onPointerDown={() => triggerCausalFeedback("tap")}
+                onClick={refreshHealth}
+                disabled={isCheckingHealth}
+                className="px-2.5 py-1 rounded-xl bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/[0.1] text-[11px] font-medium text-[#F5F5F7] flex items-center gap-1 apple-pressable disabled:opacity-50"
+              >
+                <Google_Icon name="refresh" size={13} />
+                <span>{isCheckingHealth ? "กำลังเช็ค..." : "เช็ค /health"}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs apple-tabular">
+              <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2.5">
+                <div className="text-[10px] text-[#6E6E73]">status</div>
+                <div
+                  className={`font-mono font-bold mt-0.5 ${
+                    health?.status === "ok"
+                      ? "text-[#30D158]"
+                      : isCheckingHealth
+                      ? "text-[#FF9F0A]"
+                      : "text-[#FF453A]"
+                  }`}
+                >
+                  {isCheckingHealth ? "warming..." : health?.status || "error"}
+                </div>
+              </div>
+
+              <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2.5">
+                <div className="text-[10px] text-[#6E6E73]">device / cuda / fp16</div>
+                <div className="font-mono font-bold text-[#F5F5F7] mt-0.5">
+                  {health?.device || "cpu"} / {String(Boolean(health?.cuda))} /{" "}
+                  {String(Boolean(health?.fp16))}
+                </div>
+              </div>
+
+              <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2.5">
+                <div className="text-[10px] text-[#6E6E73]">conf / imgsz</div>
+                <div className="font-mono font-bold text-[#0A84FF] mt-0.5">
+                  {health?.conf ?? 0.25} / {health?.imgsz ?? 640}px
+                </div>
+              </div>
+
+              <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2.5">
+                <div className="text-[10px] text-[#6E6E73]">limits (upload / stride / ws)</div>
+                <div className="font-mono font-bold text-[#64D2FF] mt-0.5">
+                  {MODEL_SPEC_INFO.maxUploadMb}MB / {MODEL_SPEC_INFO.videoStride}f /{" "}
+                  {MODEL_SPEC_INFO.wsIdleSeconds}s
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2.5 text-[11px] font-mono text-[#A1A1A6] truncate">
+              model: {health?.model || MODEL_SPEC_INFO.weightsPath}
             </div>
           </div>
 
-          {/* Right: Signal Selector & IFAB Target Criteria Inspector (lg: 4 cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-5">
-            <div className="apple-material-dark rounded-[22px] p-5">
-              <h3 className="text-sm font-semibold apple-title text-[#F5F5F7] flex items-center gap-2 mb-3">
-                <Google_Icon name="layers" size={16} className="text-[#0A84FF]" />
-                เลือกท่าสัญญาณเป้าหมาย (20 IFAB Signals)
-              </h3>
-              <div className="grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto pr-1">
-                {IFAB_RULES.map((rule) => (
-                  <button
-                    key={rule.id}
-                    type="button"
-                    onPointerDown={() => triggerCausalFeedback("snap")}
-                    onClick={() => setSelectedRuleId(rule.id)}
-                    className={`px-3 py-2 rounded-xl text-left text-xs apple-pressable border flex flex-col ${
-                      selectedRuleId === rule.id
-                        ? "bg-[#0A84FF]/20 border-[#0A84FF] text-[#F5F5F7] shadow-sm"
-                        : "bg-[#141416]/85 border-white/[0.08] text-[#A1A1A6] hover:border-white/[0.18] hover:text-[#F5F5F7]"
-                    }`}
-                  >
-                    <span className="font-semibold truncate">{rule.nameTh}</span>
-                    <span className="text-[10px] text-[#6E6E73] truncate">{rule.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="apple-material-dark rounded-[22px] p-5 flex-1 flex flex-col justify-between gap-3">
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold apple-title text-[#F5F5F7] flex items-center gap-2">
-                  <Google_Icon name="straighten" size={16} className="text-[#30D158]" />
-                  เกณฑ์มาตรฐาน IFAB ({selectedRule.ifabLaw})
-                </h3>
-
-                <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3 flex justify-between items-center">
-                  <div>
-                    <div className="text-xs text-[#A1A1A6]">Arm Elevation Target</div>
-                    <div className="text-[10px] text-[#6E6E73] apple-tabular">
-                      ขั้นต่ำที่ยอมรับ {selectedRule.minElevationDeg}°
-                    </div>
-                  </div>
-                  <div className="text-base font-mono font-bold apple-tabular text-[#0A84FF]">
-                    {selectedRule.targetElevationDeg}°
-                  </div>
-                </div>
-
-                <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3 flex justify-between items-center">
-                  <div>
-                    <div className="text-xs text-[#A1A1A6]">Elbow Straightness</div>
-                    <div className="text-[10px] text-[#6E6E73] apple-tabular">
-                      ค้างสัญญาณอย่างน้อย {selectedRule.minHoldSeconds}s
-                    </div>
-                  </div>
-                  <div className="text-base font-mono font-bold apple-tabular text-[#30D158]">
-                    {selectedRule.targetStraightnessDeg}°
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3">
-                <div className="text-xs text-[#A1A1A6] mb-1 flex items-center gap-1.5">
-                  <Google_Icon name="lightbulb" size={14} className="text-[#FF9F0A]" />
-                  <span>คำแนะนำการฝึกสอน (Coaching Tip):</span>
-                </div>
-                <div className="text-xs text-[#F5F5F7] font-medium leading-relaxed">
-                  {selectedRule.coachingTips[0] || "รักษาท่าทางให้มั่นคง"}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* 20 Model Classes & Metrics */}
+          <Drill_Selector />
         </div>
       </section>
     </main>

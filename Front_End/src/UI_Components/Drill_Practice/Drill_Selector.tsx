@@ -1,70 +1,107 @@
 "use client";
 
 import React, { useState } from "react";
-import { GestureCategory, GestureRule } from "../../Data_Types/Referee_Types";
-import { IFAB_RULES } from "../../Core_Lib/Ifab_Rules_Catalog";
+import { GestureCategory, SignalClassInfo } from "../../Data_Types/Referee_Types";
+import {
+  IFAB_SIGNAL_CLASSES,
+  MODEL_SPEC_INFO,
+} from "../../Core_Lib/Ifab_Rules_Catalog";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
-export interface DrillSelectorProps {
-  selectedRuleId: number;
-  onSelectDrill: (rule: GestureRule) => void;
-}
-
 const CATEGORIES: { id: GestureCategory | "all"; label: string }[] = [
   { id: "all", label: "ทั้งหมด (20)" },
-  { id: "restarts", label: "ลูกตั้งเตะ (Restarts)" },
-  { id: "fouls", label: "การทำฟาวล์ (Fouls)" },
+  { id: "restarts", label: "ลูกตั้งเตะ" },
+  { id: "fouls", label: "การทำฟาวล์" },
   { id: "match_control", label: "การควบคุมเกม" },
-  { id: "offside", label: "การล้ำหน้า (Offside)" },
+  { id: "offside", label: "ล้ำหน้า" },
 ];
 
-export const Drill_Selector: React.FC<DrillSelectorProps> = ({
-  selectedRuleId,
-  onSelectDrill,
-}) => {
+export const Drill_Selector: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<GestureCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<number>(1);
 
-  const filteredRules = IFAB_RULES.filter((rule) => {
+  const filtered = IFAB_SIGNAL_CLASSES.filter((cls) => {
     const matchesCategory =
-      activeCategory === "all" || rule.category === activeCategory;
+      activeCategory === "all" || cls.category === activeCategory;
+    const q = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      rule.nameTh.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rule.ifabLaw.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      cls.nameTh.toLowerCase().includes(q) ||
+      cls.name.toLowerCase().includes(q) ||
+      cls.ifabLaw.toLowerCase().includes(q);
     return matchesCategory && matchesSearch;
   });
 
+  const selectedClass: SignalClassInfo =
+    IFAB_SIGNAL_CLASSES.find((c) => c.id === selectedId) || IFAB_SIGNAL_CLASSES[0];
+
   return (
-    <div className="apple-material-dark rounded-[22px] p-4 flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3">
+    <div className="apple-material-dark rounded-[22px] p-4 flex flex-col gap-3">
+      {/* Model Evaluation Benchmark Header (apiSpec.md & hfModelCard.md) */}
+      <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold apple-title text-[#F5F5F7] flex items-center gap-2">
-          <Google_Icon name="emoji_events" size={16} className="text-[#0A84FF]" />
-          เลือกแบบฝึกหัดสัญญาณผู้ตัดสิน (IFAB Drills)
+          <Google_Icon name="layers" size={16} className="text-[#0A84FF]" />
+          20 คลาสของโมเดล YOLO26n-pose
         </h2>
-        <span className="text-xs text-[#6E6E73] font-mono apple-tabular">
-          {filteredRules.length} รายการ
+        <span className="text-[11px] text-[#A1A1A6] font-mono apple-tabular">
+          {filtered.length} / {IFAB_SIGNAL_CLASSES.length}
+        </span>
+      </div>
+
+      {/* Model Test Metrics Summary */}
+      <div className="grid grid-cols-3 gap-2 text-center text-[11px] apple-tabular">
+        <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2">
+          <div className="text-[#6E6E73]">Macro-F1</div>
+          <div className="font-mono font-bold text-[#0A84FF] mt-0.5">
+            {MODEL_SPEC_INFO.macroF1.toFixed(2)}
+          </div>
+        </div>
+        <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2">
+          <div className="text-[#6E6E73]">Accuracy</div>
+          <div className="font-mono font-bold text-[#30D158] mt-0.5">
+            {(MODEL_SPEC_INFO.accuracy * 100).toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-2">
+          <div className="text-[#6E6E73]">Pose mAP</div>
+          <div className="font-mono font-bold text-[#64D2FF] mt-0.5">
+            {MODEL_SPEC_INFO.poseMap5095.toFixed(3)}
+          </div>
+        </div>
+      </div>
+
+      {/* Known F1=0 Limitation Banner */}
+      <div className="px-3 py-2 rounded-xl bg-[#2C1A04]/80 border border-[#FF9F0A]/35 text-[11px] text-[#FFD18A] flex items-start gap-2">
+        <Google_Icon name="warning" size={14} className="text-[#FF9F0A] shrink-0 mt-0.5" />
+        <span>
+          จากชุดทดสอบ {MODEL_SPEC_INFO.testPersons} คน คลาส{" "}
+          <code className="font-mono text-[#FF9F0A]">Offside</code>,{" "}
+          <code className="font-mono text-[#FF9F0A]">Goal</code>,{" "}
+          <code className="font-mono text-[#FF9F0A]">Elbowing</code> มี{" "}
+          <b>F1 = 0</b> ยังจำแนกไม่ได้
         </span>
       </div>
 
       {/* Search Input */}
-      <div className="relative mb-3">
+      <div className="relative">
         <Google_Icon name="search" size={16} className="text-[#6E6E73] absolute left-3 top-2.5" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="ค้นหาชื่อสัญญาณ, กฎ IFAB..."
+          placeholder="ค้นหาชื่อคลาส (เช่น Card, Corner_Kick)..."
           className="w-full bg-[#141416] border border-white/[0.1] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#F5F5F7] placeholder-[#6E6E73] focus:outline-none focus:border-[#0A84FF] transition"
         />
       </div>
 
       {/* Category Pills */}
-      <div className="flex gap-1.5 overflow-x-auto pb-2 mb-2 scrollbar-none">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
+            type="button"
             onPointerDown={() => triggerCausalFeedback("tap")}
             onClick={() => setActiveCategory(cat.id)}
             className={`px-3 py-1 rounded-xl text-[11px] font-medium whitespace-nowrap apple-pressable border ${
@@ -78,46 +115,56 @@ export const Drill_Selector: React.FC<DrillSelectorProps> = ({
         ))}
       </div>
 
-      {/* Drill List */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[360px]">
-        {filteredRules.map((rule) => {
-          const isSelected = rule.id === selectedRuleId;
-
+      {/* 20 Classes List */}
+      <div className="overflow-y-auto space-y-1.5 pr-1 max-h-[280px]">
+        {filtered.map((cls) => {
+          const isSelected = cls.id === selectedClass.id;
           return (
             <button
-              key={rule.id}
+              key={cls.id}
+              type="button"
               onPointerDown={() => triggerCausalFeedback("snap")}
-              onClick={() => onSelectDrill(rule)}
-              className={`w-full text-left p-3 rounded-2xl border apple-pressable flex flex-col gap-1.5 ${
+              onClick={() => setSelectedId(cls.id)}
+              className={`w-full text-left px-3 py-2 rounded-xl border apple-pressable flex items-center justify-between gap-2 ${
                 isSelected
-                  ? "bg-[#0A84FF]/15 border-[#0A84FF] text-[#F5F5F7] shadow-md"
-                  : "bg-[#141416]/80 border-white/[0.08] text-[#A1A1A6] hover:border-white/[0.18] hover:bg-[#2C2C2E]/70"
+                  ? "bg-[#0A84FF]/15 border-[#0A84FF] text-[#F5F5F7]"
+                  : "bg-[#141416]/80 border-white/[0.08] text-[#A1A1A6] hover:border-white/[0.18]"
               }`}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[#F5F5F7]">
-                  {rule.nameTh}
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#2C2C2E] text-[#A1A1A6] border border-white/[0.08]">
-                  {rule.activeArm.toUpperCase()}
-                </span>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#F5F5F7] truncate">
+                  #{cls.id} · {cls.nameTh}
+                </div>
+                <div className="text-[11px] font-mono text-[#A1A1A6] truncate">
+                  {cls.name}
+                </div>
               </div>
 
-              <div className="text-[11px] text-[#A1A1A6] font-mono truncate">
-                {rule.name}
-              </div>
-
-              <div className="flex items-center gap-3 text-[10px] text-[#6E6E73] pt-1 border-t border-white/[0.06] apple-tabular">
-                <span className="flex items-center gap-1">
-                  <Google_Icon name="schedule" size={13} className="text-[#0A84FF]" />
-                  Hold: {rule.minHoldSeconds}s
+              {cls.isF1ZeroLimited ? (
+                <span className="shrink-0 px-2 py-0.5 rounded-full bg-[#FF9F0A]/15 border border-[#FF9F0A]/40 text-[#FF9F0A] text-[10px] font-mono font-bold">
+                  F1=0
                 </span>
-                <span>•</span>
-                <span>เป้าหมาย: {rule.targetElevationDeg}°</span>
-              </div>
+              ) : (
+                <span className="shrink-0 text-[10px] font-mono text-[#6E6E73]">
+                  {cls.ifabLaw.split(" - ")[0]}
+                </span>
+              )}
             </button>
           );
         })}
+      </div>
+
+      {/* Selected Class Detail */}
+      <div className="bg-[#141416] border border-white/[0.08] rounded-xl p-3 text-xs space-y-1">
+        <div className="font-bold text-[#F5F5F7]">
+          {selectedClass.nameTh} ({selectedClass.name})
+        </div>
+        <div className="text-[11px] text-[#0A84FF] font-mono">
+          {selectedClass.ifabLaw}
+        </div>
+        <p className="text-[11px] text-[#A1A1A6] leading-relaxed">
+          {selectedClass.descriptionTh}
+        </p>
       </div>
     </div>
   );
