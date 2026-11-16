@@ -14,6 +14,8 @@ export interface SignalClassInfo {
   ifabLaw: string;
   category: GestureCategory;
   descriptionTh: string;
+  descriptionEn: string;
+  coachingTips: string[];
   isF1ZeroLimited: boolean;
 }
 
