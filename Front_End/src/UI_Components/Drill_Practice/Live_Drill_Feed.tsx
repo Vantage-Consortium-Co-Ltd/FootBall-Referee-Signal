@@ -54,7 +54,6 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [mirror, setMirror] = useState<boolean>(true);
-  const [showGhost, setShowGhost] = useState<boolean>(true);
   const [showAngles, setShowAngles] = useState<boolean>(true);
   const [showBBoxes, setShowBBoxes] = useState<boolean>(true);
 
@@ -775,7 +774,6 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
               width={640}
               height={480}
               mirror={mirror}
-              showGhost={showGhost}
               showAngles={showAngles}
               showBBoxes={showBBoxes}
               onTagPerson={handleTagPerson}
@@ -901,18 +899,6 @@ export const Live_Drill_Feed: React.FC<LiveDrillFeedProps> = ({
           >
             <Google_Icon name="flip" size={14} />
             Mirror View: {mirror ? "ON" : "OFF"}
-          </button>
-          <button
-            type="button"
-            onPointerDown={() => triggerCausalFeedback("tap")}
-            onClick={() => setShowGhost(!showGhost)}
-            className={`px-3 py-1.5 rounded-xl border text-xs apple-pressable ${
-              showGhost
-                ? "bg-[#0A84FF]/15 border-[#0A84FF]/45 text-[#0A84FF]"
-                : "bg-[#2C2C2E]/70 border-white/[0.08] text-[#A1A1A6]"
-            }`}
-          >
-            Ghost Guide: {showGhost ? "ON" : "OFF"}
           </button>
           <button
             type="button"

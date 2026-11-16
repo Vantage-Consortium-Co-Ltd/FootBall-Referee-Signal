@@ -11,7 +11,6 @@ import {
   drawActiveArmHighlight,
   drawAngleArc,
   drawBones,
-  drawGhostSkeleton,
   drawJoints,
   drawPersonBoundingBox,
   toCanvasCoords,
@@ -24,7 +23,6 @@ export interface SkeletonCanvasProps {
   persons?: TaggedPerson[];
   width?: number;
   height?: number;
-  showGhost?: boolean;
   showAngles?: boolean;
   showBBoxes?: boolean;
   mirror?: boolean;
@@ -39,7 +37,6 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
   persons = [],
   width = 640,
   height = 480,
-  showGhost = true,
   showAngles = true,
   showBBoxes = true,
   mirror = true,
@@ -103,11 +100,6 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
       persons.forEach((person) => {
         drawPersonBoundingBox(ctx, person, width, height, mirror);
       });
-    }
-
-    // 2. Draw Ghost Target Skeleton if targetRule is provided
-    if (showGhost && targetRule) {
-      drawGhostSkeleton(ctx, targetRule, width, height, mirror);
     }
 
     // Determine which keypoints to render (use active tagged person's keypoints if available)
@@ -202,7 +194,6 @@ export const Skeleton_Canvas: React.FC<SkeletonCanvasProps> = ({
     angles,
     width,
     height,
-    showGhost,
     showAngles,
     showBBoxes,
     mirror,

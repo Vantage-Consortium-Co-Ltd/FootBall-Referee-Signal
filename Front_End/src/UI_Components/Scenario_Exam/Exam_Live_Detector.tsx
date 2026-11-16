@@ -602,7 +602,6 @@ export const Exam_Live_Detector: React.FC<ExamLiveDetectorProps> = ({
                   width={440}
                   height={330}
                   mirror={true}
-                  showGhost={isDecisionLocked}
                   showAngles={isDecisionLocked && Boolean(livePerson)}
                   showBBoxes={false}
                   className="w-full h-full object-contain"
