@@ -9,3 +9,6 @@ matplotlib
 mlflow
 pyyaml
 requests
+fastapi
+uvicorn[standard]
+python-multipart
