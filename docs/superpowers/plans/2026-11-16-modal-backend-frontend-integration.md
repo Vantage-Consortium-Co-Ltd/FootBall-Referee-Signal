@@ -1,6 +1,6 @@
 # Modal FastAPI Backend & Next.js Frontend Integration Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Save this plan both as an artifact (`<artifactDir>/implementation_plan.md`) and in the repository at `docs/superpowers/plans/2026-11-16-modal-backend-frontend-integration.md`. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Save this plan both as an artifact (`<artifactDir>/implementation_plan.md`) and in the repository at `docs/superpowers/plans/2026-11-16-modal-backend-frontend-integration.md`. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** ผสานระบบ Backend FastAPI บน Modal (`https://kitkhachon-xx--web.us-east.modal.run/`) เข้ากับ Next.js Frontend (`Front_End/`) ครบทั้ง 4 Endpoints (`GET /health`, `POST /predict/image`, `POST /predict/video`, `WS /ws/webcam`) พร้อมรวม Branch `origin/main` เข้าสู่ `dev/phuriphat`, สร้าง Next.js BFF API Proxy เพื่อแก้ปัญหา CORS และซ่อน API Key, และเชื่อมต่อแบบ Hybrid Mode ในหน้า `/drills`, `/examination`, และ `Nav_Bar`
 
@@ -41,40 +41,40 @@
 ## Tasks
 
 ### Task 1: Merge `origin/main` into `dev/phuriphat` & Configure Environment Files
-- [ ] **Step 1: Save the implementation plan artifact and repo plan document**
-- [ ] **Step 2: Merge `origin/main` into `dev/phuriphat`**
-- [ ] **Step 3: Create `Front_End/.env.example` and `Front_End/.env.local`**
-- [ ] **Step 4: Verify merge and git status**
-- [ ] **Step 5: Commit the merge and plan**
+- [x] **Step 1: Save the implementation plan artifact and repo plan document**
+- [x] **Step 2: Merge `origin/main` into `dev/phuriphat`**
+- [x] **Step 3: Create `Front_End/.env.example` and `Front_End/.env.local`**
+- [x] **Step 4: Verify merge and git status**
+- [x] **Step 5: Commit the merge and plan**
 
 ### Task 2: Backend API Types & Next.js BFF Proxy Routes (`/api/inference/*`)
-- [ ] **Step 1: Append Modal API types to `Front_End/src/Data_Types/Referee_Types.ts`**
-- [ ] **Step 2: Implement `Front_End/src/app/api/inference/health/route.ts`**
-- [ ] **Step 3: Implement `Front_End/src/app/api/inference/image/route.ts`**
-- [ ] **Step 4: Implement `Front_End/src/app/api/inference/video/route.ts` and `Front_End/src/app/api/inference/ws-config/route.ts`**
-- [ ] **Step 5: Run TypeScript check and commit**
+- [x] **Step 1: Append Modal API types to `Front_End/src/Data_Types/Referee_Types.ts`**
+- [x] **Step 2: Implement `Front_End/src/app/api/inference/health/route.ts`**
+- [x] **Step 3: Implement `Front_End/src/app/api/inference/image/route.ts`**
+- [x] **Step 4: Implement `Front_End/src/app/api/inference/video/route.ts` and `Front_End/src/app/api/inference/ws-config/route.ts`**
+- [x] **Step 5: Run TypeScript check and commit**
 
 ### Task 3: Frontend API Client & Hybrid Posture Adapter (`Front_End/src/Core_Lib/Api_Client.ts`)
-- [ ] **Step 1: Implement REST & WebSocket helper functions in `Front_End/src/Core_Lib/Api_Client.ts`**
-- [ ] **Step 2: Implement `evaluateHybridPostureFromDetections` in `Front_End/src/Core_Lib/Api_Client.ts`**
-- [ ] **Step 3: Run TypeScript check and commit**
+- [x] **Step 1: Implement REST & WebSocket helper functions in `Front_End/src/Core_Lib/Api_Client.ts`**
+- [x] **Step 2: Implement `evaluateHybridPostureFromDetections` in `Front_End/src/Core_Lib/Api_Client.ts`**
+- [x] **Step 3: Run TypeScript check and commit**
 
 ### Task 4: Live `/health` Status Indicator on `Nav_Bar.tsx` and Home (`page.tsx`)
-- [ ] **Step 1: Update `Nav_Bar.tsx` to check `/api/inference/health` on mount and on click**
-- [ ] **Step 2: Update `Front_End/src/app/page.tsx` to display real `/health` status**
-- [ ] **Step 3: Run TypeScript check and commit**
+- [x] **Step 1: Update `Nav_Bar.tsx` to check `/api/inference/health` on mount and on click**
+- [x] **Step 2: Update `Front_End/src/app/page.tsx` to display real `/health` status**
+- [x] **Step 3: Run TypeScript check and commit**
 
 ### Task 5: Integrate `/ws/webcam`, `/predict/image`, and `/predict/video` in `/drills`
-- [ ] **Step 1: Upgrade `Front_End/src/UI_Components/Drill_Practice/Live_Drill_Feed.tsx` with `/ws/webcam` and Snapshot Annotation**
-- [ ] **Step 2: Create `Front_End/src/UI_Components/Drill_Practice/Media_Upload_Analyzer.tsx`**
-- [ ] **Step 3: Export `Media_Upload_Analyzer` in `Front_End/src/UI_Components/Drill_Practice/index.ts` and add the 3-mode switcher in `Front_End/src/app/drills/page.tsx`**
-- [ ] **Step 4: Run TypeScript check and commit**
+- [x] **Step 1: Upgrade `Front_End/src/UI_Components/Drill_Practice/Live_Drill_Feed.tsx` with `/ws/webcam` and Snapshot Annotation**
+- [x] **Step 2: Create `Front_End/src/UI_Components/Drill_Practice/Media_Upload_Analyzer.tsx`**
+- [x] **Step 3: Export `Media_Upload_Analyzer` in `Front_End/src/UI_Components/Drill_Practice/index.ts` and add the 3-mode switcher in `Front_End/src/app/drills/page.tsx`**
+- [x] **Step 4: Run TypeScript check and commit**
 
 ### Task 6: Integrate `/ws/webcam` & `/predict/image` into Scenario Examination (`Exam_Live_Detector.tsx`)
-- [ ] **Step 1: Wire `/ws/webcam` and `/predict/image` photo check into `Exam_Live_Detector.tsx`**
-- [ ] **Step 2: Run TypeScript check and commit**
+- [x] **Step 1: Wire `/ws/webcam` and `/predict/image` photo check into `Exam_Live_Detector.tsx`**
+- [x] **Step 2: Run TypeScript check and commit**
 
 ### Task 7: End-to-End Verification Against Live Modal Backend (`verification-before-completion`)
-- [ ] **Step 1: Create and run `Front_End/scripts/verify-modal-api.mjs`**
-- [ ] **Step 2: Run `npm run typecheck` and `npm run build` in `Front_End/`**
-- [ ] **Step 3: Commit verification script and update plan checkboxes**
+- [x] **Step 1: Create and run `Front_End/scripts/verify-modal-api.mjs`**
+- [x] **Step 2: Run `npm run typecheck` and `npm run build` in `Front_End/`**
+- [x] **Step 3: Commit verification script and update plan checkboxes**
