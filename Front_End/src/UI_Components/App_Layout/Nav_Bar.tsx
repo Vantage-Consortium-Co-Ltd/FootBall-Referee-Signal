@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation";
 import { Google_Icon } from "../Common/Google_Icon";
 
 const NAV_LINKS = [
-  { href: "/", label: "หน้าหลัก", icon: "sports_soccer" },
-  { href: "/live", label: "ฝึกซ้อมสด", icon: "videocam" },
+  { href: "/", label: "ฝึกซ้อมสด", icon: "videocam" },
   { href: "/upload", label: "ตรวจคลิป/ภาพ", icon: "photo_camera" },
   { href: "/signals", label: "กติกา 20 ท่า", icon: "menu_book" },
 ] as const;
@@ -29,7 +28,9 @@ export const Nav_Bar: React.FC = () => {
   }, [pathname]);
 
   const activeIndex = NAV_LINKS.findIndex((link) => {
-    if (link.href === "/") return pathname === "/";
+    if (link.href === "/") {
+      return pathname === "/" || pathname === "/live" || pathname === "/drills";
+    }
     return pathname.startsWith(link.href);
   });
 

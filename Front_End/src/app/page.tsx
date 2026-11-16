@@ -42,7 +42,7 @@ export default function Home() {
         {/* Minimal Header Bar */}
         <section className="flex items-center justify-between gap-4">
           <h1 className="text-lg md:text-xl font-bold tracking-tight text-white">
-            ระบบวิเคราะห์สัญญาณผู้ตัดสิน
+            ฝึกซ้อมสัญญาณผู้ตัดสินผ่านกล้องสด
           </h1>
         </section>
 
