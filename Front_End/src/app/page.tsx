@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Skeleton_Canvas } from "../UI_Components/Canvas_Engine/Skeleton_Canvas";
 import {
@@ -14,6 +14,8 @@ import {
 } from "../UI_Components/App_Layout";
 import { Google_Icon } from "../UI_Components/Common/Google_Icon";
 import { triggerCausalFeedback } from "../Core_Lib/Apple_Spring_Engine";
+import { checkModalHealth } from "../Core_Lib/Api_Client";
+import type { ModalHealthResponse } from "../Data_Types/Referee_Types";
 
 export default function Home() {
   const [selectedRuleId, setSelectedRuleId] = useState<number>(1); // Default: Indirect Free Kick
@@ -21,10 +23,31 @@ export default function Home() {
   const [mirror, setMirror] = useState<boolean>(true);
   const [showGhost, setShowGhost] = useState<boolean>(true);
   const [showAngles, setShowAngles] = useState<boolean>(true);
+  const [modalHealth, setModalHealth] = useState<ModalHealthResponse | null>(null);
+  const [isCheckingHealth, setIsCheckingHealth] = useState<boolean>(true);
 
   const selectedRule =
     MOCK_IFAB_RULES.find((r) => r.id === selectedRuleId) || MOCK_IFAB_RULES[1];
   const systemHealth = getMockSystemHealth();
+
+  const refreshHealth = useCallback(async () => {
+    setIsCheckingHealth(true);
+    const res = await checkModalHealth();
+    setModalHealth(res);
+    setIsCheckingHealth(false);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    checkModalHealth().then((res) => {
+      if (!active) return;
+      setModalHealth(res);
+      setIsCheckingHealth(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Animation frame loop to simulate 60 FPS skeleton movement
   useEffect(() => {
@@ -60,17 +83,49 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/[0.1] rounded-full px-3.5 py-1.5 text-xs">
+          <button
+            type="button"
+            onPointerDown={() => triggerCausalFeedback("tap")}
+            onClick={refreshHealth}
+            title={
+              modalHealth?.status === "ok"
+                ? `Endpoint: ${modalHealth.model} — คลิกเพื่อตรวจสอบอีกครั้ง`
+                : `${systemHealth.services.length} Services Configured — คลิกเพื่อ Warmup Modal API`
+            }
+            className="flex items-center gap-2 bg-[#1C1C1E] border border-white/[0.1] hover:border-white/[0.2] rounded-full px-3.5 py-1.5 text-xs apple-pressable"
+          >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#30D158] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#30D158]"></span>
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  isCheckingHealth
+                    ? "bg-[#FF9F0A]"
+                    : modalHealth?.status === "ok"
+                    ? "bg-[#30D158]"
+                    : "bg-[#0A84FF]"
+                }`}
+              ></span>
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${
+                  isCheckingHealth
+                    ? "bg-[#FF9F0A]"
+                    : modalHealth?.status === "ok"
+                    ? "bg-[#30D158]"
+                    : "bg-[#0A84FF]"
+                }`}
+              ></span>
             </span>
             <span className="text-[#F5F5F7] font-medium apple-tabular">
-              {systemHealth.services.length} Services Ready
+              {isCheckingHealth
+                ? "Warming Modal CPU..."
+                : modalHealth?.status === "ok"
+                ? `Modal ${modalHealth.device.toUpperCase()} Online · ${
+                    modalHealth.model.split("/").pop() || "best_overall.pt"
+                  } · imgsz ${modalHealth.imgsz} · conf ${modalHealth.conf}`
+                : `${systemHealth.services.length} Services Ready (Simulation)`}
             </span>
             <span className="text-[#6E6E73]">|</span>
             <span className="text-[#0A84FF] font-mono apple-tabular">60 FPS Native</span>
-          </div>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
+import { checkModalHealth } from "../../Core_Lib/Api_Client";
+import type { ModalHealthResponse } from "../../Data_Types/Referee_Types";
 
 const NAV_ITEMS = [
   { href: "/drills", label: "ห้องฝึกซ้อมสด", icon: "videocam" },
@@ -17,6 +19,63 @@ export const Nav_Bar: React.FC = () => {
   const pathname = usePathname();
   const isLightRoute =
     pathname?.startsWith("/handbook") || pathname?.startsWith("/gradebook");
+
+  const [healthState, setHealthState] = useState<"warming" | "online" | "offline">("warming");
+  const [healthInfo, setHealthInfo] = useState<ModalHealthResponse | null>(null);
+
+  const refreshHealth = useCallback(async () => {
+    setHealthState("warming");
+    const res = await checkModalHealth();
+    setHealthInfo(res);
+    setHealthState(res.status === "ok" ? "online" : "offline");
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const init = async () => {
+      const res = await checkModalHealth();
+      if (!active) return;
+      setHealthInfo(res);
+      setHealthState(res.status === "ok" ? "online" : "offline");
+    };
+    init();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const statusPillStyle =
+    healthState === "online"
+      ? isLightRoute
+        ? "bg-[#34C759]/10 border-[#34C759]/30 text-[#1E8E3E]"
+        : "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158]"
+      : healthState === "warming"
+      ? isLightRoute
+        ? "bg-[#FF9500]/10 border-[#FF9500]/30 text-[#C96A00]"
+        : "bg-[#FF9F0A]/15 border-[#FF9F0A]/35 text-[#FF9F0A]"
+      : isLightRoute
+      ? "bg-[#007AFF]/10 border-[#007AFF]/30 text-[#007AFF]"
+      : "bg-[#0A84FF]/15 border-[#0A84FF]/35 text-[#64D2FF]";
+
+  const statusDotStyle =
+    healthState === "online"
+      ? isLightRoute
+        ? "bg-[#34C759]"
+        : "bg-[#30D158]"
+      : healthState === "warming"
+      ? "bg-[#FF9F0A] animate-pulse"
+      : isLightRoute
+      ? "bg-[#007AFF]"
+      : "bg-[#64D2FF]";
+
+  const statusLabel =
+    healthState === "online"
+      ? `Modal AI Online · ${(healthInfo?.device || "cpu").toUpperCase()}${
+          healthInfo?.latencyMs ? ` (${healthInfo.latencyMs}ms)` : ""
+        }`
+      : healthState === "warming"
+      ? "Warming Modal CPU..."
+      : "Simulation Fallback";
 
   return (
     <nav
@@ -98,22 +157,22 @@ export const Nav_Bar: React.FC = () => {
           })}
         </div>
 
-        {/* Right: Offline Status & Trainee Profile Pill */}
+        {/* Right: Live Modal API Status & Trainee Profile Pill */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-medium ${
-              isLightRoute
-                ? "bg-[#34C759]/10 border-[#34C759]/30 text-[#1E8E3E]"
-                : "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158]"
-            }`}
+          <button
+            type="button"
+            onPointerDown={() => triggerCausalFeedback("tap")}
+            onClick={refreshHealth}
+            title={
+              healthState === "online"
+                ? `Model: ${healthInfo?.model} (conf ${healthInfo?.conf}, imgsz ${healthInfo?.imgsz}) — คลิกเพื่อเช็คสถานะอีกครั้ง`
+                : healthInfo?.detail || "คลิกเพื่อ Warmup / เชื่อมต่อ Modal API"
+            }
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-medium apple-pressable apple-tabular ${statusPillStyle}`}
           >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isLightRoute ? "bg-[#34C759]" : "bg-[#30D158]"
-              }`}
-            />
-            <span>Offline Demo Ready</span>
-          </div>
+            <span className={`w-2 h-2 rounded-full ${statusDotStyle}`} />
+            <span>{statusLabel}</span>
+          </button>
 
           <Link
             href="/gradebook"
