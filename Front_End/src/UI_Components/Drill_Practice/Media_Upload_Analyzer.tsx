@@ -20,15 +20,14 @@ import { Google_Icon } from "../Common/Google_Icon";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
 
 export interface MediaUploadAnalyzerProps {
-  mode: "image" | "video";
+  mode?: "auto" | "image" | "video";
 }
 
-export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
-  mode,
-}) => {
+export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
 
+  const [activeType, setActiveType] = useState<"image" | "video" | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -77,12 +76,39 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
       return;
     }
 
+    const isVideo =
+      file.type.startsWith("video/") ||
+      /\.(mp4|mov|avi|webm|mkv|m4v)$/i.test(file.name);
+    const isImage =
+      file.type.startsWith("image/") ||
+      /\.(jpe?g|png|webp|bmp|gif)$/i.test(file.name);
+
+    if (!isVideo && !isImage) {
+      setErrorMsg("รองรับเฉพาะไฟล์รูปภาพ (JPG, PNG, WebP) หรือวิดีโอ (MP4, MOV, WebM)");
+      triggerCausalFeedback("warning");
+      return;
+    }
+
     setFileName(file.name);
     setIsLoading(true);
     triggerCausalFeedback("tap");
 
     try {
-      if (mode === "image") {
+      if (isVideo) {
+        setActiveType("video");
+        const nextVideoUrl = URL.createObjectURL(file);
+        setVideoPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return nextVideoUrl;
+        });
+        setActiveFrameIdx(null);
+        setTimelineFilter("detected");
+
+        const res = await predictVideoFile(file);
+        setVideoResult(res);
+        triggerCausalFeedback("success");
+      } else {
+        setActiveType("image");
         const nextOriginalUrl = URL.createObjectURL(file);
         setOriginalImageUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
@@ -98,18 +124,6 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           if (prev) URL.revokeObjectURL(prev);
           return res.annotatedImageUrl;
         });
-        triggerCausalFeedback("success");
-      } else {
-        const nextVideoUrl = URL.createObjectURL(file);
-        setVideoPreviewUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return nextVideoUrl;
-        });
-        setActiveFrameIdx(null);
-        setTimelineFilter("detected");
-
-        const res = await predictVideoFile(file);
-        setVideoResult(res);
         triggerCausalFeedback("success");
       }
     } catch (err: unknown) {
@@ -209,19 +223,23 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
 
   return (
     <section
-      aria-label={mode === "image" ? "วิเคราะห์รูปภาพ" : "วิเคราะห์วิดีโอ"}
+      aria-label="วิเคราะห์ไฟล์สื่อ"
       className="rounded-2xl bg-[#0D131A] border border-white/[0.08] overflow-hidden flex flex-col"
     >
       {/* Compact Header */}
       <div className="px-4 py-3 bg-white/[0.02] border-b border-white/[0.08] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Google_Icon
-            name={mode === "image" ? "photo_camera" : "movie"}
+            name={activeType === "video" ? "movie" : "photo_camera"}
             size={17}
             className="text-emerald-400 shrink-0"
           />
           <h2 className="text-sm font-semibold text-white">
-            {mode === "image" ? "วิเคราะห์รูปภาพ" : "วิเคราะห์วิดีโอ"}
+            {activeType === "video"
+              ? "ผลวิเคราะห์วิดีโอ"
+              : activeType === "image"
+              ? "ผลวิเคราะห์รูปภาพ"
+              : "วิเคราะห์รูปภาพหรือวิดีโอ"}
           </h2>
         </div>
 
@@ -233,28 +251,24 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 apple-pressable disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           <Google_Icon name="layers" size={14} />
-          <span>{mode === "image" ? "เลือกรูปภาพ" : "เลือกวิดีโอ"}</span>
+          <span>เลือกไฟล์</span>
         </button>
 
         <input
           ref={fileInputRef}
           type="file"
-          accept={
-            mode === "image"
-              ? "image/jpeg,image/png,image/webp,image/*"
-              : "video/mp4,video/quicktime,video/webm,video/*"
-          }
+          accept="image/*,video/*,image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
           onChange={handleFileChange}
           className="hidden"
         />
       </div>
 
       <div className="p-4 md:p-5 space-y-4">
-        {/* Single-Line Minimal Dropzone */}
+        {/* Universal Drag & Drop Dropzone */}
         <div
           role="button"
           tabIndex={0}
-          aria-label="เลือกหรือวางไฟล์"
+          aria-label="เลือกหรือวางไฟล์ภาพหรือวิดีโอ"
           onDragOver={(e) => {
             e.preventDefault();
             setIsDragging(true);
@@ -275,17 +289,16 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           }`}
         >
           <div className="flex flex-col items-center gap-2">
-            <Google_Icon
-              name={mode === "image" ? "photo_camera" : "movie"}
-              size={22}
-              className="text-emerald-400"
-            />
+            <div className="flex items-center gap-2 text-emerald-400">
+              <Google_Icon name="photo_camera" size={20} />
+              <Google_Icon name="movie" size={20} />
+            </div>
             <span className="text-xs font-medium text-slate-200">
               {isLoading
                 ? "กำลังวิเคราะห์..."
                 : fileName
                 ? fileName
-                : `วางไฟล์หรือคลิกเพื่อเลือกไฟล์ · สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB`}
+                : `วางไฟล์หรือคลิกเพื่อเลือกไฟล์ (รูปภาพ หรือ วิดีโอ) · สูงสุด ${MODEL_SPEC_INFO.maxUploadMb} MB`}
             </span>
           </div>
         </div>
@@ -300,8 +313,8 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           </div>
         )}
 
-        {/* PHOTO RESULTS */}
-        {mode === "image" && (originalImageUrl || annotatedImageUrl) && (
+        {/* PHOTO RESULTS (Auto-rendered when uploaded file is image) */}
+        {activeType === "image" && (originalImageUrl || annotatedImageUrl) && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <div className="bg-black/40 border border-white/[0.08] rounded-xl p-3 space-y-2">
@@ -404,8 +417,8 @@ export const Media_Upload_Analyzer: React.FC<MediaUploadAnalyzerProps> = ({
           </div>
         )}
 
-        {/* VIDEO RESULTS */}
-        {mode === "video" && videoPreviewUrl && (
+        {/* VIDEO RESULTS (Auto-rendered when uploaded file is video) */}
+        {activeType === "video" && videoPreviewUrl && (
           <div className="space-y-4">
             <div className="bg-black rounded-xl border border-white/[0.08] overflow-hidden">
               <video
