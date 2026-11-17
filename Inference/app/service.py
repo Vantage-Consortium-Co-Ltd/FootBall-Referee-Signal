@@ -1,4 +1,4 @@
-"""FastAPI service for the referee-signal model.
+"""FastAPI service for the referee-signal model + hand refiner (refine: section of config.yaml; refine.enabled false = plain YOLO).
 
   GET  /health            model + settings
   POST /predict/image     multipart 'file' -> JSON [{label, confidence}]   (?annotated=true -> JPEG with boxes/skeleton)
@@ -53,7 +53,7 @@ def create_app(cfg):
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "model": cfg.model_path, "device": cfg.device, "fp16": app.state.det.kw["quantize"] == "fp16", "cuda": torch.cuda.is_available(), "conf": cfg.conf, "imgsz": cfg.imgsz}
+        return {"status": "ok", "model": cfg.model_path, "device": cfg.device, "fp16": app.state.det.kw["quantize"] == "fp16", "cuda": torch.cuda.is_available(), "conf": cfg.conf, "imgsz": cfg.imgsz, "refine": cfg.refine.enabled, "refine_groups": cfg.refine.groups}
 
     @app.post("/predict/image", dependencies=[Depends(require_key)])
     async def predict_image(file: UploadFile = File(...), annotated: bool = False):

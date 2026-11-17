@@ -1,6 +1,6 @@
-"""Run the FastAPI service (settings: inference: section of config.yaml).
+"""Run the FastAPI service (settings: inference: + refine: sections of config.yaml).
 
-  python Inference/main.py            # http://127.0.0.1:8000  (docs at /docs)
+  python Inference/main.py     # http://127.0.0.1:8000  (docs at /docs)
 """
 import sys
 from pathlib import Path

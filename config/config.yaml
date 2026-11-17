@@ -119,14 +119,12 @@ modal:
   python_version: "3.12"
 
 
-# ============================================================ 6. REFINE (separate service in Inference_Refine/; merge into Inference/ after review)
+# ============================================================ 6. REFINE (hand refiner inside the Inference/ service)
 refine:
-  port: 8001                                    # Inference_Refine/main.py (the main service keeps inference.port)
   enabled: true                                 # false = plain YOLO answer (A/B without redeploying)
   groups: [Goal, Substitution]                  # confusable classes: when YOLO says one of these, hand features pick among them
   dataset: Data_Pipeline/output/dataset         # train+val persons the refiner is fit on; must be the dataset of inference.model_path
   refiner_dir: Train/models/refiner             # Train/trainRefiner.py writes <refiner_dir>/<tag>/{refiner.joblib,meta.json}
   refiner_path: Train/models/refiner/v1/refiner.joblib   # the one the service loads: tag of the YOLO weights in inference.model_path
   experiment: referee-refiner                   # MLflow experiment (server: log_model.mlflow.uri)
-  hand_model_path: Inference_Refine/assets/hand_landmarker.task   # MediaPipe HandLandmarker
-  modal_app_name: football-signal-refine
+  hand_model_path: Inference/assets/hand_landmarker.task   # MediaPipe HandLandmarker

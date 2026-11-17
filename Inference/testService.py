@@ -1,4 +1,4 @@
-"""Self-check of the API with the real model: python Inference/testService.py"""
+"""Self-check of the refine API with the real model: python Inference/testService.py"""
 import os
 import sys
 from pathlib import Path
@@ -14,8 +14,8 @@ from utils.loadUtils import ROOT, load_config  # noqa: E402
 
 os.environ.pop(load_config().api_key_env, None)  # first part runs without auth
 cfg = load_config()
-img_path = next((ROOT / "Data_Pipeline/output_classcut/dataset/images/test").glob("*.jpg"), None) or next(
-    (ROOT / "Data_Pipeline/output/dataset/images/test").glob("*.jpg"))
+DS = ROOT / cfg.refine.dataset
+img_path = next((DS / "images/test").glob("*.jpg"))
 img = cv2.imread(str(img_path))
 jpg = cv2.imencode(".jpg", img)[1].tobytes()
 
@@ -37,6 +37,25 @@ with TestClient(create_app(cfg)) as c:
     with c.websocket_connect("/ws/webcam") as ws:
         ws.send_bytes(jpg)
         assert ws.receive_json()["detections"]
+# refine on vs off on test images with exactly one person of a group class: the refined answer must not be worse
+import copy
+import yaml
+names = yaml.safe_load((DS / "data.yaml").read_text(encoding="utf-8"))["names"]
+cases = []
+for lbl in sorted((DS / "labels/test").glob("*.txt")):
+    rows = np.loadtxt(lbl, ndmin=2)
+    if len(rows) == 1 and names[int(rows[0, 0])] in cfg.refine.groups:
+        cases.append((DS / "images/test" / (lbl.stem + ".jpg"), names[int(rows[0, 0])]))
+assert cases, "no single-person Goal/Substitution test images"
+off = copy.deepcopy(cfg)
+off.refine.enabled = False
+hits = {}
+for name, c_ in (("yolo", off), ("refined", cfg)):
+    with TestClient(create_app(c_)) as c:
+        hits[name] = sum(max(c.post("/predict/image", files={"file": ("a.jpg", p_.read_bytes())}).json()["detections"] or [{"label": "", "confidence": 0}], key=lambda d: d["confidence"])["label"] == gt for p_, gt in cases)
+print(f"single-person {cfg.refine.groups} test images: {len(cases)}  correct yolo={hits['yolo']} refined={hits['refined']}")
+assert hits["refined"] >= hits["yolo"], hits
+
 # auth + websocket idle timeout (key set via the environment, like a Modal Secret)
 os.environ[cfg.api_key_env] = "k"
 cfg.ws_idle_seconds = 1

@@ -11,15 +11,16 @@ import yaml
 
 ROOT = Path("/app") if Path("/app/config").exists() else Path(__file__).resolve().parents[1]  # Modal runs this file from /root, our files live in /app
 CFG = yaml.safe_load((ROOT / "config" / "config.yaml").read_text(encoding="utf-8"))
-M, INF = CFG["modal"], CFG["inference"]
+M, INF, REF = CFG["modal"], CFG["inference"], CFG["refine"]
 
 image = (
     modal.Image.debian_slim(python_version=M["python_version"])
     .apt_install("libgl1", "libglib2.0-0")  # opencv
-    .pip_install("torch", "torchvision", "ultralytics", "fastapi", "python-multipart", "pyyaml")
-    .add_local_dir(str(ROOT / "Inference"), "/app/Inference", ignore=["**/__pycache__", "testService.py", "modalApp.py"])
+    .pip_install("torch", "torchvision", "ultralytics", "fastapi", "python-multipart", "pyyaml", "mediapipe", "scikit-learn", "joblib")
+    .add_local_dir(str(ROOT / "Inference"), "/app/Inference", ignore=["**/__pycache__", "testService.py", "testRefine.py", "modalApp.py"])
     .add_local_dir(str(ROOT / "config"), "/app/config")
     .add_local_file(str(ROOT / INF["model_path"]), f"/app/{INF['model_path']}")  # weights baked into the image
+    .add_local_file(str(ROOT / REF["refiner_path"]), f"/app/{REF['refiner_path']}")
 )
 app = modal.App(M["app_name"])
 

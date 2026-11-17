@@ -5,7 +5,7 @@
   python Train/trainRefiner.py --tag v3-cutbyclass --dataset Data_Pipeline/output_classcut/dataset
 
 Writes Train/models/refiner/<tag>/{refiner.joblib,meta.json}. MLflow (server log_model.mlflow.uri, experiment refine.experiment) is
-skipped with a warning when the server is unreachable. Needs mediapipe (pip install -r Inference_Refine/requirements.txt).
+skipped with a warning when the server is unreachable. Needs mediapipe (pip install -r requirements.txt).
 """
 import argparse
 import json
@@ -19,7 +19,7 @@ import pandas as pd
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "Inference_Refine"))
+sys.path.insert(0, str(ROOT / "Inference"))
 from app.handFeatures import Hands  # noqa: E402
 from app.refine import cv_macro_f1, fit_refiner  # noqa: E402
 from utils.loadUtils import load_config, resolve  # noqa: E402

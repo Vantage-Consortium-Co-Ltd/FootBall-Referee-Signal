@@ -1,4 +1,4 @@
-"""Self-check of the refine step (no YOLO needed): python Inference_Refine/testRefine.py"""
+"""Self-check of the refine step (no YOLO needed): python Inference/testRefine.py"""
 import sys
 from pathlib import Path
 
