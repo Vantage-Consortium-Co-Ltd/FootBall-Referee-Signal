@@ -22,3 +22,4 @@ Data_Pipeline/output*/
 *.pdf
 kaggle/
 config_kaggle.yaml
+poc_hand_refiner/

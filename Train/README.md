@@ -20,3 +20,5 @@ python Train/trainOneStage.py --data path/to/data.yaml --device 0
 ```
 `fliplr=0` is forced (flipping is done offline in Data_Pipeline, only for `flip_classes`). Outputs `best.pt` + MLflow run in `mlruns/`.
 Early stopping is on (`patience: 30` in `config.yaml`) and `optimizer` is set explicitly, because under the default `optimizer=auto` Ultralytics ignores `lr0`. Trials are named `trial{k}` with `exist_ok=True`, so pass a new `--project` for every round or you overwrite the previous one.
+
+**Hand refiner** (CPU): `python Train/trainRefiner.py [--tag v3-notflip --dataset Data_Pipeline/output_notflip/dataset]` fits a logistic regression on MediaPipe hand features of the `refine.groups` classes (train+val only), scores it with burst-grouped CV, writes `Train/models/refiner/<tag>/{refiner.joblib,meta.json}` and logs it to MLflow experiment `referee-refiner`. Used by `Inference_Refine/`; fit one per YOLO weights/dataset.
