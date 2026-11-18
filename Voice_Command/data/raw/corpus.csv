@@ -1,0 +1,1001 @@
+﻿id,text,label,label_id,vision_class_id,style,alias,template
+s0000,ผู้รักษาประตูใช้มือรับบอลที่เพื่อนส่งคืนด้วยเท้า กรรมการต้องให้สัญญาณอะไร,Indirect_Free_Kick,0,1,situation,,
+s0001,กรรมการชูแขนตรงขึ้นเหนือหัวค้างไว้คือท่าอะไร ขอฝึกหน่อย,Indirect_Free_Kick,0,1,situation,,
+s0002,ผู้รักษาประตูถือบอลเกินหกวินาทีต้องให้สัญญาณแบบไหน,Indirect_Free_Kick,0,1,situation,,
+s0003,ขอท่าที่ชูมือข้างเดียวขึ้นฟ้าจนกว่าบอลจะโดนผู้เล่นคนที่สอง,Indirect_Free_Kick,0,1,situation,,
+s0004,เล่นในลักษณะอันตรายแต่ไม่ได้ปะทะตัว ต้องให้ลูกโทษแบบไหน,Indirect_Free_Kick,0,1,situation,,
+s0005,ลูกตั้งเตะที่ยิงเข้าประตูตรงๆไม่ได้ต้องทำสัญญาณยังไง,Indirect_Free_Kick,0,1,situation,,
+s0006,ฝึกท่ายกแขนขึ้นตรงๆหลังเป่านกหวีด,Indirect_Free_Kick,0,1,situation,,
+s0007,ถ้าผู้เล่นยืนล้ำหน้าแล้วโดนเป่า ลูกเตะที่ได้ต้องชูแขนแบบไหน,Indirect_Free_Kick,0,1,situation,,
+s0008,ขอวิธีให้สัญญาณอินไดเรกต์ฟรีคิก,Indirect_Free_Kick,0,1,translit,อินไดเรกต์ฟรีคิก,ขอวิธีให้สัญญาณ{x}
+s0009,ถ้าเป็นอินไดเร็กฟรีคิก กรรมการทำท่าไหน,Indirect_Free_Kick,0,1,translit,อินไดเร็กฟรีคิก,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0010,วันนี้ขอซ้อม indirect free kick,Indirect_Free_Kick,0,1,english,indirect free kick,วันนี้ขอซ้อม{x}
+s0011,วันนี้ขอซ้อมฟรีคิกสองจังหวะ,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,วันนี้ขอซ้อม{x}
+s0012,ท่าลูกตั้งเตะแบบอ้อมหน้าตาเป็นยังไง,Indirect_Free_Kick,0,1,colloquial,ลูกตั้งเตะแบบอ้อม,ท่า{x}หน้าตาเป็นยังไง
+s0013,จะให้ฟรีคิกอ้อมต้องทำมือแบบไหน,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกอ้อม,จะให้{x}ต้องทำมือแบบไหน
+s0014,สอนทำสัญญาณการเตะโทษโดยอ้อมหน่อยครับ,Indirect_Free_Kick,0,1,formal,การเตะโทษโดยอ้อม,สอนทำสัญญาณ{x}หน่อยครับ
+s0015,แสดงท่า indirect kick,Indirect_Free_Kick,0,1,english,indirect kick,แสดงท่า{x}
+s0016,ช่วยดูว่าทำท่า IFK ถูกไหม,Indirect_Free_Kick,0,1,english,IFK,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0017,เริ่มฝึกท่าฟรีคิกโดยอ้อม,Indirect_Free_Kick,0,1,formal,ฟรีคิกโดยอ้อม,เริ่มฝึกท่า{x}
+s0018,ช่วยเช็คท่าฟรีคิกแตะสองทีให้หน่อย,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกแตะสองที,ช่วยเช็คท่า{x}ให้หน่อย
+s0019,อินไดเร็คฟรีคิค,Indirect_Free_Kick,0,1,translit,อินไดเร็คฟรีคิค,{x}
+s0020,จะให้เตะโทษทางอ้อมต้องทำมือแบบไหน,Indirect_Free_Kick,0,1,formal,เตะโทษทางอ้อม,จะให้{x}ต้องทำมือแบบไหน
+s0021,ท่าลูกเตะโทษโดยอ้อมทำยังไง,Indirect_Free_Kick,0,1,formal,ลูกเตะโทษโดยอ้อม,ท่า{x}ทำยังไง
+s0022,เปิดโหมดฝึก indirect free kick,Indirect_Free_Kick,0,1,english,indirect free kick,เปิดโหมดฝึก{x}
+s0023,ลองท่าอินไดเร็กฟรีคิกดู,Indirect_Free_Kick,0,1,translit,อินไดเร็กฟรีคิก,ลองท่า{x}ดู
+s0024,แสดงท่าฟรีคิกสองจังหวะ,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,แสดงท่า{x}
+s0025,วันนี้ขอซ้อมลูกตั้งเตะแบบอ้อม,Indirect_Free_Kick,0,1,colloquial,ลูกตั้งเตะแบบอ้อม,วันนี้ขอซ้อม{x}
+s0026,ช่วยเช็คท่า indirect free kick ให้หน่อย,Indirect_Free_Kick,0,1,english,indirect free kick,ช่วยเช็คท่า{x}ให้หน่อย
+s0027,ขอดูท่าฟรีคิกโดยอ้อม,Indirect_Free_Kick,0,1,formal,ฟรีคิกโดยอ้อม,ขอดูท่า{x}
+s0028,ไปที่ท่าอินไดเร็กฟรีคิก,Indirect_Free_Kick,0,1,translit,อินไดเร็กฟรีคิก,ไปที่ท่า{x}
+s0029,สัญญาณ IFK ต้องทำมือยังไง,Indirect_Free_Kick,0,1,english,IFK,สัญญาณ{x}ต้องทำมือยังไง
+s0030,ช่วยเช็คท่าฟรีคิกโดยอ้อมให้หน่อย,Indirect_Free_Kick,0,1,formal,ฟรีคิกโดยอ้อม,ช่วยเช็คท่า{x}ให้หน่อย
+s0031,ไปที่ท่าฟรีคิกสองจังหวะ,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,ไปที่ท่า{x}
+s0032,อยากฝึกท่าฟรีคิกแตะสองที,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกแตะสองที,อยากฝึกท่า{x}
+s0033,ขอฝึกฟรีคิกแตะสองทีอีกรอบ,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกแตะสองที,ขอฝึก{x}อีกรอบ
+s0034,ขอวิธีให้สัญญาณฟรีคิกสองจังหวะ,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,ขอวิธีให้สัญญาณ{x}
+s0035,ขอท่าฟรีคิกโดยอ้อมหน่อย,Indirect_Free_Kick,0,1,formal,ฟรีคิกโดยอ้อม,ขอท่า{x}หน่อย
+s0036,เริ่มฝึกท่า indirect kick,Indirect_Free_Kick,0,1,english,indirect kick,เริ่มฝึกท่า{x}
+s0037,ช่วยดูว่าทำท่าอินไดเร็คฟรีคิคถูกไหม,Indirect_Free_Kick,0,1,translit,อินไดเร็คฟรีคิค,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0038,ท่าฟรีคิกสองจังหวะทำยังไง,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,ท่า{x}ทำยังไง
+s0039,ขอท่าอินไดเรกต์ฟรีคิก,Indirect_Free_Kick,0,1,translit,อินไดเรกต์ฟรีคิก,ขอท่า{x}
+s0040,ขอวิธีให้สัญญาณการเตะโทษโดยอ้อม,Indirect_Free_Kick,0,1,formal,การเตะโทษโดยอ้อม,ขอวิธีให้สัญญาณ{x}
+s0041,ลองท่าฟรีคิกโดยอ้อมดู,Indirect_Free_Kick,0,1,formal,ฟรีคิกโดยอ้อม,ลองท่า{x}ดู
+s0042,สอนท่าอินไดเรกต์ฟรีคิก,Indirect_Free_Kick,0,1,translit,อินไดเรกต์ฟรีคิก,สอนท่า{x}
+s0043,ขอฝึกการเตะโทษโดยอ้อมอีกรอบ,Indirect_Free_Kick,0,1,formal,การเตะโทษโดยอ้อม,ขอฝึก{x}อีกรอบ
+s0044,แสดงท่าอินไดเร็คฟรีคิค,Indirect_Free_Kick,0,1,translit,อินไดเร็คฟรีคิค,แสดงท่า{x}
+s0045,ช่วยดูว่าทำท่าอินไดเรกต์ฟรีคิกถูกไหม,Indirect_Free_Kick,0,1,translit,อินไดเรกต์ฟรีคิก,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0046,เช็คฟรีคิกสองจังหวะหน่อย,Indirect_Free_Kick,0,1,colloquial,ฟรีคิกสองจังหวะ,เช็ค{x}หน่อย
+s0047,เปิดโหมดฝึกอินไดเร็คฟรีคิค,Indirect_Free_Kick,0,1,translit,อินไดเร็คฟรีคิค,เปิดโหมดฝึก{x}
+s0048,ขอท่าอินไดเรกต์ฟรีคิกหน่อย,Indirect_Free_Kick,0,1,translit,อินไดเรกต์ฟรีคิก,ขอท่า{x}หน่อย
+s0049,ฝึกลูกตั้งเตะแบบอ้อม,Indirect_Free_Kick,0,1,colloquial,ลูกตั้งเตะแบบอ้อม,ฝึก{x}
+s0050,ผู้เล่นโดนเสียบสกัดนอกกรอบเขตโทษ กรรมการต้องชี้ทิศทางยังไง,Direct_Free_Kick,1,2,situation,,
+s0051,ขอท่าชี้แขนไปด้านข้างในแนวนอนบอกทีมที่ได้ลูกตั้งเตะ,Direct_Free_Kick,1,2,situation,,
+s0052,ทำฟาวล์นอกเขตโทษแล้วยิงเข้าประตูได้เลย ต้องให้สัญญาณแบบไหน,Direct_Free_Kick,1,2,situation,,
+s0053,กางแขนข้างเดียวชี้ไปทางประตูฝั่งที่ได้เตะคือท่าอะไร,Direct_Free_Kick,1,2,situation,,
+s0054,ฝึกท่าเป่านกหวีดแล้วเหยียดแขนชี้ไปทางทีมที่ได้ฟรีคิก,Direct_Free_Kick,1,2,situation,,
+s0055,ฟาวล์กลางสนามให้ทีมเตะยิงตรงได้ทำมือยังไง,Direct_Free_Kick,1,2,situation,,
+s0056,อยากซ้อมท่าชี้ทิศทางลูกเตะโทษที่ยิงเข้าประตูได้ทันที,Direct_Free_Kick,1,2,situation,,
+s0057,ถ้ามีการฟาวล์ร้ายแรงนอกกรอบ สัญญาณที่ให้ลูกตั้งเตะยิงตรงคืออะไร,Direct_Free_Kick,1,2,situation,,
+s0058,อยากฝึกท่าไดเรกต์ฟรีคิก,Direct_Free_Kick,1,2,translit,ไดเรกต์ฟรีคิก,อยากฝึกท่า{x}
+s0059,ช่วยเช็คท่า direct free kick ให้หน่อย,Direct_Free_Kick,1,2,english,direct free kick,ช่วยเช็คท่า{x}ให้หน่อย
+s0060,วันนี้ขอซ้อม DFK,Direct_Free_Kick,1,2,english,DFK,วันนี้ขอซ้อม{x}
+s0061,ฝึกลูกฟรีคิก,Direct_Free_Kick,1,2,colloquial,ลูกฟรีคิก,ฝึก{x}
+s0062,สอนท่าการเตะโทษโดยตรง,Direct_Free_Kick,1,2,formal,การเตะโทษโดยตรง,สอนท่า{x}
+s0063,ขอวิธีให้สัญญาณลูกเตะโทษโดยตรง,Direct_Free_Kick,1,2,formal,ลูกเตะโทษโดยตรง,ขอวิธีให้สัญญาณ{x}
+s0064,สอนท่าฟรีคิกตรง,Direct_Free_Kick,1,2,colloquial,ฟรีคิกตรง,สอนท่า{x}
+s0065,แสดงท่าไดเร็กฟรีคิก,Direct_Free_Kick,1,2,translit,ไดเร็กฟรีคิก,แสดงท่า{x}
+s0066,ช่วยเช็คท่าฟรีคิกยิงตรงให้หน่อย,Direct_Free_Kick,1,2,colloquial,ฟรีคิกยิงตรง,ช่วยเช็คท่า{x}ให้หน่อย
+s0067,ทดสอบท่า free kick,Direct_Free_Kick,1,2,english,free kick,ทดสอบท่า{x}
+s0068,ฝึกเตะโทษทางตรง,Direct_Free_Kick,1,2,formal,เตะโทษทางตรง,ฝึก{x}
+s0069,practice ไดเร็คฟรีคิค,Direct_Free_Kick,1,2,translit,ไดเร็คฟรีคิค,practice {x}
+s0070,ขอวิธีให้สัญญาณฟรีคิกโดยตรง,Direct_Free_Kick,1,2,formal,ฟรีคิกโดยตรง,ขอวิธีให้สัญญาณ{x}
+s0071,ถ้าเป็นลูกตั้งเตะ กรรมการทำท่าไหน,Direct_Free_Kick,1,2,colloquial,ลูกตั้งเตะ,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0072,เริ่มฝึกท่าไดเรกต์ฟรีคิก,Direct_Free_Kick,1,2,translit,ไดเรกต์ฟรีคิก,เริ่มฝึกท่า{x}
+s0073,ขอท่าไดเรกต์ฟรีคิกหน่อย,Direct_Free_Kick,1,2,translit,ไดเรกต์ฟรีคิก,ขอท่า{x}หน่อย
+s0074,เลือกท่า direct free kick,Direct_Free_Kick,1,2,english,direct free kick,เลือกท่า{x}
+s0075,ถ้าเป็นไดเรกต์ฟรีคิก กรรมการทำท่าไหน,Direct_Free_Kick,1,2,translit,ไดเรกต์ฟรีคิก,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0076,วันนี้ขอซ้อมไดเร็กฟรีคิก,Direct_Free_Kick,1,2,translit,ไดเร็กฟรีคิก,วันนี้ขอซ้อม{x}
+s0077,แสดงท่าการเตะโทษโดยตรง,Direct_Free_Kick,1,2,formal,การเตะโทษโดยตรง,แสดงท่า{x}
+s0078,practice free kick,Direct_Free_Kick,1,2,english,free kick,practice {x}
+s0079,practice direct free kick,Direct_Free_Kick,1,2,english,direct free kick,practice {x}
+s0080,อยากซ้อมให้สัญญาณลูกเตะโทษโดยตรง,Direct_Free_Kick,1,2,formal,ลูกเตะโทษโดยตรง,อยากซ้อมให้สัญญาณ{x}
+s0081,ช่วยเช็คท่าไดเร็กฟรีคิกให้หน่อย,Direct_Free_Kick,1,2,translit,ไดเร็กฟรีคิก,ช่วยเช็คท่า{x}ให้หน่อย
+s0082,แสดงท่าฟรีคิกโดยตรง,Direct_Free_Kick,1,2,formal,ฟรีคิกโดยตรง,แสดงท่า{x}
+s0083,อยากซ้อมให้สัญญาณไดเร็คฟรีคิค,Direct_Free_Kick,1,2,translit,ไดเร็คฟรีคิค,อยากซ้อมให้สัญญาณ{x}
+s0084,ถ้าเป็น free kick กรรมการทำท่าไหน,Direct_Free_Kick,1,2,english,free kick,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0085,ขอวิธีให้สัญญาณไดเรกต์ฟรีคิก,Direct_Free_Kick,1,2,translit,ไดเรกต์ฟรีคิก,ขอวิธีให้สัญญาณ{x}
+s0086,ขอฝึกท่าเตะโทษทางตรงค่ะ,Direct_Free_Kick,1,2,formal,เตะโทษทางตรง,ขอฝึกท่า{x}ค่ะ
+s0087,ขอฝึกฟรีคิกตรงอีกรอบ,Direct_Free_Kick,1,2,colloquial,ฟรีคิกตรง,ขอฝึก{x}อีกรอบ
+s0088,เลือกท่าฟรีคิกยิงตรง,Direct_Free_Kick,1,2,colloquial,ฟรีคิกยิงตรง,เลือกท่า{x}
+s0089,ขอฝึก direct free kick อีกรอบ,Direct_Free_Kick,1,2,english,direct free kick,ขอฝึก{x}อีกรอบ
+s0090,สอนท่าเตะโทษทางตรง,Direct_Free_Kick,1,2,formal,เตะโทษทางตรง,สอนท่า{x}
+s0091,อยากฝึกท่าลูกเตะโทษโดยตรง,Direct_Free_Kick,1,2,formal,ลูกเตะโทษโดยตรง,อยากฝึกท่า{x}
+s0092,show me เตะโทษทางตรง,Direct_Free_Kick,1,2,formal,เตะโทษทางตรง,show me {x}
+s0093,ลูกฟรีคิก,Direct_Free_Kick,1,2,colloquial,ลูกฟรีคิก,{x}
+s0094,ขอท่าลูกเตะโทษโดยตรงหน่อย,Direct_Free_Kick,1,2,formal,ลูกเตะโทษโดยตรง,ขอท่า{x}หน่อย
+s0095,ลองท่า direct free kick ดู,Direct_Free_Kick,1,2,english,direct free kick,ลองท่า{x}ดู
+s0096,ขอท่า DFK หน่อย,Direct_Free_Kick,1,2,english,DFK,ขอท่า{x}หน่อย
+s0097,อยากฝึกท่า DFK,Direct_Free_Kick,1,2,english,DFK,อยากฝึกท่า{x}
+s0098,ขอฝึกท่าฟรีคิกโดยตรงค่ะ,Direct_Free_Kick,1,2,formal,ฟรีคิกโดยตรง,ขอฝึกท่า{x}ค่ะ
+s0099,ไปที่ท่า free kick,Direct_Free_Kick,1,2,english,free kick,ไปที่ท่า{x}
+s0100,นักเตะถ่วงเวลาบ่อยๆ กรรมการจะลงโทษตักเตือนยังไง,Yellow_Card,2,3,situation,,
+s0101,ผู้เล่นถอดเสื้อฉลองประตู ต้องโดนลงโทษแบบไหน ขอฝึกท่านั้น,Yellow_Card,2,3,situation,,
+s0102,อยากฝึกชูใบสีเหลืองขึ้นเหนือหัว,Yellow_Card,2,3,situation,,
+s0103,ผู้เล่นเถียงคำตัดสินไม่หยุด ต้องคาดโทษยังไง,Yellow_Card,2,3,situation,,
+s0104,ผู้เล่นพุ่งล้มหลอกกรรมการ ควรได้ใบอะไร ขอดูท่าหน่อย,Yellow_Card,2,3,situation,,
+s0105,ขอท่าชูใบเตือนครั้งแรกให้นักเตะ,Yellow_Card,2,3,situation,,
+s0106,ผู้เล่นออกจากสนามโดยไม่ขออนุญาตกรรมการต้องโดนเตือนยังไง,Yellow_Card,2,3,situation,,
+s0107,ชูการ์ดสีเหลืองยังไงให้ถูกต้อง,Yellow_Card,2,3,situation,,
+s0108,ท่าใบเหลืองเตือนหน้าตาเป็นยังไง,Yellow_Card,2,3,colloquial,ใบเหลืองเตือน,ท่า{x}หน้าตาเป็นยังไง
+s0109,เยลโล่การ์ด,Yellow_Card,2,3,translit,เยลโล่การ์ด,{x}
+s0110,ถ้าเป็นการ์ดเหลือง กรรมการทำท่าไหน,Yellow_Card,2,3,translit,การ์ดเหลือง,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0111,ขอวิธีให้สัญญาณใบเหลือง,Yellow_Card,2,3,formal,ใบเหลือง,ขอวิธีให้สัญญาณ{x}
+s0112,ถ้าเป็น yellow card กรรมการทำท่าไหน,Yellow_Card,2,3,english,yellow card,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0113,เช็คโดนเหลืองหน่อย,Yellow_Card,2,3,colloquial,โดนเหลือง,เช็ค{x}หน่อย
+s0114,เช็ค caution หน่อย,Yellow_Card,2,3,english,caution,เช็ค{x}หน่อย
+s0115,practice การคาดโทษ,Yellow_Card,2,3,formal,การคาดโทษ,practice {x}
+s0116,ท่าใบตักเตือนทำยังไง,Yellow_Card,2,3,formal,ใบตักเตือน,ท่า{x}ทำยังไง
+s0117,ขอฝึกท่าชักใบเหลืองค่ะ,Yellow_Card,2,3,colloquial,ชักใบเหลือง,ขอฝึกท่า{x}ค่ะ
+s0118,วันนี้ขอซ้อมเยลโลว์การ์ด,Yellow_Card,2,3,translit,เยลโลว์การ์ด,วันนี้ขอซ้อม{x}
+s0119,วันนี้ขอซ้อม booking,Yellow_Card,2,3,english,booking,วันนี้ขอซ้อม{x}
+s0120,วันนี้ขอซ้อมการตักเตือน,Yellow_Card,2,3,formal,การตักเตือน,วันนี้ขอซ้อม{x}
+s0121,ท่าแจกใบเหลืองทำยังไง,Yellow_Card,2,3,colloquial,แจกใบเหลือง,ท่า{x}ทำยังไง
+s0122,สัญญาณโดนเหลืองต้องทำมือยังไง,Yellow_Card,2,3,colloquial,โดนเหลือง,สัญญาณ{x}ต้องทำมือยังไง
+s0123,ขอฝึกท่าเยลโล่การ์ดค่ะ,Yellow_Card,2,3,translit,เยลโล่การ์ด,ขอฝึกท่า{x}ค่ะ
+s0124,สอนท่า caution,Yellow_Card,2,3,english,caution,สอนท่า{x}
+s0125,ขอท่า yellow card หน่อย,Yellow_Card,2,3,english,yellow card,ขอท่า{x}หน่อย
+s0126,เช็คการคาดโทษหน่อย,Yellow_Card,2,3,formal,การคาดโทษ,เช็ค{x}หน่อย
+s0127,ช่วยเช็คท่าการ์ดเหลืองให้หน่อย,Yellow_Card,2,3,translit,การ์ดเหลือง,ช่วยเช็คท่า{x}ให้หน่อย
+s0128,ทดสอบท่าใบตักเตือน,Yellow_Card,2,3,formal,ใบตักเตือน,ทดสอบท่า{x}
+s0129,ลองท่าโดนเหลืองดู,Yellow_Card,2,3,colloquial,โดนเหลือง,ลองท่า{x}ดู
+s0130,ตรวจท่าใบเหลืองให้หน่อย,Yellow_Card,2,3,formal,ใบเหลือง,ตรวจท่า{x}ให้หน่อย
+s0131,ฝึก caution,Yellow_Card,2,3,english,caution,ฝึก{x}
+s0132,จะให้การ์ดเหลืองต้องทำมือแบบไหน,Yellow_Card,2,3,translit,การ์ดเหลือง,จะให้{x}ต้องทำมือแบบไหน
+s0133,อยากฝึกท่าใบเหลืองเตือน,Yellow_Card,2,3,colloquial,ใบเหลืองเตือน,อยากฝึกท่า{x}
+s0134,ช่วยดูว่าทำท่า caution ถูกไหม,Yellow_Card,2,3,english,caution,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0135,ช่วยเช็คท่าใบเหลืองให้หน่อย,Yellow_Card,2,3,formal,ใบเหลือง,ช่วยเช็คท่า{x}ให้หน่อย
+s0136,ฝึกโดนเหลือง,Yellow_Card,2,3,colloquial,โดนเหลือง,ฝึก{x}
+s0137,ขอท่า booking หน่อย,Yellow_Card,2,3,english,booking,ขอท่า{x}หน่อย
+s0138,แสดงท่าใบตักเตือน,Yellow_Card,2,3,formal,ใบตักเตือน,แสดงท่า{x}
+s0139,ช่วยเช็คท่าการคาดโทษให้หน่อย,Yellow_Card,2,3,formal,การคาดโทษ,ช่วยเช็คท่า{x}ให้หน่อย
+s0140,ตรวจท่า caution ให้หน่อย,Yellow_Card,2,3,english,caution,ตรวจท่า{x}ให้หน่อย
+s0141,สอนท่าใบเหลือง,Yellow_Card,2,3,formal,ใบเหลือง,สอนท่า{x}
+s0142,ท่า booking ทำยังไง,Yellow_Card,2,3,english,booking,ท่า{x}ทำยังไง
+s0143,สอนท่าโดนเหลือง,Yellow_Card,2,3,colloquial,โดนเหลือง,สอนท่า{x}
+s0144,ไปที่ท่าเยลโล่การ์ด,Yellow_Card,2,3,translit,เยลโล่การ์ด,ไปที่ท่า{x}
+s0145,ขอฝึกใบเหลืองอีกรอบ,Yellow_Card,2,3,formal,ใบเหลือง,ขอฝึก{x}อีกรอบ
+s0146,สัญญาณ caution ต้องทำมือยังไง,Yellow_Card,2,3,english,caution,สัญญาณ{x}ต้องทำมือยังไง
+s0147,ลองท่าใบเหลืองเตือนดู,Yellow_Card,2,3,colloquial,ใบเหลืองเตือน,ลองท่า{x}ดู
+s0148,แสดงท่าการคาดโทษ,Yellow_Card,2,3,formal,การคาดโทษ,แสดงท่า{x}
+s0149,ถ้าเป็น booking กรรมการทำท่าไหน,Yellow_Card,2,3,english,booking,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0150,ผู้เล่นเสียบสกัดรุนแรงเกินกว่าเหตุ กรรมการต้องไล่ออกยังไง,Red_Card,3,3,situation,,
+s0151,นักเตะถ่มน้ำลายใส่คู่แข่ง ต้องลงโทษท่าไหน,Red_Card,3,3,situation,,
+s0152,ผู้เล่นได้ใบเตือนครบสองใบแล้วต้องทำยังไงต่อ,Red_Card,3,3,situation,,
+s0153,ทำฟาวล์ทำลายโอกาสยิงประตูที่ชัดเจน ต้องให้ออกจากสนาม,Red_Card,3,3,situation,,
+s0154,ขอฝึกชูใบสีแดงขึ้นเหนือศีรษะ,Red_Card,3,3,situation,,
+s0155,ผู้เล่นต่อยคู่แข่งกลางสนาม กรรมการต้องชูใบอะไร,Red_Card,3,3,situation,,
+s0156,ใช้วาจาหยาบคายด่ากรรมการ ต้องไล่ออกด้วยท่าไหน,Red_Card,3,3,situation,,
+s0157,อยากรู้ท่าไล่นักเตะออกจากการแข่งขัน,Red_Card,3,3,situation,,
+s0158,ขอท่าโดนแดง,Red_Card,3,3,colloquial,โดนแดง,ขอท่า{x}
+s0159,ใบแดงตรงๆ,Red_Card,3,3,colloquial,ใบแดงตรงๆ,{x}
+s0160,practice sending off,Red_Card,3,3,english,sending off,practice {x}
+s0161,สอนทำสัญญาณเรดการ์ดหน่อยครับ,Red_Card,3,3,translit,เรดการ์ด,สอนทำสัญญาณ{x}หน่อยครับ
+s0162,show me การไล่ออกจากสนาม,Red_Card,3,3,formal,การไล่ออกจากสนาม,show me {x}
+s0163,เช็คใบแดงหน่อย,Red_Card,3,3,formal,ใบแดง,เช็ค{x}หน่อย
+s0164,ขอดูท่าการไล่ออก,Red_Card,3,3,formal,การไล่ออก,ขอดูท่า{x}
+s0165,ลองท่าแดงตรงดู,Red_Card,3,3,colloquial,แดงตรง,ลองท่า{x}ดู
+s0166,ถ้าเป็นเร็ดการ์ด กรรมการทำท่าไหน,Red_Card,3,3,translit,เร็ดการ์ด,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0167,ทดสอบท่าไล่ออกจากเกม,Red_Card,3,3,colloquial,ไล่ออกจากเกม,ทดสอบท่า{x}
+s0168,จะให้ red card ต้องทำมือแบบไหน,Red_Card,3,3,english,red card,จะให้{x}ต้องทำมือแบบไหน
+s0169,ฝึก sent off,Red_Card,3,3,english,sent off,ฝึก{x}
+s0170,ลองท่าใบแดงไล่ออกดู,Red_Card,3,3,formal,ใบแดงไล่ออก,ลองท่า{x}ดู
+s0171,ขอฝึกท่าการ์ดแดงค่ะ,Red_Card,3,3,translit,การ์ดแดง,ขอฝึกท่า{x}ค่ะ
+s0172,จะให้ sending off ต้องทำมือแบบไหน,Red_Card,3,3,english,sending off,จะให้{x}ต้องทำมือแบบไหน
+s0173,เริ่มฝึกท่าเรดการ์ด,Red_Card,3,3,translit,เรดการ์ด,เริ่มฝึกท่า{x}
+s0174,ท่า sending off หน้าตาเป็นยังไง,Red_Card,3,3,english,sending off,ท่า{x}หน้าตาเป็นยังไง
+s0175,ตรวจท่าโดนแดงให้หน่อย,Red_Card,3,3,colloquial,โดนแดง,ตรวจท่า{x}ให้หน่อย
+s0176,show me ใบแดง,Red_Card,3,3,formal,ใบแดง,show me {x}
+s0177,ตรวจท่าใบแดงตรงๆให้หน่อย,Red_Card,3,3,colloquial,ใบแดงตรงๆ,ตรวจท่า{x}ให้หน่อย
+s0178,ฝึกโดนแดง,Red_Card,3,3,colloquial,โดนแดง,ฝึก{x}
+s0179,ขอวิธีให้สัญญาณใบแดงตรงๆ,Red_Card,3,3,colloquial,ใบแดงตรงๆ,ขอวิธีให้สัญญาณ{x}
+s0180,เริ่มฝึกท่าเร็ดการ์ด,Red_Card,3,3,translit,เร็ดการ์ด,เริ่มฝึกท่า{x}
+s0181,แสดงท่า sent off,Red_Card,3,3,english,sent off,แสดงท่า{x}
+s0182,ขอฝึกท่า red card ค่ะ,Red_Card,3,3,english,red card,ขอฝึกท่า{x}ค่ะ
+s0183,ไปที่ท่าแดงตรง,Red_Card,3,3,colloquial,แดงตรง,ไปที่ท่า{x}
+s0184,ขอฝึกท่าใบแดงค่ะ,Red_Card,3,3,formal,ใบแดง,ขอฝึกท่า{x}ค่ะ
+s0185,ขอดูท่า sent off,Red_Card,3,3,english,sent off,ขอดูท่า{x}
+s0186,สอนทำสัญญาณ red card หน่อยครับ,Red_Card,3,3,english,red card,สอนทำสัญญาณ{x}หน่อยครับ
+s0187,ไปที่ท่าไล่ออกจากเกม,Red_Card,3,3,colloquial,ไล่ออกจากเกม,ไปที่ท่า{x}
+s0188,เช็คการไล่ออกจากสนามหน่อย,Red_Card,3,3,formal,การไล่ออกจากสนาม,เช็ค{x}หน่อย
+s0189,show me red card,Red_Card,3,3,english,red card,show me {x}
+s0190,การไล่ออกจากสนาม,Red_Card,3,3,formal,การไล่ออกจากสนาม,{x}
+s0191,ทดสอบท่าการไล่ออกจากสนาม,Red_Card,3,3,formal,การไล่ออกจากสนาม,ทดสอบท่า{x}
+s0192,วันนี้ขอซ้อมการไล่ออก,Red_Card,3,3,formal,การไล่ออก,วันนี้ขอซ้อม{x}
+s0193,เช็คโดนแดงหน่อย,Red_Card,3,3,colloquial,โดนแดง,เช็ค{x}หน่อย
+s0194,ช่วยเช็คท่าไล่ออกจากเกมให้หน่อย,Red_Card,3,3,colloquial,ไล่ออกจากเกม,ช่วยเช็คท่า{x}ให้หน่อย
+s0195,สัญญาณการไล่ออกต้องทำมือยังไง,Red_Card,3,3,formal,การไล่ออก,สัญญาณ{x}ต้องทำมือยังไง
+s0196,จะให้แดงตรงต้องทำมือแบบไหน,Red_Card,3,3,colloquial,แดงตรง,จะให้{x}ต้องทำมือแบบไหน
+s0197,ถ้าเป็นแดงตรง กรรมการทำท่าไหน,Red_Card,3,3,colloquial,แดงตรง,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0198,ถ้าเป็นใบแดงไล่ออก กรรมการทำท่าไหน,Red_Card,3,3,formal,ใบแดงไล่ออก,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0199,ขอท่าโดนแดงหน่อย,Red_Card,3,3,colloquial,โดนแดง,ขอท่า{x}หน่อย
+s0200,โดนฟาวล์แต่ทีมยังครองบอลได้เปรียบอยู่ กรรมการไม่เป่า ต้องทำท่าไหน,Play_On,4,4,situation,,
+s0201,ขอท่าเหยียดแขนสองข้างไปข้างหน้าเหมือนโบกให้เกมไปต่อ,Play_On,4,4,situation,,
+s0202,ไม่เป่านกหวีดแต่ให้เกมดำเนินต่อต้องทำสัญญาณยังไง,Play_On,4,4,situation,,
+s0203,อยากฝึกท่ากวาดแขนทั้งสองไปทางทีมที่บุกอยู่,Play_On,4,4,situation,,
+s0204,มีฟาวล์เกิดขึ้นแต่การหยุดเกมจะเสียเปรียบ ต้องให้สัญญาณอะไร,Play_On,4,4,situation,,
+s0205,ฝึกท่าปล่อยให้เกมไหลต่อโดยไม่หยุด,Play_On,4,4,situation,,
+s0206,ถ้าทีมที่โดนฟาวล์กำลังจะได้โอกาสยิง กรรมการควรทำท่าไหน,Play_On,4,4,situation,,
+s0207,ท่าแกว่งแขนสองข้างไปด้านหน้าคือท่าอะไร ขอซ้อมหน่อย,Play_On,4,4,situation,,
+s0208,ท่าเพลย์ออนทำยังไง,Play_On,4,4,translit,เพลย์ออน,ท่า{x}ทำยังไง
+s0209,ขอวิธีให้สัญญาณแอดวานเทจเพลย์ออน,Play_On,4,4,translit,แอดวานเทจเพลย์ออน,ขอวิธีให้สัญญาณ{x}
+s0210,ทดสอบท่า advantage,Play_On,4,4,english,advantage,ทดสอบท่า{x}
+s0211,แสดงท่า advantage play on,Play_On,4,4,english,advantage play on,แสดงท่า{x}
+s0212,ลองท่าเล่นต่อไปเลยดู,Play_On,4,4,colloquial,เล่นต่อไปเลย,ลองท่า{x}ดู
+s0213,อยากฝึกท่าปล่อยเล่นต่อ,Play_On,4,4,colloquial,ปล่อยเล่นต่อ,อยากฝึกท่า{x}
+s0214,show me ความได้เปรียบ,Play_On,4,4,formal,ความได้เปรียบ,show me {x}
+s0215,ขอฝึกหลักความได้เปรียบอีกรอบ,Play_On,4,4,formal,หลักความได้เปรียบ,ขอฝึก{x}อีกรอบ
+s0216,practice การให้ความได้เปรียบ,Play_On,4,4,formal,การให้ความได้เปรียบ,practice {x}
+s0217,เปิดโหมดฝึกแอดวานเทจ,Play_On,4,4,translit,แอดวานเทจ,เปิดโหมดฝึก{x}
+s0218,จะให้ให้เล่นต่อต้องทำมือแบบไหน,Play_On,4,4,formal,ให้เล่นต่อ,จะให้{x}ต้องทำมือแบบไหน
+s0219,วันนี้ขอซ้อมไม่เป่าปล่อยไหล,Play_On,4,4,colloquial,ไม่เป่าปล่อยไหล,วันนี้ขอซ้อม{x}
+s0220,เริ่มฝึกท่าได้เปรียบ,Play_On,4,4,colloquial,ได้เปรียบ,เริ่มฝึกท่า{x}
+s0221,ตรวจท่า play on ให้หน่อย,Play_On,4,4,english,play on,ตรวจท่า{x}ให้หน่อย
+s0222,ขอท่า advantage หน่อย,Play_On,4,4,english,advantage,ขอท่า{x}หน่อย
+s0223,จะให้เพลย์ออนต้องทำมือแบบไหน,Play_On,4,4,translit,เพลย์ออน,จะให้{x}ต้องทำมือแบบไหน
+s0224,show me ปล่อยเล่นต่อ,Play_On,4,4,colloquial,ปล่อยเล่นต่อ,show me {x}
+s0225,ขอท่าเพลย์ออน,Play_On,4,4,translit,เพลย์ออน,ขอท่า{x}
+s0226,ตรวจท่าการให้ความได้เปรียบให้หน่อย,Play_On,4,4,formal,การให้ความได้เปรียบ,ตรวจท่า{x}ให้หน่อย
+s0227,จะให้แอดวานเทจเพลย์ออนต้องทำมือแบบไหน,Play_On,4,4,translit,แอดวานเทจเพลย์ออน,จะให้{x}ต้องทำมือแบบไหน
+s0228,ขอท่าหลักความได้เปรียบ,Play_On,4,4,formal,หลักความได้เปรียบ,ขอท่า{x}
+s0229,สอนทำสัญญาณการให้ความได้เปรียบหน่อยครับ,Play_On,4,4,formal,การให้ความได้เปรียบ,สอนทำสัญญาณ{x}หน่อยครับ
+s0230,ขอท่า advantage,Play_On,4,4,english,advantage,ขอท่า{x}
+s0231,ไปที่ท่าความได้เปรียบ,Play_On,4,4,formal,ความได้เปรียบ,ไปที่ท่า{x}
+s0232,เช็คไม่เป่าปล่อยไหลหน่อย,Play_On,4,4,colloquial,ไม่เป่าปล่อยไหล,เช็ค{x}หน่อย
+s0233,ช่วยดูว่าทำท่าการให้ความได้เปรียบถูกไหม,Play_On,4,4,formal,การให้ความได้เปรียบ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0234,ช่วยดูว่าทำท่าได้เปรียบถูกไหม,Play_On,4,4,colloquial,ได้เปรียบ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0235,ขอฝึกท่า advantage play on ค่ะ,Play_On,4,4,english,advantage play on,ขอฝึกท่า{x}ค่ะ
+s0236,เปิดโหมดฝึกไม่เป่าปล่อยไหล,Play_On,4,4,colloquial,ไม่เป่าปล่อยไหล,เปิดโหมดฝึก{x}
+s0237,ขอฝึกแอดวานเทจเพลย์ออนอีกรอบ,Play_On,4,4,translit,แอดวานเทจเพลย์ออน,ขอฝึก{x}อีกรอบ
+s0238,ลองท่า advantage ดู,Play_On,4,4,english,advantage,ลองท่า{x}ดู
+s0239,แสดงท่าปล่อยเล่นต่อ,Play_On,4,4,colloquial,ปล่อยเล่นต่อ,แสดงท่า{x}
+s0240,ขอดูท่าแอดวานเทจเพลย์ออน,Play_On,4,4,translit,แอดวานเทจเพลย์ออน,ขอดูท่า{x}
+s0241,ลองท่า advantage play on ดู,Play_On,4,4,english,advantage play on,ลองท่า{x}ดู
+s0242,วันนี้ขอซ้อม advantage,Play_On,4,4,english,advantage,วันนี้ขอซ้อม{x}
+s0243,ช่วยดูว่าทำท่าปล่อยเล่นต่อถูกไหม,Play_On,4,4,colloquial,ปล่อยเล่นต่อ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0244,advantage,Play_On,4,4,english,advantage,{x}
+s0245,แสดงท่าแอดวานเทจ,Play_On,4,4,translit,แอดวานเทจ,แสดงท่า{x}
+s0246,เลือกท่าหลักความได้เปรียบ,Play_On,4,4,formal,หลักความได้เปรียบ,เลือกท่า{x}
+s0247,ขอท่า advantage play on หน่อย,Play_On,4,4,english,advantage play on,ขอท่า{x}หน่อย
+s0248,practice ไม่เป่าปล่อยไหล,Play_On,4,4,colloquial,ไม่เป่าปล่อยไหล,practice {x}
+s0249,ทดสอบท่าเล่นต่อไปเลย,Play_On,4,4,colloquial,เล่นต่อไปเลย,ทดสอบท่า{x}
+s0250,กองหลังทำฟาวล์ในกรอบเขตโทษ กรรมการต้องชี้ไปที่ไหน,Penalty_Kick,5,5,situation,,
+s0251,ขอท่าชี้มือลงไปที่จุดสิบสองหลา,Penalty_Kick,5,5,situation,,
+s0252,ผู้เล่นโดนดึงเสื้อในกรอบใหญ่ต้องให้สัญญาณอะไร,Penalty_Kick,5,5,situation,,
+s0253,อยากฝึกท่าวิ่งไปชี้ที่จุดหน้าประตู,Penalty_Kick,5,5,situation,,
+s0254,ฟาวล์เกิดในเขตโทษของทีมรับต้องทำมือยังไง,Penalty_Kick,5,5,situation,,
+s0255,ฝึกท่าชี้แขนเฉียงลงไปทางจุดเตะหน้าประตู,Penalty_Kick,5,5,situation,,
+s0256,กองหน้าโดนตัดขาในกรอบ ต้องเป่าและชี้ยังไง,Penalty_Kick,5,5,situation,,
+s0257,ท่าที่กรรมการชี้ลงพื้นตรงกรอบเขตโทษเรียกว่าอะไร,Penalty_Kick,5,5,situation,,
+s0258,ขอดูท่าการเตะจุดโทษ,Penalty_Kick,5,5,formal,การเตะจุดโทษ,ขอดูท่า{x}
+s0259,ขอฝึกชี้จุดโทษอีกรอบ,Penalty_Kick,5,5,colloquial,ชี้จุดโทษ,ขอฝึก{x}อีกรอบ
+s0260,ไปที่ท่าเพนัลตี้,Penalty_Kick,5,5,translit,เพนัลตี้,ไปที่ท่า{x}
+s0261,ขอดูท่าเตะจุดโทษ,Penalty_Kick,5,5,colloquial,เตะจุดโทษ,ขอดูท่า{x}
+s0262,ตรวจท่า penalty kick ให้หน่อย,Penalty_Kick,5,5,english,penalty kick,ตรวจท่า{x}ให้หน่อย
+s0263,ขอท่าลูกเตะจุดโทษ,Penalty_Kick,5,5,formal,ลูกเตะจุดโทษ,ขอท่า{x}
+s0264,ท่าชี้จุดหน้าตาเป็นยังไง,Penalty_Kick,5,5,colloquial,ชี้จุด,ท่า{x}หน้าตาเป็นยังไง
+s0265,เลือกท่า PK,Penalty_Kick,5,5,english,PK,เลือกท่า{x}
+s0266,ไปที่ท่า penalty,Penalty_Kick,5,5,english,penalty,ไปที่ท่า{x}
+s0267,ขอฝึกท่าลูกโทษค่ะ,Penalty_Kick,5,5,formal,ลูกโทษ,ขอฝึกท่า{x}ค่ะ
+s0268,ขอดูท่าเพนนัลตี้,Penalty_Kick,5,5,translit,เพนนัลตี้,ขอดูท่า{x}
+s0269,show me จุดโทษ,Penalty_Kick,5,5,formal,จุดโทษ,show me {x}
+s0270,อยากฝึกท่าลูกโทษสิบสองหลา,Penalty_Kick,5,5,colloquial,ลูกโทษสิบสองหลา,อยากฝึกท่า{x}
+s0271,เช็คเพนัลตี้คิกหน่อย,Penalty_Kick,5,5,translit,เพนัลตี้คิก,เช็ค{x}หน่อย
+s0272,ช่วยเช็คท่าเพนัลตี้ให้หน่อย,Penalty_Kick,5,5,translit,เพนัลตี้,ช่วยเช็คท่า{x}ให้หน่อย
+s0273,เริ่มฝึกท่าเพนัลตี้,Penalty_Kick,5,5,translit,เพนัลตี้,เริ่มฝึกท่า{x}
+s0274,ขอวิธีให้สัญญาณเพนัลตี้,Penalty_Kick,5,5,translit,เพนัลตี้,ขอวิธีให้สัญญาณ{x}
+s0275,ท่า PK หน้าตาเป็นยังไง,Penalty_Kick,5,5,english,PK,ท่า{x}หน้าตาเป็นยังไง
+s0276,practice ชี้จุด,Penalty_Kick,5,5,colloquial,ชี้จุด,practice {x}
+s0277,ขอฝึกท่า penalty kick ค่ะ,Penalty_Kick,5,5,english,penalty kick,ขอฝึกท่า{x}ค่ะ
+s0278,เช็คลูกเตะจุดโทษหน่อย,Penalty_Kick,5,5,formal,ลูกเตะจุดโทษ,เช็ค{x}หน่อย
+s0279,penalty kick,Penalty_Kick,5,5,english,penalty kick,{x}
+s0280,show me penalty,Penalty_Kick,5,5,english,penalty,show me {x}
+s0281,อยากฝึกท่าชี้จุด,Penalty_Kick,5,5,colloquial,ชี้จุด,อยากฝึกท่า{x}
+s0282,สัญญาณการเตะจุดโทษต้องทำมือยังไง,Penalty_Kick,5,5,formal,การเตะจุดโทษ,สัญญาณ{x}ต้องทำมือยังไง
+s0283,แสดงท่า penalty,Penalty_Kick,5,5,english,penalty,แสดงท่า{x}
+s0284,แสดงท่าเตะจุดโทษ,Penalty_Kick,5,5,colloquial,เตะจุดโทษ,แสดงท่า{x}
+s0285,วันนี้ขอซ้อมการเตะจุดโทษ,Penalty_Kick,5,5,formal,การเตะจุดโทษ,วันนี้ขอซ้อม{x}
+s0286,ท่าเพนนัลตี้ทำยังไง,Penalty_Kick,5,5,translit,เพนนัลตี้,ท่า{x}ทำยังไง
+s0287,practice เพนัลตี้,Penalty_Kick,5,5,translit,เพนัลตี้,practice {x}
+s0288,ช่วยดูว่าทำท่าลูกโทษสิบสองหลาถูกไหม,Penalty_Kick,5,5,colloquial,ลูกโทษสิบสองหลา,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0289,ตรวจท่าจุดโทษให้หน่อย,Penalty_Kick,5,5,formal,จุดโทษ,ตรวจท่า{x}ให้หน่อย
+s0290,แสดงท่า penalty kick,Penalty_Kick,5,5,english,penalty kick,แสดงท่า{x}
+s0291,ขอวิธีให้สัญญาณ penalty kick,Penalty_Kick,5,5,english,penalty kick,ขอวิธีให้สัญญาณ{x}
+s0292,ไปที่ท่าชี้จุดโทษ,Penalty_Kick,5,5,colloquial,ชี้จุดโทษ,ไปที่ท่า{x}
+s0293,ทดสอบท่าลูกเตะจุดโทษ,Penalty_Kick,5,5,formal,ลูกเตะจุดโทษ,ทดสอบท่า{x}
+s0294,อยากซ้อมให้สัญญาณจุดโทษ,Penalty_Kick,5,5,formal,จุดโทษ,อยากซ้อมให้สัญญาณ{x}
+s0295,ช่วยดูว่าทำท่าลูกโทษถูกไหม,Penalty_Kick,5,5,formal,ลูกโทษ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0296,ฝึก penalty kick,Penalty_Kick,5,5,english,penalty kick,ฝึก{x}
+s0297,วันนี้ขอซ้อมลูกโทษ,Penalty_Kick,5,5,formal,ลูกโทษ,วันนี้ขอซ้อม{x}
+s0298,สัญญาณ penalty kick ต้องทำมือยังไง,Penalty_Kick,5,5,english,penalty kick,สัญญาณ{x}ต้องทำมือยังไง
+s0299,ขอวิธีให้สัญญาณชี้จุดโทษ,Penalty_Kick,5,5,colloquial,ชี้จุดโทษ,ขอวิธีให้สัญญาณ{x}
+s0300,ผู้กำกับเส้นเห็นกองหน้ายืนเลยกองหลังคนสุดท้าย ต้องยกธงยังไง,Offside,6,6,situation,,
+s0301,ขอท่าผู้ช่วยผู้ตัดสินชูธงขึ้นตรงเหนือหัว,Offside,6,6,situation,,
+s0302,กองหน้าออกไปรับบอลก่อนจังหวะส่ง ผู้กำกับเส้นต้องทำยังไง,Offside,6,6,situation,,
+s0303,อยากฝึกท่ายกธงตั้งตรงเพื่อแจ้งกรรมการ,Offside,6,6,situation,,
+s0304,ผู้เล่นอยู่หลังแนวกองหลังตอนเพื่อนจ่ายบอล ต้องแจ้งด้วยท่าไหน,Offside,6,6,situation,,
+s0305,ฝึกยกธงค้างไว้จนกว่ากรรมการจะเป่า,Offside,6,6,situation,,
+s0306,ไลน์แมนชูธงขึ้นสูงคือสัญญาณอะไร,Offside,6,6,situation,,
+s0307,จังหวะที่กองหน้าหลุดไปก่อนกองหลังต้องให้สัญญาณแบบไหน,Offside,6,6,situation,,
+s0308,ท่าสัญญาณล้ำหน้าทำยังไง,Offside,6,6,formal,สัญญาณล้ำหน้า,ท่า{x}ทำยังไง
+s0309,show me flag offside,Offside,6,6,english,flag offside,show me {x}
+s0310,วันนี้ขอซ้อมออฟไซด์,Offside,6,6,translit,ออฟไซด์,วันนี้ขอซ้อม{x}
+s0311,ตรวจท่าออฟไซให้หน่อย,Offside,6,6,translit,ออฟไซ,ตรวจท่า{x}ให้หน่อย
+s0312,ช่วยดูว่าทำท่ายกธงล้ำถูกไหม,Offside,6,6,colloquial,ยกธงล้ำ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0313,วันนี้ขอซ้อมติดล้ำ,Offside,6,6,colloquial,ติดล้ำ,วันนี้ขอซ้อม{x}
+s0314,ทดสอบท่าออฟไซด์แฟล็ก,Offside,6,6,translit,ออฟไซด์แฟล็ก,ทดสอบท่า{x}
+s0315,ขอวิธีให้สัญญาณโดนล้ำ,Offside,6,6,colloquial,โดนล้ำ,ขอวิธีให้สัญญาณ{x}
+s0316,เริ่มฝึกท่าการล้ำหน้า,Offside,6,6,formal,การล้ำหน้า,เริ่มฝึกท่า{x}
+s0317,สอนท่าล้ำ,Offside,6,6,colloquial,ล้ำ,สอนท่า{x}
+s0318,ท่าล้ำหน้าหน้าตาเป็นยังไง,Offside,6,6,formal,ล้ำหน้า,ท่า{x}หน้าตาเป็นยังไง
+s0319,จะให้ offside ต้องทำมือแบบไหน,Offside,6,6,english,offside,จะให้{x}ต้องทำมือแบบไหน
+s0320,ขอท่ายกธงล้ำหน้า,Offside,6,6,formal,ยกธงล้ำหน้า,ขอท่า{x}
+s0321,ช่วยเช็คท่า offside flag ให้หน่อย,Offside,6,6,english,offside flag,ช่วยเช็คท่า{x}ให้หน่อย
+s0322,ไปที่ท่าสัญญาณล้ำหน้า,Offside,6,6,formal,สัญญาณล้ำหน้า,ไปที่ท่า{x}
+s0323,ขอดูท่าติดล้ำ,Offside,6,6,colloquial,ติดล้ำ,ขอดูท่า{x}
+s0324,เช็คยกธงล้ำหน่อย,Offside,6,6,colloquial,ยกธงล้ำ,เช็ค{x}หน่อย
+s0325,ท่ายกธงล้ำหน้าตาเป็นยังไง,Offside,6,6,colloquial,ยกธงล้ำ,ท่า{x}หน้าตาเป็นยังไง
+s0326,practice ออฟไซ,Offside,6,6,translit,ออฟไซ,practice {x}
+s0327,ขอฝึกท่าการล้ำหน้าค่ะ,Offside,6,6,formal,การล้ำหน้า,ขอฝึกท่า{x}ค่ะ
+s0328,เปิดโหมดฝึกโดนล้ำ,Offside,6,6,colloquial,โดนล้ำ,เปิดโหมดฝึก{x}
+s0329,practice flag offside,Offside,6,6,english,flag offside,practice {x}
+s0330,ขอฝึกท่า flag offside ค่ะ,Offside,6,6,english,flag offside,ขอฝึกท่า{x}ค่ะ
+s0331,อยากซ้อมให้สัญญาณโดนล้ำ,Offside,6,6,colloquial,โดนล้ำ,อยากซ้อมให้สัญญาณ{x}
+s0332,ขอท่าสัญญาณล้ำหน้าหน่อย,Offside,6,6,formal,สัญญาณล้ำหน้า,ขอท่า{x}หน่อย
+s0333,แสดงท่าล้ำหน้า,Offside,6,6,formal,ล้ำหน้า,แสดงท่า{x}
+s0334,ขอวิธีให้สัญญาณติดล้ำ,Offside,6,6,colloquial,ติดล้ำ,ขอวิธีให้สัญญาณ{x}
+s0335,จะให้ติดล้ำต้องทำมือแบบไหน,Offside,6,6,colloquial,ติดล้ำ,จะให้{x}ต้องทำมือแบบไหน
+s0336,ท่าออฟไซด์แฟล็กทำยังไง,Offside,6,6,translit,ออฟไซด์แฟล็ก,ท่า{x}ทำยังไง
+s0337,ขอท่าติดล้ำ,Offside,6,6,colloquial,ติดล้ำ,ขอท่า{x}
+s0338,เช็คออฟไซหน่อย,Offside,6,6,translit,ออฟไซ,เช็ค{x}หน่อย
+s0339,เลือกท่า offside,Offside,6,6,english,offside,เลือกท่า{x}
+s0340,สัญญาณ offside ต้องทำมือยังไง,Offside,6,6,english,offside,สัญญาณ{x}ต้องทำมือยังไง
+s0341,ท่าติดล้ำทำยังไง,Offside,6,6,colloquial,ติดล้ำ,ท่า{x}ทำยังไง
+s0342,ช่วยเช็คท่ายกธงล้ำให้หน่อย,Offside,6,6,colloquial,ยกธงล้ำ,ช่วยเช็คท่า{x}ให้หน่อย
+s0343,สัญญาณ flag offside ต้องทำมือยังไง,Offside,6,6,english,flag offside,สัญญาณ{x}ต้องทำมือยังไง
+s0344,ฝึกยกธงล้ำหน้า,Offside,6,6,formal,ยกธงล้ำหน้า,ฝึก{x}
+s0345,เปิดโหมดฝึก flag offside,Offside,6,6,english,flag offside,เปิดโหมดฝึก{x}
+s0346,ช่วยดูว่าทำท่ายกธงล้ำหน้าถูกไหม,Offside,6,6,formal,ยกธงล้ำหน้า,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0347,ฝึกออฟไซด์แฟล็ก,Offside,6,6,translit,ออฟไซด์แฟล็ก,ฝึก{x}
+s0348,show me offside,Offside,6,6,english,offside,show me {x}
+s0349,ถ้าเป็นออฟไซด์แฟล็ก กรรมการทำท่าไหน,Offside,6,6,translit,ออฟไซด์แฟล็ก,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0350,หลังยกธงล้ำหน้าแล้ว ต้องบอกกรรมการว่าเกิดตรงกลางสนามยังไง,Offside_Location,7,7,situation,,
+s0351,ขอท่าเหยียดธงไปข้างหน้าในแนวนอนบอกจุดที่ผู้เล่นยืน,Offside_Location,7,7,situation,,
+s0352,ผู้เล่นล้ำอยู่ฝั่งไกลจากผู้กำกับเส้น ต้องชี้ธงระดับไหน,Offside_Location,7,7,situation,,
+s0353,อยากฝึกลดธงลงชี้บอกว่าผู้เล่นอยู่ฝั่งใกล้,Offside_Location,7,7,situation,,
+s0354,ผู้ช่วยผู้ตัดสินต้องระบุจุดเตะลูกโทษจากการล้ำยังไง,Offside_Location,7,7,situation,,
+s0355,ฝึกท่าชี้ธงบอกแนวที่นักเตะอยู่ตอนล้ำ,Offside_Location,7,7,situation,,
+s0356,ธงที่ชี้ออกไปตรงๆด้านหน้าหมายถึงอะไร,Offside_Location,7,7,situation,,
+s0357,จะบอกกรรมการว่าการล้ำเกิดแถวไหนของสนามต้องทำยังไง,Offside_Location,7,7,situation,,
+s0358,ท่าตำแหน่งที่เกิดการล้ำหน้าหน้าตาเป็นยังไง,Offside_Location,7,7,formal,ตำแหน่งที่เกิดการล้ำหน้า,ท่า{x}หน้าตาเป็นยังไง
+s0359,เริ่มฝึกท่าโลเคชั่นออฟไซด์,Offside_Location,7,7,translit,โลเคชั่นออฟไซด์,เริ่มฝึกท่า{x}
+s0360,อยากฝึกท่าล้ำฝั่งไหน,Offside_Location,7,7,colloquial,ล้ำฝั่งไหน,อยากฝึกท่า{x}
+s0361,เช็คออฟไซด์โพสิชั่นหน่อย,Offside_Location,7,7,translit,ออฟไซด์โพสิชั่น,เช็ค{x}หน่อย
+s0362,อยากฝึกท่าตำแหน่งล้ำหน้า,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,อยากฝึกท่า{x}
+s0363,ทดสอบท่า offside spot,Offside_Location,7,7,english,offside spot,ทดสอบท่า{x}
+s0364,อยากซ้อมให้สัญญาณจุดที่ล้ำหน้า,Offside_Location,7,7,formal,จุดที่ล้ำหน้า,อยากซ้อมให้สัญญาณ{x}
+s0365,อยากซ้อมให้สัญญาณออฟไซด์โลเคชั่น,Offside_Location,7,7,translit,ออฟไซด์โลเคชั่น,อยากซ้อมให้สัญญาณ{x}
+s0366,วันนี้ขอซ้อมธงชี้ตำแหน่งล้ำ,Offside_Location,7,7,colloquial,ธงชี้ตำแหน่งล้ำ,วันนี้ขอซ้อม{x}
+s0367,ช่วยเช็คท่าการชี้ตำแหน่งล้ำหน้าให้หน่อย,Offside_Location,7,7,formal,การชี้ตำแหน่งล้ำหน้า,ช่วยเช็คท่า{x}ให้หน่อย
+s0368,ลองท่า offside position ดู,Offside_Location,7,7,english,offside position,ลองท่า{x}ดู
+s0369,ขอฝึกท่าล้ำตรงไหนค่ะ,Offside_Location,7,7,colloquial,ล้ำตรงไหน,ขอฝึกท่า{x}ค่ะ
+s0370,ขอดูท่า offside location,Offside_Location,7,7,english,offside location,ขอดูท่า{x}
+s0371,ช่วยดูว่าทำท่าชี้จุดล้ำถูกไหม,Offside_Location,7,7,colloquial,ชี้จุดล้ำ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0372,ทดสอบท่าออฟไซด์โพสิชั่น,Offside_Location,7,7,translit,ออฟไซด์โพสิชั่น,ทดสอบท่า{x}
+s0373,เปิดโหมดฝึกออฟไซด์โพสิชั่น,Offside_Location,7,7,translit,ออฟไซด์โพสิชั่น,เปิดโหมดฝึก{x}
+s0374,ถ้าเป็นตำแหน่งล้ำหน้า กรรมการทำท่าไหน,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0375,แสดงท่าตำแหน่งล้ำหน้า,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,แสดงท่า{x}
+s0376,จะให้ล้ำฝั่งไหนต้องทำมือแบบไหน,Offside_Location,7,7,colloquial,ล้ำฝั่งไหน,จะให้{x}ต้องทำมือแบบไหน
+s0377,ฝึกตำแหน่งล้ำหน้า,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,ฝึก{x}
+s0378,เปิดโหมดฝึกจุดที่ล้ำหน้า,Offside_Location,7,7,formal,จุดที่ล้ำหน้า,เปิดโหมดฝึก{x}
+s0379,ตรวจท่าโลเคชั่นออฟไซด์ให้หน่อย,Offside_Location,7,7,translit,โลเคชั่นออฟไซด์,ตรวจท่า{x}ให้หน่อย
+s0380,วันนี้ขอซ้อมล้ำตรงไหน,Offside_Location,7,7,colloquial,ล้ำตรงไหน,วันนี้ขอซ้อม{x}
+s0381,practice ล้ำฝั่งไหน,Offside_Location,7,7,colloquial,ล้ำฝั่งไหน,practice {x}
+s0382,practice จุดที่ล้ำหน้า,Offside_Location,7,7,formal,จุดที่ล้ำหน้า,practice {x}
+s0383,ลองท่าล้ำตรงไหนดู,Offside_Location,7,7,colloquial,ล้ำตรงไหน,ลองท่า{x}ดู
+s0384,ขอท่าธงชี้ตำแหน่งล้ำ,Offside_Location,7,7,colloquial,ธงชี้ตำแหน่งล้ำ,ขอท่า{x}
+s0385,ลองท่าออฟไซด์โลเคชั่นดู,Offside_Location,7,7,translit,ออฟไซด์โลเคชั่น,ลองท่า{x}ดู
+s0386,ช่วยดูว่าทำท่าตำแหน่งล้ำหน้าถูกไหม,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0387,สอนทำสัญญาณออฟไซด์โลเคชั่นหน่อยครับ,Offside_Location,7,7,translit,ออฟไซด์โลเคชั่น,สอนทำสัญญาณ{x}หน่อยครับ
+s0388,practice การชี้ตำแหน่งล้ำหน้า,Offside_Location,7,7,formal,การชี้ตำแหน่งล้ำหน้า,practice {x}
+s0389,จะให้ตำแหน่งที่เกิดการล้ำหน้าต้องทำมือแบบไหน,Offside_Location,7,7,formal,ตำแหน่งที่เกิดการล้ำหน้า,จะให้{x}ต้องทำมือแบบไหน
+s0390,สัญญาณ offside location ต้องทำมือยังไง,Offside_Location,7,7,english,offside location,สัญญาณ{x}ต้องทำมือยังไง
+s0391,เลือกท่าล้ำฝั่งไหน,Offside_Location,7,7,colloquial,ล้ำฝั่งไหน,เลือกท่า{x}
+s0392,ไปที่ท่าออฟไซด์โลเคชั่น,Offside_Location,7,7,translit,ออฟไซด์โลเคชั่น,ไปที่ท่า{x}
+s0393,วันนี้ขอซ้อมตำแหน่งล้ำหน้า,Offside_Location,7,7,formal,ตำแหน่งล้ำหน้า,วันนี้ขอซ้อม{x}
+s0394,show me ชี้จุดล้ำ,Offside_Location,7,7,colloquial,ชี้จุดล้ำ,show me {x}
+s0395,เปิดโหมดฝึกธงชี้ตำแหน่งล้ำ,Offside_Location,7,7,colloquial,ธงชี้ตำแหน่งล้ำ,เปิดโหมดฝึก{x}
+s0396,เลือกท่าล้ำตรงไหน,Offside_Location,7,7,colloquial,ล้ำตรงไหน,เลือกท่า{x}
+s0397,ฝึกโลเคชั่นออฟไซด์,Offside_Location,7,7,translit,โลเคชั่นออฟไซด์,ฝึก{x}
+s0398,ขอวิธีให้สัญญาณออฟไซด์โพสิชั่น,Offside_Location,7,7,translit,ออฟไซด์โพสิชั่น,ขอวิธีให้สัญญาณ{x}
+s0399,ช่วยเช็คท่าตำแหน่งที่เกิดการล้ำหน้าให้หน่อย,Offside_Location,7,7,formal,ตำแหน่งที่เกิดการล้ำหน้า,ช่วยเช็คท่า{x}ให้หน่อย
+s0400,ตัวสำรองยืนรออยู่ข้างสนาม ผู้กำกับเส้นต้องแจ้งกรรมการยังไง,Substitution,8,8,situation,,
+s0401,ขอท่าชูธงด้วยมือสองข้างเหนือหัว,Substitution,8,8,situation,,
+s0402,โค้ชอยากส่งผู้เล่นใหม่ลงไป ผู้ช่วยกรรมการต้องให้สัญญาณอะไร,Substitution,8,8,situation,,
+s0403,อยากฝึกท่าจับธงสองมือยกขึ้นเหนือศีรษะ,Substitution,8,8,situation,,
+s0404,ผู้เล่นบาดเจ็บต้องออกและมีคนลงแทน ต้องทำท่าไหน,Substitution,8,8,situation,,
+s0405,ฝึกแจ้งว่ามีการสลับผู้เล่นตอนบอลออก,Substitution,8,8,situation,,
+s0406,ไลน์แมนกางธงสองมือเหนือหัวหมายถึงอะไร,Substitution,8,8,situation,,
+s0407,จะให้ผู้เล่นคนใหม่ลงสนามต้องแจ้งด้วยสัญญาณแบบไหน,Substitution,8,8,situation,,
+s0408,ตรวจท่าการเปลี่ยนตัวผู้เล่นให้หน่อย,Substitution,8,8,formal,การเปลี่ยนตัวผู้เล่น,ตรวจท่า{x}ให้หน่อย
+s0409,ขอฝึกท่า player change ค่ะ,Substitution,8,8,english,player change,ขอฝึกท่า{x}ค่ะ
+s0410,เช็คซับหน่อย,Substitution,8,8,translit,ซับ,เช็ค{x}หน่อย
+s0411,ทดสอบท่า sub,Substitution,8,8,english,sub,ทดสอบท่า{x}
+s0412,show me substitution,Substitution,8,8,english,substitution,show me {x}
+s0413,ลองท่าซับตัวดู,Substitution,8,8,colloquial,ซับตัว,ลองท่า{x}ดู
+s0414,ขอฝึกเปลี่ยนตัวอีกรอบ,Substitution,8,8,formal,เปลี่ยนตัว,ขอฝึก{x}อีกรอบ
+s0415,practice เปลี่ยนตัวผู้เล่น,Substitution,8,8,formal,เปลี่ยนตัวผู้เล่น,practice {x}
+s0416,ทดสอบท่าส่งตัวสำรองลง,Substitution,8,8,colloquial,ส่งตัวสำรองลง,ทดสอบท่า{x}
+s0417,ขอฝึกท่าซับสติวชั่นค่ะ,Substitution,8,8,translit,ซับสติวชั่น,ขอฝึกท่า{x}ค่ะ
+s0418,ตรวจท่าขอเปลี่ยนตัวให้หน่อย,Substitution,8,8,colloquial,ขอเปลี่ยนตัว,ตรวจท่า{x}ให้หน่อย
+s0419,ขอดูท่าการเปลี่ยนตัว,Substitution,8,8,formal,การเปลี่ยนตัว,ขอดูท่า{x}
+s0420,ไปที่ท่าซับสติติวชั่น,Substitution,8,8,translit,ซับสติติวชั่น,ไปที่ท่า{x}
+s0421,ลองท่าเปลี่ยนคนดู,Substitution,8,8,colloquial,เปลี่ยนคน,ลองท่า{x}ดู
+s0422,เริ่มฝึกท่าซับ,Substitution,8,8,translit,ซับ,เริ่มฝึกท่า{x}
+s0423,ไปที่ท่า player change,Substitution,8,8,english,player change,ไปที่ท่า{x}
+s0424,สอนท่า substitution,Substitution,8,8,english,substitution,สอนท่า{x}
+s0425,ซับ,Substitution,8,8,translit,ซับ,{x}
+s0426,ช่วยดูว่าทำท่า sub ถูกไหม,Substitution,8,8,english,sub,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0427,สอนท่าซับ,Substitution,8,8,translit,ซับ,สอนท่า{x}
+s0428,วันนี้ขอซ้อม substitution,Substitution,8,8,english,substitution,วันนี้ขอซ้อม{x}
+s0429,สัญญาณ player change ต้องทำมือยังไง,Substitution,8,8,english,player change,สัญญาณ{x}ต้องทำมือยังไง
+s0430,ขอฝึกท่าเปลี่ยนตัวผู้เล่นค่ะ,Substitution,8,8,formal,เปลี่ยนตัวผู้เล่น,ขอฝึกท่า{x}ค่ะ
+s0431,show me ซับ,Substitution,8,8,translit,ซับ,show me {x}
+s0432,ฝึก sub,Substitution,8,8,english,sub,ฝึก{x}
+s0433,ท่าซับทำยังไง,Substitution,8,8,translit,ซับ,ท่า{x}ทำยังไง
+s0434,ท่า sub ทำยังไง,Substitution,8,8,english,sub,ท่า{x}ทำยังไง
+s0435,สัญญาณซับต้องทำมือยังไง,Substitution,8,8,translit,ซับ,สัญญาณ{x}ต้องทำมือยังไง
+s0436,อยากฝึกท่าขอเปลี่ยนตัว,Substitution,8,8,colloquial,ขอเปลี่ยนตัว,อยากฝึกท่า{x}
+s0437,สอนท่าขอเปลี่ยนตัว,Substitution,8,8,colloquial,ขอเปลี่ยนตัว,สอนท่า{x}
+s0438,เริ่มฝึกท่าเปลี่ยนตัว,Substitution,8,8,formal,เปลี่ยนตัว,เริ่มฝึกท่า{x}
+s0439,show me sub,Substitution,8,8,english,sub,show me {x}
+s0440,จะให้การเปลี่ยนตัวต้องทำมือแบบไหน,Substitution,8,8,formal,การเปลี่ยนตัว,จะให้{x}ต้องทำมือแบบไหน
+s0441,เช็ค player change หน่อย,Substitution,8,8,english,player change,เช็ค{x}หน่อย
+s0442,practice การเปลี่ยนตัว,Substitution,8,8,formal,การเปลี่ยนตัว,practice {x}
+s0443,ท่าขอเปลี่ยนตัวทำยังไง,Substitution,8,8,colloquial,ขอเปลี่ยนตัว,ท่า{x}ทำยังไง
+s0444,ลองท่าซับสติวชั่นดู,Substitution,8,8,translit,ซับสติวชั่น,ลองท่า{x}ดู
+s0445,ไปที่ท่าซับตัว,Substitution,8,8,colloquial,ซับตัว,ไปที่ท่า{x}
+s0446,ขอฝึกการเปลี่ยนตัวอีกรอบ,Substitution,8,8,formal,การเปลี่ยนตัว,ขอฝึก{x}อีกรอบ
+s0447,ช่วยดูว่าทำท่าเปลี่ยนตัวผู้เล่นถูกไหม,Substitution,8,8,formal,เปลี่ยนตัวผู้เล่น,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0448,ท่า sub หน้าตาเป็นยังไง,Substitution,8,8,english,sub,ท่า{x}หน้าตาเป็นยังไง
+s0449,วันนี้ขอซ้อมซับ,Substitution,8,8,translit,ซับ,วันนี้ขอซ้อม{x}
+s0450,บอลข้ามเส้นประตูไปทั้งลูกแล้ว กรรมการต้องทำท่าไหน,Goal,9,9,situation,,
+s0451,ขอท่ายกแขนสองข้างขึ้นเหนือหัวตอนนับประตู,Goal,9,9,situation,,
+s0452,ทีมยิงเข้าอย่างถูกกติกา ต้องให้สัญญาณอะไร,Goal,9,9,situation,,
+s0453,อยากฝึกท่ายืนยันว่าลูกนี้นับ,Goal,9,9,situation,,
+s0454,ลูกยิงตุงตาข่ายแล้ว ต้องชูมือยังไง,Goal,9,9,situation,,
+s0455,ฝึกท่าชูสองแขนประกาศว่าบอลเข้า,Goal,9,9,situation,,
+s0456,หลังเช็ควาร์แล้วยืนยันประตูต้องทำยังไง,Goal,9,9,situation,,
+s0457,สกอร์เปลี่ยนเพราะบอลเข้า กรรมการต้องแจ้งด้วยท่าไหน,Goal,9,9,situation,,
+s0458,เช็คการได้ประตูหน่อย,Goal,9,9,formal,การได้ประตู,เช็ค{x}หน่อย
+s0459,show me ให้ประตู,Goal,9,9,formal,ให้ประตู,show me {x}
+s0460,ลองท่าประตูนับดู,Goal,9,9,formal,ประตูนับ,ลองท่า{x}ดู
+s0461,จะให้ goal given ต้องทำมือแบบไหน,Goal,9,9,english,goal given,จะให้{x}ต้องทำมือแบบไหน
+s0462,ขอฝึกโกลอีกรอบ,Goal,9,9,translit,โกล,ขอฝึก{x}อีกรอบ
+s0463,สอนท่าได้ประตู,Goal,9,9,colloquial,ได้ประตู,สอนท่า{x}
+s0464,ท่า goal ทำยังไง,Goal,9,9,english,goal,ท่า{x}ทำยังไง
+s0465,ทดสอบท่าโกว์,Goal,9,9,translit,โกว์,ทดสอบท่า{x}
+s0466,ตรวจท่าเข้าประตูให้หน่อย,Goal,9,9,colloquial,เข้าประตู,ตรวจท่า{x}ให้หน่อย
+s0467,ท่า goal scored ทำยังไง,Goal,9,9,english,goal scored,ท่า{x}ทำยังไง
+s0468,ขอวิธีให้สัญญาณการนับประตู,Goal,9,9,formal,การนับประตู,ขอวิธีให้สัญญาณ{x}
+s0469,ขอฝึกท่าโกลนับค่ะ,Goal,9,9,translit,โกลนับ,ขอฝึกท่า{x}ค่ะ
+s0470,สัญญาณนับประตูเลยต้องทำมือยังไง,Goal,9,9,colloquial,นับประตูเลย,สัญญาณ{x}ต้องทำมือยังไง
+s0471,ยิงเข้า,Goal,9,9,colloquial,ยิงเข้า,{x}
+s0472,ท่าได้ประตูทำยังไง,Goal,9,9,colloquial,ได้ประตู,ท่า{x}ทำยังไง
+s0473,ขอฝึก goal อีกรอบ,Goal,9,9,english,goal,ขอฝึก{x}อีกรอบ
+s0474,ขอวิธีให้สัญญาณโกล,Goal,9,9,translit,โกล,ขอวิธีให้สัญญาณ{x}
+s0475,จะให้ให้ประตูต้องทำมือแบบไหน,Goal,9,9,formal,ให้ประตู,จะให้{x}ต้องทำมือแบบไหน
+s0476,ขอท่าการได้ประตู,Goal,9,9,formal,การได้ประตู,ขอท่า{x}
+s0477,สัญญาณโกลต้องทำมือยังไง,Goal,9,9,translit,โกล,สัญญาณ{x}ต้องทำมือยังไง
+s0478,สอนท่าโกล,Goal,9,9,translit,โกล,สอนท่า{x}
+s0479,เริ่มฝึกท่าได้ประตู,Goal,9,9,colloquial,ได้ประตู,เริ่มฝึกท่า{x}
+s0480,goal scored,Goal,9,9,english,goal scored,{x}
+s0481,อยากซ้อมให้สัญญาณ goal scored,Goal,9,9,english,goal scored,อยากซ้อมให้สัญญาณ{x}
+s0482,show me goal scored,Goal,9,9,english,goal scored,show me {x}
+s0483,อยากฝึกท่าโกว์,Goal,9,9,translit,โกว์,อยากฝึกท่า{x}
+s0484,วันนี้ขอซ้อมยิงเข้า,Goal,9,9,colloquial,ยิงเข้า,วันนี้ขอซ้อม{x}
+s0485,ขอดูท่าให้ประตู,Goal,9,9,formal,ให้ประตู,ขอดูท่า{x}
+s0486,ช่วยเช็คท่าการนับประตูให้หน่อย,Goal,9,9,formal,การนับประตู,ช่วยเช็คท่า{x}ให้หน่อย
+s0487,ตรวจท่าการนับประตูให้หน่อย,Goal,9,9,formal,การนับประตู,ตรวจท่า{x}ให้หน่อย
+s0488,ขอวิธีให้สัญญาณโกลนับ,Goal,9,9,translit,โกลนับ,ขอวิธีให้สัญญาณ{x}
+s0489,ขอท่าให้ประตู,Goal,9,9,formal,ให้ประตู,ขอท่า{x}
+s0490,ตรวจท่านับประตูเลยให้หน่อย,Goal,9,9,colloquial,นับประตูเลย,ตรวจท่า{x}ให้หน่อย
+s0491,ช่วยเช็คท่าเข้าประตูให้หน่อย,Goal,9,9,colloquial,เข้าประตู,ช่วยเช็คท่า{x}ให้หน่อย
+s0492,ช่วยดูว่าทำท่าการนับประตูถูกไหม,Goal,9,9,formal,การนับประตู,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0493,ช่วยดูว่าทำท่ายิงเข้าถูกไหม,Goal,9,9,colloquial,ยิงเข้า,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0494,เริ่มฝึกท่า goal,Goal,9,9,english,goal,เริ่มฝึกท่า{x}
+s0495,ขอท่า goal scored หน่อย,Goal,9,9,english,goal scored,ขอท่า{x}หน่อย
+s0496,ฝึกนับประตูเลย,Goal,9,9,colloquial,นับประตูเลย,ฝึก{x}
+s0497,ท่ายิงเข้าหน้าตาเป็นยังไง,Goal,9,9,colloquial,ยิงเข้า,ท่า{x}หน้าตาเป็นยังไง
+s0498,ขอท่าโกว์,Goal,9,9,translit,โกว์,ขอท่า{x}
+s0499,ลองท่าได้ประตูดู,Goal,9,9,colloquial,ได้ประตู,ลองท่า{x}ดู
+s0500,บอลเข้าประตูแต่มีฟาวล์ก่อนหน้า กรรมการต้องยกเลิกยังไง,Disallowed_Goal,10,10,situation,,
+s0501,ขอท่าไขว้แขนแล้วโบกไปมาด้านหน้าลำตัว,Disallowed_Goal,10,10,situation,,
+s0502,ยิงเข้าแต่ผู้ยิงล้ำหน้าอยู่ ต้องให้สัญญาณอะไร,Disallowed_Goal,10,10,situation,,
+s0503,อยากฝึกท่าแสดงว่าลูกที่เข้าไปไม่ถูกนับ,Disallowed_Goal,10,10,situation,,
+s0504,หลังดูวาร์แล้วตัดสินยกเลิกลูกที่ยิงได้ต้องทำมือยังไง,Disallowed_Goal,10,10,situation,,
+s0505,ฝึกท่ากางแขนไขว้กันแล้วปัดออกด้านข้าง,Disallowed_Goal,10,10,situation,,
+s0506,บอลเข้าแต่โดนมือคนยิงก่อน กรรมการไม่นับต้องทำท่าไหน,Disallowed_Goal,10,10,situation,,
+s0507,ท่าแกว่งแขนไขว้หน้าอกหมายถึงอะไร ขอซ้อมหน่อย,Disallowed_Goal,10,10,situation,,
+s0508,ท่าประตูโมฆะทำยังไง,Disallowed_Goal,10,10,colloquial,ประตูโมฆะ,ท่า{x}ทำยังไง
+s0509,ช่วยดูว่าทำท่ายิงเข้าแต่ไม่นับถูกไหม,Disallowed_Goal,10,10,colloquial,ยิงเข้าแต่ไม่นับ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0510,แสดงท่า goal disallowed,Disallowed_Goal,10,10,english,goal disallowed,แสดงท่า{x}
+s0511,ช่วยเช็คท่าดิสอลาวด์โกลให้หน่อย,Disallowed_Goal,10,10,translit,ดิสอลาวด์โกล,ช่วยเช็คท่า{x}ให้หน่อย
+s0512,เลือกท่าโกลไม่นับ,Disallowed_Goal,10,10,colloquial,โกลไม่นับ,เลือกท่า{x}
+s0513,เริ่มฝึกท่าโนโกว์,Disallowed_Goal,10,10,translit,โนโกว์,เริ่มฝึกท่า{x}
+s0514,เริ่มฝึกท่าการยกเลิกประตู,Disallowed_Goal,10,10,formal,การยกเลิกประตู,เริ่มฝึกท่า{x}
+s0515,สอนทำสัญญาณ disallowed goal หน่อยครับ,Disallowed_Goal,10,10,english,disallowed goal,สอนทำสัญญาณ{x}หน่อยครับ
+s0516,สัญญาณประตูไม่นับต้องทำมือยังไง,Disallowed_Goal,10,10,formal,ประตูไม่นับ,สัญญาณ{x}ต้องทำมือยังไง
+s0517,ขอวิธีให้สัญญาณไม่ให้ประตู,Disallowed_Goal,10,10,formal,ไม่ให้ประตู,ขอวิธีให้สัญญาณ{x}
+s0518,ถ้าเป็นไม่นับประตู กรรมการทำท่าไหน,Disallowed_Goal,10,10,formal,ไม่นับประตู,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0519,จะให้โนโกลต้องทำมือแบบไหน,Disallowed_Goal,10,10,translit,โนโกล,จะให้{x}ต้องทำมือแบบไหน
+s0520,ตรวจท่าปัดตกประตูให้หน่อย,Disallowed_Goal,10,10,colloquial,ปัดตกประตู,ตรวจท่า{x}ให้หน่อย
+s0521,ท่า no goal หน้าตาเป็นยังไง,Disallowed_Goal,10,10,english,no goal,ท่า{x}หน้าตาเป็นยังไง
+s0522,อยากฝึกท่ายิงเข้าแต่ไม่นับ,Disallowed_Goal,10,10,colloquial,ยิงเข้าแต่ไม่นับ,อยากฝึกท่า{x}
+s0523,ขอท่าประตูโมฆะหน่อย,Disallowed_Goal,10,10,colloquial,ประตูโมฆะ,ขอท่า{x}หน่อย
+s0524,ประตูไม่นับ,Disallowed_Goal,10,10,formal,ประตูไม่นับ,{x}
+s0525,ขอท่าการยกเลิกประตูหน่อย,Disallowed_Goal,10,10,formal,การยกเลิกประตู,ขอท่า{x}หน่อย
+s0526,ทดสอบท่าประตูไม่นับ,Disallowed_Goal,10,10,formal,ประตูไม่นับ,ทดสอบท่า{x}
+s0527,ฝึกประตูโมฆะ,Disallowed_Goal,10,10,colloquial,ประตูโมฆะ,ฝึก{x}
+s0528,ลองท่า goal disallowed ดู,Disallowed_Goal,10,10,english,goal disallowed,ลองท่า{x}ดู
+s0529,เลือกท่า goal disallowed,Disallowed_Goal,10,10,english,goal disallowed,เลือกท่า{x}
+s0530,เปิดโหมดฝึกการยกเลิกประตู,Disallowed_Goal,10,10,formal,การยกเลิกประตู,เปิดโหมดฝึก{x}
+s0531,แสดงท่าดิสอลาวด์โกล,Disallowed_Goal,10,10,translit,ดิสอลาวด์โกล,แสดงท่า{x}
+s0532,วันนี้ขอซ้อม disallowed goal,Disallowed_Goal,10,10,english,disallowed goal,วันนี้ขอซ้อม{x}
+s0533,ขอวิธีให้สัญญาณดิสอลาวด์โกล,Disallowed_Goal,10,10,translit,ดิสอลาวด์โกล,ขอวิธีให้สัญญาณ{x}
+s0534,สอนทำสัญญาณโนโกลหน่อยครับ,Disallowed_Goal,10,10,translit,โนโกล,สอนทำสัญญาณ{x}หน่อยครับ
+s0535,ช่วยดูว่าทำท่าโกลไม่นับถูกไหม,Disallowed_Goal,10,10,colloquial,โกลไม่นับ,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0536,เปิดโหมดฝึกยิงเข้าแต่ไม่นับ,Disallowed_Goal,10,10,colloquial,ยิงเข้าแต่ไม่นับ,เปิดโหมดฝึก{x}
+s0537,ขอฝึกประตูไม่นับอีกรอบ,Disallowed_Goal,10,10,formal,ประตูไม่นับ,ขอฝึก{x}อีกรอบ
+s0538,สอนทำสัญญาณ goal disallowed หน่อยครับ,Disallowed_Goal,10,10,english,goal disallowed,สอนทำสัญญาณ{x}หน่อยครับ
+s0539,practice โนโกว์,Disallowed_Goal,10,10,translit,โนโกว์,practice {x}
+s0540,ฝึกดิสอลาวด์โกล,Disallowed_Goal,10,10,translit,ดิสอลาวด์โกล,ฝึก{x}
+s0541,ขอท่ายิงเข้าแต่ไม่นับ,Disallowed_Goal,10,10,colloquial,ยิงเข้าแต่ไม่นับ,ขอท่า{x}
+s0542,ขอฝึกไม่นับประตูอีกรอบ,Disallowed_Goal,10,10,formal,ไม่นับประตู,ขอฝึก{x}อีกรอบ
+s0543,ท่าดิสอลาวด์โกลทำยังไง,Disallowed_Goal,10,10,translit,ดิสอลาวด์โกล,ท่า{x}ทำยังไง
+s0544,ตรวจท่ายิงเข้าแต่ไม่นับให้หน่อย,Disallowed_Goal,10,10,colloquial,ยิงเข้าแต่ไม่นับ,ตรวจท่า{x}ให้หน่อย
+s0545,ลองท่าไม่ให้ประตูดู,Disallowed_Goal,10,10,formal,ไม่ให้ประตู,ลองท่า{x}ดู
+s0546,ท่าโนโกว์หน้าตาเป็นยังไง,Disallowed_Goal,10,10,translit,โนโกว์,ท่า{x}หน้าตาเป็นยังไง
+s0547,สัญญาณไม่ให้ประตูต้องทำมือยังไง,Disallowed_Goal,10,10,formal,ไม่ให้ประตู,สัญญาณ{x}ต้องทำมือยังไง
+s0548,แสดงท่าโนโกล,Disallowed_Goal,10,10,translit,โนโกล,แสดงท่า{x}
+s0549,ขอฝึกท่า goal disallowed ค่ะ,Disallowed_Goal,10,10,english,goal disallowed,ขอฝึกท่า{x}ค่ะ
+s0550,ผู้เล่นล้มเจ็บหนักกลางสนาม กรรมการต้องหยุดเกมยังไง,Time_out,11,11,situation,,
+s0551,ขอท่าไขว้แขนสองข้างเหนือศีรษะเป็นรูปตัวเอ็กซ์,Time_out,11,11,situation,,
+s0552,อากาศร้อนจัดต้องพักให้นักเตะดื่มน้ำ ต้องทำสัญญาณอะไร,Time_out,11,11,situation,,
+s0553,อยากฝึกท่าหยุดนาฬิกาการแข่งขันชั่วคราว,Time_out,11,11,situation,,
+s0554,มีคนบุกลงสนาม ต้องหยุดเกมด้วยท่าไหน,Time_out,11,11,situation,,
+s0555,ฝึกท่าชูแขนไขว้กันบนหัวเพื่อพักการเล่น,Time_out,11,11,situation,,
+s0556,ต้องเรียกหมอสนามเข้ามาดูอาการนักเตะ ให้สัญญาณยังไง,Time_out,11,11,situation,,
+s0557,จะสั่งให้เกมหยุดชั่วคราวเพราะไฟสนามดับต้องทำยังไง,Time_out,11,11,situation,,
+s0558,ลองท่าขอเวลานอกดู,Time_out,11,11,colloquial,ขอเวลานอก,ลองท่า{x}ดู
+s0559,ฝึกหยุดเกม,Time_out,11,11,colloquial,หยุดเกม,ฝึก{x}
+s0560,อยากซ้อมให้สัญญาณ stop the clock,Time_out,11,11,english,stop the clock,อยากซ้อมให้สัญญาณ{x}
+s0561,ลองท่าไทม์เอาท์ดู,Time_out,11,11,translit,ไทม์เอาท์,ลองท่า{x}ดู
+s0562,show me การหยุดการแข่งขัน,Time_out,11,11,formal,การหยุดการแข่งขัน,show me {x}
+s0563,ฝึกการขอเวลานอก,Time_out,11,11,formal,การขอเวลานอก,ฝึก{x}
+s0564,อยากฝึกท่า time out,Time_out,11,11,english,time out,อยากฝึกท่า{x}
+s0565,ขอท่า timeout,Time_out,11,11,english,timeout,ขอท่า{x}
+s0566,ขอท่าทดเวลาบาดเจ็บหน่อย,Time_out,11,11,colloquial,ทดเวลาบาดเจ็บ,ขอท่า{x}หน่อย
+s0567,ถ้าเป็นการพักการแข่งขัน กรรมการทำท่าไหน,Time_out,11,11,formal,การพักการแข่งขัน,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0568,อยากฝึกท่าพักเกมแป๊บ,Time_out,11,11,colloquial,พักเกมแป๊บ,อยากฝึกท่า{x}
+s0569,ตรวจท่าไทม์เอ้าท์ให้หน่อย,Time_out,11,11,translit,ไทม์เอ้าท์,ตรวจท่า{x}ให้หน่อย
+s0570,อยากฝึกท่าไทม์เอาต์,Time_out,11,11,translit,ไทม์เอาต์,อยากฝึกท่า{x}
+s0571,เลือกท่าเวลานอก,Time_out,11,11,formal,เวลานอก,เลือกท่า{x}
+s0572,สัญญาณขอเวลานอกต้องทำมือยังไง,Time_out,11,11,colloquial,ขอเวลานอก,สัญญาณ{x}ต้องทำมือยังไง
+s0573,ขอท่าหยุดเกม,Time_out,11,11,colloquial,หยุดเกม,ขอท่า{x}
+s0574,ช่วยเช็คท่าขอเวลานอกให้หน่อย,Time_out,11,11,colloquial,ขอเวลานอก,ช่วยเช็คท่า{x}ให้หน่อย
+s0575,ขอเวลานอก,Time_out,11,11,colloquial,ขอเวลานอก,{x}
+s0576,สัญญาณ stop the clock ต้องทำมือยังไง,Time_out,11,11,english,stop the clock,สัญญาณ{x}ต้องทำมือยังไง
+s0577,ขอดูท่า timeout,Time_out,11,11,english,timeout,ขอดูท่า{x}
+s0578,practice ไทม์เอาท์,Time_out,11,11,translit,ไทม์เอาท์,practice {x}
+s0579,ไปที่ท่า timeout,Time_out,11,11,english,timeout,ไปที่ท่า{x}
+s0580,ขอท่าการพักการแข่งขันหน่อย,Time_out,11,11,formal,การพักการแข่งขัน,ขอท่า{x}หน่อย
+s0581,ฝึก timeout,Time_out,11,11,english,timeout,ฝึก{x}
+s0582,ช่วยดูว่าทำท่า time out ถูกไหม,Time_out,11,11,english,time out,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0583,วันนี้ขอซ้อมไทม์เอ้าท์,Time_out,11,11,translit,ไทม์เอ้าท์,วันนี้ขอซ้อม{x}
+s0584,สัญญาณไทม์เอาท์ต้องทำมือยังไง,Time_out,11,11,translit,ไทม์เอาท์,สัญญาณ{x}ต้องทำมือยังไง
+s0585,show me time out,Time_out,11,11,english,time out,show me {x}
+s0586,จะให้ไทม์เอาท์ต้องทำมือแบบไหน,Time_out,11,11,translit,ไทม์เอาท์,จะให้{x}ต้องทำมือแบบไหน
+s0587,practice ไทม์เอ้าท์,Time_out,11,11,translit,ไทม์เอ้าท์,practice {x}
+s0588,ช่วยดูว่าทำท่า timeout ถูกไหม,Time_out,11,11,english,timeout,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0589,เริ่มฝึกท่าไทม์เอ้าท์,Time_out,11,11,translit,ไทม์เอ้าท์,เริ่มฝึกท่า{x}
+s0590,เปิดโหมดฝึกการหยุดการแข่งขัน,Time_out,11,11,formal,การหยุดการแข่งขัน,เปิดโหมดฝึก{x}
+s0591,เช็คการขอเวลานอกหน่อย,Time_out,11,11,formal,การขอเวลานอก,เช็ค{x}หน่อย
+s0592,ท่าเวลานอกทำยังไง,Time_out,11,11,formal,เวลานอก,ท่า{x}ทำยังไง
+s0593,ขอวิธีให้สัญญาณหยุดเกม,Time_out,11,11,colloquial,หยุดเกม,ขอวิธีให้สัญญาณ{x}
+s0594,วันนี้ขอซ้อมเวลานอก,Time_out,11,11,formal,เวลานอก,วันนี้ขอซ้อม{x}
+s0595,ขอฝึกท่าทดเวลาบาดเจ็บค่ะ,Time_out,11,11,colloquial,ทดเวลาบาดเจ็บ,ขอฝึกท่า{x}ค่ะ
+s0596,สอนทำสัญญาณ timeout หน่อยครับ,Time_out,11,11,english,timeout,สอนทำสัญญาณ{x}หน่อยครับ
+s0597,แสดงท่าทดเวลาบาดเจ็บ,Time_out,11,11,colloquial,ทดเวลาบาดเจ็บ,แสดงท่า{x}
+s0598,practice หยุดเกม,Time_out,11,11,colloquial,หยุดเกม,practice {x}
+s0599,show me หยุดเกม,Time_out,11,11,colloquial,หยุดเกม,show me {x}
+s0600,กองหลังเตะบอลออกหลังเส้นประตูตัวเอง กรรมการต้องชี้ยังไง,Corner_Kick,12,12,situation,,
+s0601,ขอท่าชี้แขนเฉียงขึ้นไปทางธงที่มุมสนาม,Corner_Kick,12,12,situation,,
+s0602,ผู้รักษาประตูปัดบอลออกหลังเส้น ต้องให้สัญญาณอะไร,Corner_Kick,12,12,situation,,
+s0603,อยากฝึกท่าชี้ไปที่ธงมุมฝั่งซ้าย,Corner_Kick,12,12,situation,,
+s0604,บอลโดนกองหลังแล้วหลุดออกเส้นหลัง ต้องให้ลูกแบบไหน,Corner_Kick,12,12,situation,,
+s0605,ฝึกท่ายกแขนชี้ทแยงขึ้นไปทางมุมธง,Corner_Kick,12,12,situation,,
+s0606,ไลน์แมนชี้ธงไปที่มุมสนามหมายถึงอะไร,Corner_Kick,12,12,situation,,
+s0607,ทีมบุกได้เตะจากธงมุม กรรมการต้องทำท่าไหน,Corner_Kick,12,12,situation,,
+s0608,ฝึก corner flag,Corner_Kick,12,12,english,corner flag,ฝึก{x}
+s0609,corner kick,Corner_Kick,12,12,english,corner kick,{x}
+s0610,ฝึกลูกมุม,Corner_Kick,12,12,colloquial,ลูกมุม,ฝึก{x}
+s0611,ฝึกลูกเตะมุม,Corner_Kick,12,12,formal,ลูกเตะมุม,ฝึก{x}
+s0612,ขอฝึกท่าเตะจากมุมสนามค่ะ,Corner_Kick,12,12,formal,เตะจากมุมสนาม,ขอฝึกท่า{x}ค่ะ
+s0613,วันนี้ขอซ้อม corner,Corner_Kick,12,12,english,corner,วันนี้ขอซ้อม{x}
+s0614,แสดงท่าคอร์เนอร์คิก,Corner_Kick,12,12,translit,คอร์เนอร์คิก,แสดงท่า{x}
+s0615,practice การเตะมุม,Corner_Kick,12,12,formal,การเตะมุม,practice {x}
+s0616,เช็คเตะมุมหน่อย,Corner_Kick,12,12,colloquial,เตะมุม,เช็ค{x}หน่อย
+s0617,วันนี้ขอซ้อมได้มุม,Corner_Kick,12,12,colloquial,ได้มุม,วันนี้ขอซ้อม{x}
+s0618,ขอท่าชี้มุม,Corner_Kick,12,12,colloquial,ชี้มุม,ขอท่า{x}
+s0619,เริ่มฝึกท่าลูกเตะจากมุม,Corner_Kick,12,12,formal,ลูกเตะจากมุม,เริ่มฝึกท่า{x}
+s0620,ตรวจท่าคอนเนอร์ให้หน่อย,Corner_Kick,12,12,translit,คอนเนอร์,ตรวจท่า{x}ให้หน่อย
+s0621,สอนทำสัญญาณคอร์เนอร์หน่อยครับ,Corner_Kick,12,12,translit,คอร์เนอร์,สอนทำสัญญาณ{x}หน่อยครับ
+s0622,ไปที่ท่า corner flag,Corner_Kick,12,12,english,corner flag,ไปที่ท่า{x}
+s0623,สัญญาณลูกเตะมุมต้องทำมือยังไง,Corner_Kick,12,12,formal,ลูกเตะมุม,สัญญาณ{x}ต้องทำมือยังไง
+s0624,corner,Corner_Kick,12,12,english,corner,{x}
+s0625,ขอท่าเตะจากมุมสนามหน่อย,Corner_Kick,12,12,formal,เตะจากมุมสนาม,ขอท่า{x}หน่อย
+s0626,ขอฝึกท่าการเตะมุมค่ะ,Corner_Kick,12,12,formal,การเตะมุม,ขอฝึกท่า{x}ค่ะ
+s0627,อยากฝึกท่าการเตะมุม,Corner_Kick,12,12,formal,การเตะมุม,อยากฝึกท่า{x}
+s0628,ท่าลูกเตะมุมทำยังไง,Corner_Kick,12,12,formal,ลูกเตะมุม,ท่า{x}ทำยังไง
+s0629,ขอฝึกลูกเตะมุมอีกรอบ,Corner_Kick,12,12,formal,ลูกเตะมุม,ขอฝึก{x}อีกรอบ
+s0630,ทดสอบท่าลูกมุม,Corner_Kick,12,12,colloquial,ลูกมุม,ทดสอบท่า{x}
+s0631,ขอดูท่า corner flag,Corner_Kick,12,12,english,corner flag,ขอดูท่า{x}
+s0632,ไปที่ท่าเตะจากมุมสนาม,Corner_Kick,12,12,formal,เตะจากมุมสนาม,ไปที่ท่า{x}
+s0633,ขอท่าคอร์เนอร์คิกหน่อย,Corner_Kick,12,12,translit,คอร์เนอร์คิก,ขอท่า{x}หน่อย
+s0634,show me corner flag,Corner_Kick,12,12,english,corner flag,show me {x}
+s0635,ท่า corner kick หน้าตาเป็นยังไง,Corner_Kick,12,12,english,corner kick,ท่า{x}หน้าตาเป็นยังไง
+s0636,ตรวจท่าลูกมุมให้หน่อย,Corner_Kick,12,12,colloquial,ลูกมุม,ตรวจท่า{x}ให้หน่อย
+s0637,สอนทำสัญญาณคอนเนอร์หน่อยครับ,Corner_Kick,12,12,translit,คอนเนอร์,สอนทำสัญญาณ{x}หน่อยครับ
+s0638,ไปที่ท่าเตะมุม,Corner_Kick,12,12,colloquial,เตะมุม,ไปที่ท่า{x}
+s0639,สอนท่าคอนเนอร์,Corner_Kick,12,12,translit,คอนเนอร์,สอนท่า{x}
+s0640,เลือกท่าคอร์เนอร์คิก,Corner_Kick,12,12,translit,คอร์เนอร์คิก,เลือกท่า{x}
+s0641,ขอฝึกการเตะมุมอีกรอบ,Corner_Kick,12,12,formal,การเตะมุม,ขอฝึก{x}อีกรอบ
+s0642,แสดงท่าลูกเตะจากมุม,Corner_Kick,12,12,formal,ลูกเตะจากมุม,แสดงท่า{x}
+s0643,ถ้าเป็น corner กรรมการทำท่าไหน,Corner_Kick,12,12,english,corner,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0644,เตะจากมุมสนาม,Corner_Kick,12,12,formal,เตะจากมุมสนาม,{x}
+s0645,ตรวจท่า corner ให้หน่อย,Corner_Kick,12,12,english,corner,ตรวจท่า{x}ให้หน่อย
+s0646,ทดสอบท่าลูกเตะมุม,Corner_Kick,12,12,formal,ลูกเตะมุม,ทดสอบท่า{x}
+s0647,ขอท่าลูกมุมหน่อย,Corner_Kick,12,12,colloquial,ลูกมุม,ขอท่า{x}หน่อย
+s0648,เช็คลูกมุมหน่อย,Corner_Kick,12,12,colloquial,ลูกมุม,เช็ค{x}หน่อย
+s0649,practice ได้มุม,Corner_Kick,12,12,colloquial,ได้มุม,practice {x}
+s0650,ผู้เล่นกระโดดลอยตัวพุ่งเข้าหาคู่แข่งตอนแย่งบอล กรรมการทำท่าไหน,Jumping,13,13,situation,,
+s0651,ขอท่าชูแขนขึ้นแล้วสะบัดขึ้นด้านบนบอกว่ากระโดดเข้าใส่,Jumping,13,13,situation,,
+s0652,แย่งลูกกลางอากาศแล้วกระโจนทับหลังคู่แข่งต้องให้สัญญาณอะไร,Jumping,13,13,situation,,
+s0653,อยากฝึกท่าอธิบายฟาวล์ที่โดดใส่คนอื่น,Jumping,13,13,situation,,
+s0654,นักเตะกระโจนเข้าหาฝ่ายตรงข้ามอย่างไม่ระวัง ต้องแสดงท่าไหน,Jumping,13,13,situation,,
+s0655,ฝึกท่าบอกฟาวล์จากการลอยตัวเข้าชน,Jumping,13,13,situation,,
+s0656,ผู้เล่นใช้ตัวกระโดดอัดคู่แข่งตอนโหม่ง ต้องทำมือยังไง,Jumping,13,13,situation,,
+s0657,ท่ายกแขนข้างเดียวแล้วดีดขึ้นหมายถึงฟาวล์อะไร,Jumping,13,13,situation,,
+s0658,เปิดโหมดฝึกโดดใส่,Jumping,13,13,colloquial,โดดใส่,เปิดโหมดฝึก{x}
+s0659,ขอฝึกการกระโดดเข้าใส่คู่แข่งอีกรอบ,Jumping,13,13,formal,การกระโดดเข้าใส่คู่แข่ง,ขอฝึก{x}อีกรอบ
+s0660,ขอท่า jumping,Jumping,13,13,english,jumping,ขอท่า{x}
+s0661,ขอท่ากระโดดอัด,Jumping,13,13,colloquial,กระโดดอัด,ขอท่า{x}
+s0662,ฝึกกระโดดเข้าใส่คู่แข่ง,Jumping,13,13,formal,กระโดดเข้าใส่คู่แข่ง,ฝึก{x}
+s0663,ท่า jump in หน้าตาเป็นยังไง,Jumping,13,13,english,jump in,ท่า{x}หน้าตาเป็นยังไง
+s0664,ขอฝึกกระโดดใส่อีกรอบ,Jumping,13,13,colloquial,กระโดดใส่,ขอฝึก{x}อีกรอบ
+s0665,ขอดูท่ากระโดดชน,Jumping,13,13,colloquial,กระโดดชน,ขอดูท่า{x}
+s0666,practice จั๊มปิ้ง,Jumping,13,13,translit,จั๊มปิ้ง,practice {x}
+s0667,ลองท่า jumping at opponent ดู,Jumping,13,13,english,jumping at opponent,ลองท่า{x}ดู
+s0668,แสดงท่าฟาวล์กระโดดเข้าใส่,Jumping,13,13,formal,ฟาวล์กระโดดเข้าใส่,แสดงท่า{x}
+s0669,ขอฝึกท่าจัมปิ้งค่ะ,Jumping,13,13,translit,จัมปิ้ง,ขอฝึกท่า{x}ค่ะ
+s0670,เริ่มฝึกท่าการกระโดดใส่ผู้เล่น,Jumping,13,13,formal,การกระโดดใส่ผู้เล่น,เริ่มฝึกท่า{x}
+s0671,ท่าจัมพ์อิ้งหน้าตาเป็นยังไง,Jumping,13,13,translit,จัมพ์อิ้ง,ท่า{x}หน้าตาเป็นยังไง
+s0672,ฝึกโดดใส่,Jumping,13,13,colloquial,โดดใส่,ฝึก{x}
+s0673,ท่าโดดใส่หน้าตาเป็นยังไง,Jumping,13,13,colloquial,โดดใส่,ท่า{x}หน้าตาเป็นยังไง
+s0674,ช่วยดูว่าทำท่ากระโดดใส่ถูกไหม,Jumping,13,13,colloquial,กระโดดใส่,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0675,สอนทำสัญญาณ jump in หน่อยครับ,Jumping,13,13,english,jump in,สอนทำสัญญาณ{x}หน่อยครับ
+s0676,ไปที่ท่า jumping,Jumping,13,13,english,jumping,ไปที่ท่า{x}
+s0677,show me การกระโดดเข้าใส่คู่แข่ง,Jumping,13,13,formal,การกระโดดเข้าใส่คู่แข่ง,show me {x}
+s0678,jump in,Jumping,13,13,english,jump in,{x}
+s0679,อยากซ้อมให้สัญญาณกระโดดเข้าใส่คู่แข่ง,Jumping,13,13,formal,กระโดดเข้าใส่คู่แข่ง,อยากซ้อมให้สัญญาณ{x}
+s0680,เปิดโหมดฝึก jumping,Jumping,13,13,english,jumping,เปิดโหมดฝึก{x}
+s0681,สัญญาณการกระโดดเข้าใส่คู่แข่งต้องทำมือยังไง,Jumping,13,13,formal,การกระโดดเข้าใส่คู่แข่ง,สัญญาณ{x}ต้องทำมือยังไง
+s0682,เช็คโดดใส่หน่อย,Jumping,13,13,colloquial,โดดใส่,เช็ค{x}หน่อย
+s0683,show me จัมปิ้ง,Jumping,13,13,translit,จัมปิ้ง,show me {x}
+s0684,จะให้กระโดดใส่ต้องทำมือแบบไหน,Jumping,13,13,colloquial,กระโดดใส่,จะให้{x}ต้องทำมือแบบไหน
+s0685,practice การกระโดดใส่ผู้เล่น,Jumping,13,13,formal,การกระโดดใส่ผู้เล่น,practice {x}
+s0686,แสดงท่าการกระโดดเข้าใส่คู่แข่ง,Jumping,13,13,formal,การกระโดดเข้าใส่คู่แข่ง,แสดงท่า{x}
+s0687,สอนทำสัญญาณจัมปิ้งหน่อยครับ,Jumping,13,13,translit,จัมปิ้ง,สอนทำสัญญาณ{x}หน่อยครับ
+s0688,ขอฝึกกระโดดชนอีกรอบ,Jumping,13,13,colloquial,กระโดดชน,ขอฝึก{x}อีกรอบ
+s0689,วันนี้ขอซ้อมกระโดดใส่,Jumping,13,13,colloquial,กระโดดใส่,วันนี้ขอซ้อม{x}
+s0690,ไปที่ท่ากระโดดอัด,Jumping,13,13,colloquial,กระโดดอัด,ไปที่ท่า{x}
+s0691,เริ่มฝึกท่า jumping,Jumping,13,13,english,jumping,เริ่มฝึกท่า{x}
+s0692,ช่วยเช็คท่ากระโดดชนให้หน่อย,Jumping,13,13,colloquial,กระโดดชน,ช่วยเช็คท่า{x}ให้หน่อย
+s0693,ขอวิธีให้สัญญาณจั๊มปิ้ง,Jumping,13,13,translit,จั๊มปิ้ง,ขอวิธีให้สัญญาณ{x}
+s0694,ทดสอบท่า jump in,Jumping,13,13,english,jump in,ทดสอบท่า{x}
+s0695,จัมพ์อิ้ง,Jumping,13,13,translit,จัมพ์อิ้ง,{x}
+s0696,วันนี้ขอซ้อมฟาวล์กระโดดเข้าใส่,Jumping,13,13,formal,ฟาวล์กระโดดเข้าใส่,วันนี้ขอซ้อม{x}
+s0697,ลองท่าจัมพ์อิ้งดู,Jumping,13,13,translit,จัมพ์อิ้ง,ลองท่า{x}ดู
+s0698,ไปที่ท่าจัมพ์อิ้ง,Jumping,13,13,translit,จัมพ์อิ้ง,ไปที่ท่า{x}
+s0699,ขอท่ากระโดดใส่หน่อย,Jumping,13,13,colloquial,กระโดดใส่,ขอท่า{x}หน่อย
+s0700,ผู้เล่นยืนขวางไม่ให้คู่แข่งวิ่งไปหาบอลโดยไม่เล่นบอล กรรมการทำท่าไหน,Obstruction,14,14,situation,,
+s0701,ขอท่าเอามือสองข้างวางพาดหน้าอกเป็นแนวนอน,Obstruction,14,14,situation,,
+s0702,กองหลังใช้ตัวบังทางวิ่งของกองหน้าโดยไม่ได้แตะบอล ต้องให้สัญญาณอะไร,Obstruction,14,14,situation,,
+s0703,อยากฝึกท่าอธิบายฟาวล์ที่กันทางคู่แข่ง,Obstruction,14,14,situation,,
+s0704,ผู้เล่นไม่สนใจบอลแต่คอยกั้นไม่ให้อีกฝ่ายผ่าน ต้องแสดงท่าไหน,Obstruction,14,14,situation,,
+s0705,ฝึกท่ากางแขนขวางหน้าลำตัวบอกการขวางทาง,Obstruction,14,14,situation,,
+s0706,ยืนกั้นผู้รักษาประตูไม่ให้ปล่อยบอลต้องทำมือยังไง,Obstruction,14,14,situation,,
+s0707,ท่าวางแขนสองข้างระดับอกหมายถึงฟาวล์อะไร,Obstruction,14,14,situation,,
+s0708,ช่วยดูว่าทำท่าขวางทางถูกไหม,Obstruction,14,14,colloquial,ขวางทาง,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0709,เลือกท่า obstruction,Obstruction,14,14,english,obstruction,เลือกท่า{x}
+s0710,เช็คยืนขวางหน่อย,Obstruction,14,14,colloquial,ยืนขวาง,เช็ค{x}หน่อย
+s0711,ขอดูท่า blocking,Obstruction,14,14,english,blocking,ขอดูท่า{x}
+s0712,ช่วยดูว่าทำท่าบล็อกตัวถูกไหม,Obstruction,14,14,colloquial,บล็อกตัว,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0713,เช็คออบสตรั๊กชั่นหน่อย,Obstruction,14,14,translit,ออบสตรั๊กชั่น,เช็ค{x}หน่อย
+s0714,ลองท่าออบสตรัคชั่นดู,Obstruction,14,14,translit,ออบสตรัคชั่น,ลองท่า{x}ดู
+s0715,ไปที่ท่าการขัดขวาง,Obstruction,14,14,formal,การขัดขวาง,ไปที่ท่า{x}
+s0716,เลือกท่าการกีดขวาง,Obstruction,14,14,formal,การกีดขวาง,เลือกท่า{x}
+s0717,ตรวจท่าขัดขวางการเคลื่อนที่ให้หน่อย,Obstruction,14,14,formal,ขัดขวางการเคลื่อนที่,ตรวจท่า{x}ให้หน่อย
+s0718,ตรวจท่า impeding ให้หน่อย,Obstruction,14,14,english,impeding,ตรวจท่า{x}ให้หน่อย
+s0719,ขอท่าขัดขวางคู่แข่งหน่อย,Obstruction,14,14,formal,ขัดขวางคู่แข่ง,ขอท่า{x}หน่อย
+s0720,จะให้อิมพีดดิ้งต้องทำมือแบบไหน,Obstruction,14,14,translit,อิมพีดดิ้ง,จะให้{x}ต้องทำมือแบบไหน
+s0721,ขอฝึกท่าบังทางวิ่งค่ะ,Obstruction,14,14,colloquial,บังทางวิ่ง,ขอฝึกท่า{x}ค่ะ
+s0722,เริ่มฝึกท่ายืนขวาง,Obstruction,14,14,colloquial,ยืนขวาง,เริ่มฝึกท่า{x}
+s0723,สัญญาณยืนขวางต้องทำมือยังไง,Obstruction,14,14,colloquial,ยืนขวาง,สัญญาณ{x}ต้องทำมือยังไง
+s0724,ขอดูท่า obstruction,Obstruction,14,14,english,obstruction,ขอดูท่า{x}
+s0725,อยากซ้อมให้สัญญาณยืนขวาง,Obstruction,14,14,colloquial,ยืนขวาง,อยากซ้อมให้สัญญาณ{x}
+s0726,สอนท่าออบสตรั๊กชั่น,Obstruction,14,14,translit,ออบสตรั๊กชั่น,สอนท่า{x}
+s0727,ขอดูท่ายืนขวาง,Obstruction,14,14,colloquial,ยืนขวาง,ขอดูท่า{x}
+s0728,ขอวิธีให้สัญญาณยืนขวาง,Obstruction,14,14,colloquial,ยืนขวาง,ขอวิธีให้สัญญาณ{x}
+s0729,show me ขวางทาง,Obstruction,14,14,colloquial,ขวางทาง,show me {x}
+s0730,ขอฝึก blocking อีกรอบ,Obstruction,14,14,english,blocking,ขอฝึก{x}อีกรอบ
+s0731,สอนทำสัญญาณขัดขวางการเคลื่อนที่หน่อยครับ,Obstruction,14,14,formal,ขัดขวางการเคลื่อนที่,สอนทำสัญญาณ{x}หน่อยครับ
+s0732,ไปที่ท่าขัดขวางการเคลื่อนที่,Obstruction,14,14,formal,ขัดขวางการเคลื่อนที่,ไปที่ท่า{x}
+s0733,ขอท่าบล็อกตัว,Obstruction,14,14,colloquial,บล็อกตัว,ขอท่า{x}
+s0734,ช่วยดูว่าทำท่าการกีดขวางถูกไหม,Obstruction,14,14,formal,การกีดขวาง,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0735,การขัดขวาง,Obstruction,14,14,formal,การขัดขวาง,{x}
+s0736,วันนี้ขอซ้อม blocking,Obstruction,14,14,english,blocking,วันนี้ขอซ้อม{x}
+s0737,แสดงท่าการกีดขวาง,Obstruction,14,14,formal,การกีดขวาง,แสดงท่า{x}
+s0738,ขอท่าการขัดขวางหน่อย,Obstruction,14,14,formal,การขัดขวาง,ขอท่า{x}หน่อย
+s0739,ขอฝึกท่า obstruction ค่ะ,Obstruction,14,14,english,obstruction,ขอฝึกท่า{x}ค่ะ
+s0740,ลองท่าบล็อกตัวดู,Obstruction,14,14,colloquial,บล็อกตัว,ลองท่า{x}ดู
+s0741,อยากซ้อมให้สัญญาณ impeding,Obstruction,14,14,english,impeding,อยากซ้อมให้สัญญาณ{x}
+s0742,ไปที่ท่า impeding,Obstruction,14,14,english,impeding,ไปที่ท่า{x}
+s0743,ขอวิธีให้สัญญาณ impeding,Obstruction,14,14,english,impeding,ขอวิธีให้สัญญาณ{x}
+s0744,ท่า obstruction หน้าตาเป็นยังไง,Obstruction,14,14,english,obstruction,ท่า{x}หน้าตาเป็นยังไง
+s0745,สอนท่าออบสตรัคชั่น,Obstruction,14,14,translit,ออบสตรัคชั่น,สอนท่า{x}
+s0746,ฝึกยืนขวาง,Obstruction,14,14,colloquial,ยืนขวาง,ฝึก{x}
+s0747,ฝึกขัดขวางคู่แข่ง,Obstruction,14,14,formal,ขัดขวางคู่แข่ง,ฝึก{x}
+s0748,ลองท่าขัดขวางคู่แข่งดู,Obstruction,14,14,formal,ขัดขวางคู่แข่ง,ลองท่า{x}ดู
+s0749,อยากฝึกท่าขัดขวางคู่แข่ง,Obstruction,14,14,formal,ขัดขวางคู่แข่ง,อยากฝึกท่า{x}
+s0750,ผู้เล่นใช้สองมือดันหลังคู่แข่งตอนแย่งลูกกลางอากาศ กรรมการทำท่าไหน,Pushing,15,15,situation,,
+s0751,ขอท่ายกฝ่ามือสองข้างไว้หน้าอกแล้วดันออก,Pushing,15,15,situation,,
+s0752,กองหลังดันกองหน้าล้มในจังหวะโหม่ง ต้องให้สัญญาณอะไร,Pushing,15,15,situation,,
+s0753,อยากฝึกท่าอธิบายฟาวล์ที่ใช้มือผลักคนอื่น,Pushing,15,15,situation,,
+s0754,นักเตะผลักอกคู่แข่งหลังจบจังหวะ ต้องแสดงท่าไหน,Pushing,15,15,situation,,
+s0755,ฝึกท่าทำมือดันไปข้างหน้าบอกฟาวล์,Pushing,15,15,situation,,
+s0756,ใช้มือดันคู่แข่งออกจากทางบอลต้องทำมือยังไง,Pushing,15,15,situation,,
+s0757,ท่าตั้งฝ่ามือสองข้างระดับอกหมายถึงฟาวล์อะไร,Pushing,15,15,situation,,
+s0758,อยากฝึกท่าพุ๊ชชิ่ง,Pushing,15,15,translit,พุ๊ชชิ่ง,อยากฝึกท่า{x}
+s0759,เลือกท่าเอามือดัน,Pushing,15,15,colloquial,เอามือดัน,เลือกท่า{x}
+s0760,ขอฝึก pushing อีกรอบ,Pushing,15,15,english,pushing,ขอฝึก{x}อีกรอบ
+s0761,ขอดูท่าการผลักคู่แข่ง,Pushing,15,15,formal,การผลักคู่แข่ง,ขอดูท่า{x}
+s0762,สอนทำสัญญาณ pushing opponent หน่อยครับ,Pushing,15,15,english,pushing opponent,สอนทำสัญญาณ{x}หน่อยครับ
+s0763,ขอฝึกท่าฟาวล์ผลักค่ะ,Pushing,15,15,formal,ฟาวล์ผลัก,ขอฝึกท่า{x}ค่ะ
+s0764,practice การผลัก,Pushing,15,15,formal,การผลัก,practice {x}
+s0765,show me ผลักคู่แข่ง,Pushing,15,15,formal,ผลักคู่แข่ง,show me {x}
+s0766,เริ่มฝึกท่าพุชชิง,Pushing,15,15,translit,พุชชิง,เริ่มฝึกท่า{x}
+s0767,สอนท่า push,Pushing,15,15,english,push,สอนท่า{x}
+s0768,เริ่มฝึกท่าผลักหลัง,Pushing,15,15,colloquial,ผลักหลัง,เริ่มฝึกท่า{x}
+s0769,ขอฝึกพุชชิ่งอีกรอบ,Pushing,15,15,translit,พุชชิ่ง,ขอฝึก{x}อีกรอบ
+s0770,เริ่มฝึกท่าผลัก,Pushing,15,15,colloquial,ผลัก,เริ่มฝึกท่า{x}
+s0771,show me ดันหลัง,Pushing,15,15,colloquial,ดันหลัง,show me {x}
+s0772,อยากฝึกท่าเอามือดัน,Pushing,15,15,colloquial,เอามือดัน,อยากฝึกท่า{x}
+s0773,ไปที่ท่า pushing,Pushing,15,15,english,pushing,ไปที่ท่า{x}
+s0774,เช็คการผลักหน่อย,Pushing,15,15,formal,การผลัก,เช็ค{x}หน่อย
+s0775,ถ้าเป็นพุ๊ชชิ่ง กรรมการทำท่าไหน,Pushing,15,15,translit,พุ๊ชชิ่ง,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0776,ช่วยเช็คท่าการผลักให้หน่อย,Pushing,15,15,formal,การผลัก,ช่วยเช็คท่า{x}ให้หน่อย
+s0777,ถ้าเป็นเอามือดัน กรรมการทำท่าไหน,Pushing,15,15,colloquial,เอามือดัน,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0778,เช็คเอามือดันหน่อย,Pushing,15,15,colloquial,เอามือดัน,เช็ค{x}หน่อย
+s0779,จะให้ pushing opponent ต้องทำมือแบบไหน,Pushing,15,15,english,pushing opponent,จะให้{x}ต้องทำมือแบบไหน
+s0780,ท่าฟาวล์ผลักหน้าตาเป็นยังไง,Pushing,15,15,formal,ฟาวล์ผลัก,ท่า{x}หน้าตาเป็นยังไง
+s0781,อยากฝึกท่า push,Pushing,15,15,english,push,อยากฝึกท่า{x}
+s0782,จะให้ push ต้องทำมือแบบไหน,Pushing,15,15,english,push,จะให้{x}ต้องทำมือแบบไหน
+s0783,เอามือดัน,Pushing,15,15,colloquial,เอามือดัน,{x}
+s0784,practice push,Pushing,15,15,english,push,practice {x}
+s0785,เลือกท่า pushing opponent,Pushing,15,15,english,pushing opponent,เลือกท่า{x}
+s0786,ขอฝึกการผลักอีกรอบ,Pushing,15,15,formal,การผลัก,ขอฝึก{x}อีกรอบ
+s0787,ฟาวล์ผลัก,Pushing,15,15,formal,ฟาวล์ผลัก,{x}
+s0788,ขอวิธีให้สัญญาณ pushing,Pushing,15,15,english,pushing,ขอวิธีให้สัญญาณ{x}
+s0789,ขอท่าพุ๊ชชิ่ง,Pushing,15,15,translit,พุ๊ชชิ่ง,ขอท่า{x}
+s0790,ขอท่าผลักหลังหน่อย,Pushing,15,15,colloquial,ผลักหลัง,ขอท่า{x}หน่อย
+s0791,วันนี้ขอซ้อม pushing opponent,Pushing,15,15,english,pushing opponent,วันนี้ขอซ้อม{x}
+s0792,ทดสอบท่าผลักคู่แข่ง,Pushing,15,15,formal,ผลักคู่แข่ง,ทดสอบท่า{x}
+s0793,ตรวจท่าผลักหลังให้หน่อย,Pushing,15,15,colloquial,ผลักหลัง,ตรวจท่า{x}ให้หน่อย
+s0794,สัญญาณผลักคู่แข่งต้องทำมือยังไง,Pushing,15,15,formal,ผลักคู่แข่ง,สัญญาณ{x}ต้องทำมือยังไง
+s0795,ขอท่าพุชชิ่ง,Pushing,15,15,translit,พุชชิ่ง,ขอท่า{x}
+s0796,ขอท่าเอามือดัน,Pushing,15,15,colloquial,เอามือดัน,ขอท่า{x}
+s0797,จะให้การผลักต้องทำมือแบบไหน,Pushing,15,15,formal,การผลัก,จะให้{x}ต้องทำมือแบบไหน
+s0798,ขอฝึกท่าเอามือดันค่ะ,Pushing,15,15,colloquial,เอามือดัน,ขอฝึกท่า{x}ค่ะ
+s0799,ขอวิธีให้สัญญาณ push,Pushing,15,15,english,push,ขอวิธีให้สัญญาณ{x}
+s0800,ผู้เล่นกางแขนออกแล้วบอลกระทบแขน กรรมการทำท่าไหน,Hand_Ball,16,16,situation,,
+s0801,ขอท่าแตะมือตัวเองบอกว่าลูกโดนมือ,Hand_Ball,16,16,situation,,
+s0802,กองหลังยกแขนบล็อกลูกยิง ต้องให้สัญญาณอะไร,Hand_Ball,16,16,situation,,
+s0803,อยากฝึกท่าชี้ไปที่แขนของตัวเอง,Hand_Ball,16,16,situation,,
+s0804,นักเตะเอามือปัดบอลโดยเจตนา ต้องแสดงท่าไหน,Hand_Ball,16,16,situation,,
+s0805,ฝึกท่าตบแขนตัวเองบอกฟาวล์ใช้มือ,Hand_Ball,16,16,situation,,
+s0806,บอลกระดอนโดนแขนที่กางเกินตัว ต้องทำมือยังไง,Hand_Ball,16,16,situation,,
+s0807,ท่าเอามือจับข้อมืออีกข้างหมายถึงฟาวล์อะไร,Hand_Ball,16,16,situation,,
+s0808,เปิดโหมดฝึกบอลถูกมือ,Hand_Ball,16,16,formal,บอลถูกมือ,เปิดโหมดฝึก{x}
+s0809,สอนทำสัญญาณลูกบอลสัมผัสมือหน่อยครับ,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,สอนทำสัญญาณ{x}หน่อยครับ
+s0810,ขอดูท่าแฮนด์บอล,Hand_Ball,16,16,translit,แฮนด์บอล,ขอดูท่า{x}
+s0811,ตรวจท่า handling ให้หน่อย,Hand_Ball,16,16,english,handling,ตรวจท่า{x}ให้หน่อย
+s0812,ขอฝึกท่าแฮนด์บอลล์ค่ะ,Hand_Ball,16,16,translit,แฮนด์บอลล์,ขอฝึกท่า{x}ค่ะ
+s0813,ขอฝึกท่าแฮนด์ค่ะ,Hand_Ball,16,16,colloquial,แฮนด์,ขอฝึกท่า{x}ค่ะ
+s0814,ทดสอบท่าจับบอล,Hand_Ball,16,16,colloquial,จับบอล,ทดสอบท่า{x}
+s0815,ลองท่า hand ball ดู,Hand_Ball,16,16,english,hand ball,ลองท่า{x}ดู
+s0816,เช็คใช้มือเล่นบอลหน่อย,Hand_Ball,16,16,formal,ใช้มือเล่นบอล,เช็ค{x}หน่อย
+s0817,ลูกโดนแขน,Hand_Ball,16,16,colloquial,ลูกโดนแขน,{x}
+s0818,ช่วยเช็คท่าบอลโดนมือให้หน่อย,Hand_Ball,16,16,colloquial,บอลโดนมือ,ช่วยเช็คท่า{x}ให้หน่อย
+s0819,ขอฝึก handball อีกรอบ,Hand_Ball,16,16,english,handball,ขอฝึก{x}อีกรอบ
+s0820,อยากฝึกท่าแฮนบอล,Hand_Ball,16,16,translit,แฮนบอล,อยากฝึกท่า{x}
+s0821,สัญญาณการเล่นลูกด้วยมือต้องทำมือยังไง,Hand_Ball,16,16,formal,การเล่นลูกด้วยมือ,สัญญาณ{x}ต้องทำมือยังไง
+s0822,ลองท่าบอลถูกมือดู,Hand_Ball,16,16,formal,บอลถูกมือ,ลองท่า{x}ดู
+s0823,ขอท่าแฮนด์บอลล์หน่อย,Hand_Ball,16,16,translit,แฮนด์บอลล์,ขอท่า{x}หน่อย
+s0824,hand ball,Hand_Ball,16,16,english,hand ball,{x}
+s0825,ขอฝึก hand ball อีกรอบ,Hand_Ball,16,16,english,hand ball,ขอฝึก{x}อีกรอบ
+s0826,ถ้าเป็นลูกบอลสัมผัสมือ กรรมการทำท่าไหน,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0827,ช่วยเช็คท่าบอลถูกมือให้หน่อย,Hand_Ball,16,16,formal,บอลถูกมือ,ช่วยเช็คท่า{x}ให้หน่อย
+s0828,ขอท่าลูกบอลสัมผัสมือหน่อย,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,ขอท่า{x}หน่อย
+s0829,วันนี้ขอซ้อมลูกบอลสัมผัสมือ,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,วันนี้ขอซ้อม{x}
+s0830,เปิดโหมดฝึกบอลโดนมือ,Hand_Ball,16,16,colloquial,บอลโดนมือ,เปิดโหมดฝึก{x}
+s0831,ท่าแฮนด์บอลล์หน้าตาเป็นยังไง,Hand_Ball,16,16,translit,แฮนด์บอลล์,ท่า{x}หน้าตาเป็นยังไง
+s0832,ฝึกแฮนด์บอล,Hand_Ball,16,16,translit,แฮนด์บอล,ฝึก{x}
+s0833,ตรวจท่าจับบอลให้หน่อย,Hand_Ball,16,16,colloquial,จับบอล,ตรวจท่า{x}ให้หน่อย
+s0834,ไปที่ท่าจับบอล,Hand_Ball,16,16,colloquial,จับบอล,ไปที่ท่า{x}
+s0835,ขอวิธีให้สัญญาณ hand ball,Hand_Ball,16,16,english,hand ball,ขอวิธีให้สัญญาณ{x}
+s0836,ขอท่าลูกบอลสัมผัสมือ,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,ขอท่า{x}
+s0837,เช็คแฮนด์บอลหน่อย,Hand_Ball,16,16,translit,แฮนด์บอล,เช็ค{x}หน่อย
+s0838,ท่าบอลโดนมือหน้าตาเป็นยังไง,Hand_Ball,16,16,colloquial,บอลโดนมือ,ท่า{x}หน้าตาเป็นยังไง
+s0839,บอลถูกมือ,Hand_Ball,16,16,formal,บอลถูกมือ,{x}
+s0840,ท่าแฮนด์บอลล์ทำยังไง,Hand_Ball,16,16,translit,แฮนด์บอลล์,ท่า{x}ทำยังไง
+s0841,เริ่มฝึกท่าบอลโดนมือ,Hand_Ball,16,16,colloquial,บอลโดนมือ,เริ่มฝึกท่า{x}
+s0842,ขอดูท่าแฮนด์บอลล์,Hand_Ball,16,16,translit,แฮนด์บอลล์,ขอดูท่า{x}
+s0843,ขอท่า hand ball หน่อย,Hand_Ball,16,16,english,hand ball,ขอท่า{x}หน่อย
+s0844,จะให้แฮนด์ต้องทำมือแบบไหน,Hand_Ball,16,16,colloquial,แฮนด์,จะให้{x}ต้องทำมือแบบไหน
+s0845,ขอท่าใช้มือเล่นบอล,Hand_Ball,16,16,formal,ใช้มือเล่นบอล,ขอท่า{x}
+s0846,แสดงท่าจับบอล,Hand_Ball,16,16,colloquial,จับบอล,แสดงท่า{x}
+s0847,อยากฝึกท่า hand ball,Hand_Ball,16,16,english,hand ball,อยากฝึกท่า{x}
+s0848,ท่าลูกบอลสัมผัสมือหน้าตาเป็นยังไง,Hand_Ball,16,16,formal,ลูกบอลสัมผัสมือ,ท่า{x}หน้าตาเป็นยังไง
+s0849,สัญญาณบอลโดนมือต้องทำมือยังไง,Hand_Ball,16,16,colloquial,บอลโดนมือ,สัญญาณ{x}ต้องทำมือยังไง
+s0850,ผู้เล่นเหวี่ยงแขนกระแทกหน้าคู่แข่งตอนกระโดดโหม่ง กรรมการทำท่าไหน,Elbowing,17,17,situation,,
+s0851,ขอท่าแตะข้อศอกตัวเองบอกฟาวล์,Elbowing,17,17,situation,,
+s0852,กองหน้ากระแทกข้อศอกใส่ซี่โครงกองหลัง ต้องให้สัญญาณอะไร,Elbowing,17,17,situation,,
+s0853,อยากฝึกท่าชี้ไปที่ศอกของตัวเอง,Elbowing,17,17,situation,,
+s0854,นักเตะสะบัดศอกไปโดนปากคู่แข่ง ต้องแสดงท่าไหน,Elbowing,17,17,situation,,
+s0855,ฝึกท่ายกแขนงอแล้วเอามือจับศอก,Elbowing,17,17,situation,,
+s0856,ตอนแย่งลูกกลางอากาศมีการเหวี่ยงศอก ต้องทำมือยังไง,Elbowing,17,17,situation,,
+s0857,ท่าจับปลายแขนพับไว้ระดับอกหมายถึงฟาวล์อะไร,Elbowing,17,17,situation,,
+s0858,ขอท่าใช้ศอกทำร้ายคู่แข่ง,Elbowing,17,17,formal,ใช้ศอกทำร้ายคู่แข่ง,ขอท่า{x}
+s0859,ขอฝึกท่าเอลโบวิ่งค่ะ,Elbowing,17,17,translit,เอลโบวิ่ง,ขอฝึกท่า{x}ค่ะ
+s0860,practice ฟันศอก,Elbowing,17,17,colloquial,ฟันศอก,practice {x}
+s0861,ตรวจท่าเอลโบว์ให้หน่อย,Elbowing,17,17,translit,เอลโบว์,ตรวจท่า{x}ให้หน่อย
+s0862,วันนี้ขอซ้อมถองศอก,Elbowing,17,17,colloquial,ถองศอก,วันนี้ขอซ้อม{x}
+s0863,ขอท่า elbow,Elbowing,17,17,english,elbow,ขอท่า{x}
+s0864,ขอวิธีให้สัญญาณการใช้ศอก,Elbowing,17,17,formal,การใช้ศอก,ขอวิธีให้สัญญาณ{x}
+s0865,ขอท่าศอกใส่หน่อย,Elbowing,17,17,colloquial,ศอกใส่,ขอท่า{x}หน่อย
+s0866,เอ็ลโบว์,Elbowing,17,17,translit,เอ็ลโบว์,{x}
+s0867,ขอฝึก elbowing อีกรอบ,Elbowing,17,17,english,elbowing,ขอฝึก{x}อีกรอบ
+s0868,ขอฝึกการใช้ข้อศอกอีกรอบ,Elbowing,17,17,formal,การใช้ข้อศอก,ขอฝึก{x}อีกรอบ
+s0869,ขอฝึกท่ากระทุ้งศอกค่ะ,Elbowing,17,17,colloquial,กระทุ้งศอก,ขอฝึกท่า{x}ค่ะ
+s0870,ขอฝึก elbow foul อีกรอบ,Elbowing,17,17,english,elbow foul,ขอฝึก{x}อีกรอบ
+s0871,ช่วยเช็คท่าฟาวล์ใช้ศอกให้หน่อย,Elbowing,17,17,formal,ฟาวล์ใช้ศอก,ช่วยเช็คท่า{x}ให้หน่อย
+s0872,ลองท่าใช้ศอกทำร้ายคู่แข่งดู,Elbowing,17,17,formal,ใช้ศอกทำร้ายคู่แข่ง,ลองท่า{x}ดู
+s0873,เลือกท่าฟันศอก,Elbowing,17,17,colloquial,ฟันศอก,เลือกท่า{x}
+s0874,show me ถองศอก,Elbowing,17,17,colloquial,ถองศอก,show me {x}
+s0875,อยากซ้อมให้สัญญาณถองศอก,Elbowing,17,17,colloquial,ถองศอก,อยากซ้อมให้สัญญาณ{x}
+s0876,ถ้าเป็นเอ็ลโบว์ กรรมการทำท่าไหน,Elbowing,17,17,translit,เอ็ลโบว์,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0877,วันนี้ขอซ้อมศอกใส่,Elbowing,17,17,colloquial,ศอกใส่,วันนี้ขอซ้อม{x}
+s0878,ถ้าเป็นการใช้ศอก กรรมการทำท่าไหน,Elbowing,17,17,formal,การใช้ศอก,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0879,เช็คเอลโบวิ่งหน่อย,Elbowing,17,17,translit,เอลโบวิ่ง,เช็ค{x}หน่อย
+s0880,ตรวจท่าใช้ศอกทำร้ายคู่แข่งให้หน่อย,Elbowing,17,17,formal,ใช้ศอกทำร้ายคู่แข่ง,ตรวจท่า{x}ให้หน่อย
+s0881,อยากซ้อมให้สัญญาณ elbow,Elbowing,17,17,english,elbow,อยากซ้อมให้สัญญาณ{x}
+s0882,เช็คการใช้ศอกหน่อย,Elbowing,17,17,formal,การใช้ศอก,เช็ค{x}หน่อย
+s0883,สัญญาณเอ็ลโบว์ต้องทำมือยังไง,Elbowing,17,17,translit,เอ็ลโบว์,สัญญาณ{x}ต้องทำมือยังไง
+s0884,เปิดโหมดฝึก elbow,Elbowing,17,17,english,elbow,เปิดโหมดฝึก{x}
+s0885,practice เอลโบวิ่ง,Elbowing,17,17,translit,เอลโบวิ่ง,practice {x}
+s0886,practice elbow foul,Elbowing,17,17,english,elbow foul,practice {x}
+s0887,ตรวจท่าเอลโบวิ่งให้หน่อย,Elbowing,17,17,translit,เอลโบวิ่ง,ตรวจท่า{x}ให้หน่อย
+s0888,ขอฝึกท่าฟันศอกค่ะ,Elbowing,17,17,colloquial,ฟันศอก,ขอฝึกท่า{x}ค่ะ
+s0889,จะให้เอลโบวิ่งต้องทำมือแบบไหน,Elbowing,17,17,translit,เอลโบวิ่ง,จะให้{x}ต้องทำมือแบบไหน
+s0890,ฟาวล์ใช้ศอก,Elbowing,17,17,formal,ฟาวล์ใช้ศอก,{x}
+s0891,อยากซ้อมให้สัญญาณกระทุ้งศอก,Elbowing,17,17,colloquial,กระทุ้งศอก,อยากซ้อมให้สัญญาณ{x}
+s0892,ช่วยเช็คท่าฟันศอกให้หน่อย,Elbowing,17,17,colloquial,ฟันศอก,ช่วยเช็คท่า{x}ให้หน่อย
+s0893,ช่วยเช็คท่าถองศอกให้หน่อย,Elbowing,17,17,colloquial,ถองศอก,ช่วยเช็คท่า{x}ให้หน่อย
+s0894,ท่าถองศอกหน้าตาเป็นยังไง,Elbowing,17,17,colloquial,ถองศอก,ท่า{x}หน้าตาเป็นยังไง
+s0895,เช็คฟาวล์ใช้ศอกหน่อย,Elbowing,17,17,formal,ฟาวล์ใช้ศอก,เช็ค{x}หน่อย
+s0896,ขอท่าใช้ศอกทำร้ายคู่แข่งหน่อย,Elbowing,17,17,formal,ใช้ศอกทำร้ายคู่แข่ง,ขอท่า{x}หน่อย
+s0897,แสดงท่าใช้ศอกทำร้ายคู่แข่ง,Elbowing,17,17,formal,ใช้ศอกทำร้ายคู่แข่ง,แสดงท่า{x}
+s0898,สัญญาณเอลโบวิ่งต้องทำมือยังไง,Elbowing,17,17,translit,เอลโบวิ่ง,สัญญาณ{x}ต้องทำมือยังไง
+s0899,จะให้ฟันศอกต้องทำมือแบบไหน,Elbowing,17,17,colloquial,ฟันศอก,จะให้{x}ต้องทำมือแบบไหน
+s0900,ผู้เล่นยื่นเท้าไปเกี่ยวจนคู่แข่งล้มคะมำ กรรมการทำท่าไหน,Tripping,18,18,situation,,
+s0901,ขอท่ายกเข่าแล้วแตะหน้าแข้งตัวเอง,Tripping,18,18,situation,,
+s0902,กองหลังสอดขาเข้าไปทำให้กองหน้าล้ม ต้องให้สัญญาณอะไร,Tripping,18,18,situation,,
+s0903,อยากฝึกท่าอธิบายฟาวล์ที่ทำให้อีกฝ่ายสะดุด,Tripping,18,18,situation,,
+s0904,นักเตะเอาขาไปขวางให้คู่แข่งล้มตอนเลี้ยง ต้องแสดงท่าไหน,Tripping,18,18,situation,,
+s0905,ฝึกท่ายกขาข้างหนึ่งแล้วชี้ที่ขา,Tripping,18,18,situation,,
+s0906,ตัดขาจากด้านหลังจนล้ม ต้องทำมือยังไง,Tripping,18,18,situation,,
+s0907,ท่าแตะขาตัวเองตอนยืนขาเดียวหมายถึงฟาวล์อะไร,Tripping,18,18,situation,,
+s0908,สอนท่าขัดขา,Tripping,18,18,colloquial,ขัดขา,สอนท่า{x}
+s0909,ขอดูท่าเกี่ยวขา,Tripping,18,18,colloquial,เกี่ยวขา,ขอดูท่า{x}
+s0910,show me ปัดขา,Tripping,18,18,colloquial,ปัดขา,show me {x}
+s0911,อยากฝึกท่า tripping opponent,Tripping,18,18,english,tripping opponent,อยากฝึกท่า{x}
+s0912,ถ้าเป็นทริปปิง กรรมการทำท่าไหน,Tripping,18,18,translit,ทริปปิง,ถ้าเป็น{x} กรรมการทำท่าไหน
+s0913,เลือกท่าทริปปิ้ง,Tripping,18,18,translit,ทริปปิ้ง,เลือกท่า{x}
+s0914,ทดสอบท่าทำให้สะดุดล้ม,Tripping,18,18,formal,ทำให้สะดุดล้ม,ทดสอบท่า{x}
+s0915,ขอท่าการทำให้คู่แข่งสะดุด,Tripping,18,18,formal,การทำให้คู่แข่งสะดุด,ขอท่า{x}
+s0916,เริ่มฝึกท่า trip,Tripping,18,18,english,trip,เริ่มฝึกท่า{x}
+s0917,ฝึกทริ๊ปปิ้ง,Tripping,18,18,translit,ทริ๊ปปิ้ง,ฝึก{x}
+s0918,อยากซ้อมให้สัญญาณ tripping,Tripping,18,18,english,tripping,อยากซ้อมให้สัญญาณ{x}
+s0919,อยากซ้อมให้สัญญาณการขัดขา,Tripping,18,18,formal,การขัดขา,อยากซ้อมให้สัญญาณ{x}
+s0920,ขอฝึกท่าขัดขาคู่แข่งค่ะ,Tripping,18,18,formal,ขัดขาคู่แข่ง,ขอฝึกท่า{x}ค่ะ
+s0921,practice งัดขา,Tripping,18,18,colloquial,งัดขา,practice {x}
+s0922,ท่าเกี่ยวขาทำยังไง,Tripping,18,18,colloquial,เกี่ยวขา,ท่า{x}ทำยังไง
+s0923,สัญญาณเกี่ยวขาต้องทำมือยังไง,Tripping,18,18,colloquial,เกี่ยวขา,สัญญาณ{x}ต้องทำมือยังไง
+s0924,ขอฝึกขัดขาอีกรอบ,Tripping,18,18,colloquial,ขัดขา,ขอฝึก{x}อีกรอบ
+s0925,ตรวจท่าทริปปิงให้หน่อย,Tripping,18,18,translit,ทริปปิง,ตรวจท่า{x}ให้หน่อย
+s0926,ขอท่าทริปปิง,Tripping,18,18,translit,ทริปปิง,ขอท่า{x}
+s0927,ช่วยดูว่าทำท่า trip ถูกไหม,Tripping,18,18,english,trip,ช่วยดูว่าทำท่า{x}ถูกไหม
+s0928,แสดงท่าเกี่ยวขา,Tripping,18,18,colloquial,เกี่ยวขา,แสดงท่า{x}
+s0929,ลองท่าการทำให้คู่แข่งสะดุดดู,Tripping,18,18,formal,การทำให้คู่แข่งสะดุด,ลองท่า{x}ดู
+s0930,ช่วยเช็คท่าทำให้สะดุดล้มให้หน่อย,Tripping,18,18,formal,ทำให้สะดุดล้ม,ช่วยเช็คท่า{x}ให้หน่อย
+s0931,ท่าขัดขาหน้าตาเป็นยังไง,Tripping,18,18,colloquial,ขัดขา,ท่า{x}หน้าตาเป็นยังไง
+s0932,practice ทริปปิง,Tripping,18,18,translit,ทริปปิง,practice {x}
+s0933,ท่าทริปปิ้งหน้าตาเป็นยังไง,Tripping,18,18,translit,ทริปปิ้ง,ท่า{x}หน้าตาเป็นยังไง
+s0934,แสดงท่า trip,Tripping,18,18,english,trip,แสดงท่า{x}
+s0935,ท่าขัดขาทำยังไง,Tripping,18,18,colloquial,ขัดขา,ท่า{x}ทำยังไง
+s0936,อยากซ้อมให้สัญญาณทริ๊ปปิ้ง,Tripping,18,18,translit,ทริ๊ปปิ้ง,อยากซ้อมให้สัญญาณ{x}
+s0937,ทริปปิง,Tripping,18,18,translit,ทริปปิง,{x}
+s0938,ขอท่า tripping opponent หน่อย,Tripping,18,18,english,tripping opponent,ขอท่า{x}หน่อย
+s0939,ตรวจท่า trip ให้หน่อย,Tripping,18,18,english,trip,ตรวจท่า{x}ให้หน่อย
+s0940,อยากฝึกท่าการขัดขา,Tripping,18,18,formal,การขัดขา,อยากฝึกท่า{x}
+s0941,เริ่มฝึกท่าปัดขา,Tripping,18,18,colloquial,ปัดขา,เริ่มฝึกท่า{x}
+s0942,show me การขัดขา,Tripping,18,18,formal,การขัดขา,show me {x}
+s0943,จะให้ trip ต้องทำมือแบบไหน,Tripping,18,18,english,trip,จะให้{x}ต้องทำมือแบบไหน
+s0944,ขอท่า trip หน่อย,Tripping,18,18,english,trip,ขอท่า{x}หน่อย
+s0945,ทดสอบท่างัดขา,Tripping,18,18,colloquial,งัดขา,ทดสอบท่า{x}
+s0946,practice ปัดขา,Tripping,18,18,colloquial,ปัดขา,practice {x}
+s0947,ขอดูท่างัดขา,Tripping,18,18,colloquial,งัดขา,ขอดูท่า{x}
+s0948,เริ่มฝึกท่า tripping,Tripping,18,18,english,tripping,เริ่มฝึกท่า{x}
+s0949,ช่วยเช็คท่า tripping ให้หน่อย,Tripping,18,18,english,tripping,ช่วยเช็คท่า{x}ให้หน่อย
+s0950,ผู้เล่นเหวี่ยงเท้าไปโดนตัวคู่แข่งแทนบอล กรรมการทำท่าไหน,Kicking,19,19,situation,,
+s0951,ขอท่าเตะขาไปข้างหน้าในอากาศบอกฟาวล์,Kicking,19,19,situation,,
+s0952,นักเตะถีบอีกฝ่ายตอนแย่งบอล ต้องให้สัญญาณอะไร,Kicking,19,19,situation,,
+s0953,อยากฝึกท่าอธิบายฟาวล์ที่ใช้เท้าทำร้ายคนอื่น,Kicking,19,19,situation,,
+s0954,กองหลังตั้งใจเหยียบแล้วเตะสวนใส่ขา ต้องแสดงท่าไหน,Kicking,19,19,situation,,
+s0955,ฝึกท่าสะบัดเท้าไปข้างหน้าเลียนแบบการเตะคน,Kicking,19,19,situation,,
+s0956,เตะโดนข้อเท้าคู่แข่งจนเจ็บ ต้องทำมือยังไง,Kicking,19,19,situation,,
+s0957,ท่าเหวี่ยงขาไปด้านหน้าหมายถึงฟาวล์อะไร,Kicking,19,19,situation,,
+s0958,เลือกท่าเตะขาคนอื่น,Kicking,19,19,colloquial,เตะขาคนอื่น,เลือกท่า{x}
+s0959,ท่าคิกกิงทำยังไง,Kicking,19,19,translit,คิกกิง,ท่า{x}ทำยังไง
+s0960,ขอวิธีให้สัญญาณฟาวล์เตะ,Kicking,19,19,formal,ฟาวล์เตะ,ขอวิธีให้สัญญาณ{x}
+s0961,ขอท่าเตะคนหน่อย,Kicking,19,19,colloquial,เตะคน,ขอท่า{x}หน่อย
+s0962,อยากฝึกท่าการเตะคู่แข่ง,Kicking,19,19,formal,การเตะคู่แข่ง,อยากฝึกท่า{x}
+s0963,ทดสอบท่าคิกกิ้ง,Kicking,19,19,translit,คิกกิ้ง,ทดสอบท่า{x}
+s0964,ขอฝึกเตะใส่อีกรอบ,Kicking,19,19,colloquial,เตะใส่,ขอฝึก{x}อีกรอบ
+s0965,ช่วยเช็คท่า kicking opponent ให้หน่อย,Kicking,19,19,english,kicking opponent,ช่วยเช็คท่า{x}ให้หน่อย
+s0966,สอนท่า kick foul,Kicking,19,19,english,kick foul,สอนท่า{x}
+s0967,เลือกท่าคิ๊กกิ้ง,Kicking,19,19,translit,คิ๊กกิ้ง,เลือกท่า{x}
+s0968,เตะคู่แข่ง,Kicking,19,19,formal,เตะคู่แข่ง,{x}
+s0969,ตรวจท่าถีบใส่ให้หน่อย,Kicking,19,19,colloquial,ถีบใส่,ตรวจท่า{x}ให้หน่อย
+s0970,practice kicking,Kicking,19,19,english,kicking,practice {x}
+s0971,การเตะผู้เล่น,Kicking,19,19,formal,การเตะผู้เล่น,{x}
+s0972,ขอฝึกท่าเตะขาคนอื่นค่ะ,Kicking,19,19,colloquial,เตะขาคนอื่น,ขอฝึกท่า{x}ค่ะ
+s0973,practice คิกกิง,Kicking,19,19,translit,คิกกิง,practice {x}
+s0974,อยากซ้อมให้สัญญาณเตะคน,Kicking,19,19,colloquial,เตะคน,อยากซ้อมให้สัญญาณ{x}
+s0975,สอนท่าคิกกิ้ง,Kicking,19,19,translit,คิกกิ้ง,สอนท่า{x}
+s0976,show me ฟาวล์เตะ,Kicking,19,19,formal,ฟาวล์เตะ,show me {x}
+s0977,จะให้คิกกิ้งต้องทำมือแบบไหน,Kicking,19,19,translit,คิกกิ้ง,จะให้{x}ต้องทำมือแบบไหน
+s0978,อยากฝึกท่า kicking opponent,Kicking,19,19,english,kicking opponent,อยากฝึกท่า{x}
+s0979,สอนทำสัญญาณคิ๊กกิ้งหน่อยครับ,Kicking,19,19,translit,คิ๊กกิ้ง,สอนทำสัญญาณ{x}หน่อยครับ
+s0980,เลือกท่าคิกกิ้ง,Kicking,19,19,translit,คิกกิ้ง,เลือกท่า{x}
+s0981,ท่าเตะคนทำยังไง,Kicking,19,19,colloquial,เตะคน,ท่า{x}ทำยังไง
+s0982,ทดสอบท่าคิ๊กกิ้ง,Kicking,19,19,translit,คิ๊กกิ้ง,ทดสอบท่า{x}
+s0983,เริ่มฝึกท่าการเตะคู่แข่ง,Kicking,19,19,formal,การเตะคู่แข่ง,เริ่มฝึกท่า{x}
+s0984,แสดงท่า kick foul,Kicking,19,19,english,kick foul,แสดงท่า{x}
+s0985,ท่าคิ๊กกิ้งหน้าตาเป็นยังไง,Kicking,19,19,translit,คิ๊กกิ้ง,ท่า{x}หน้าตาเป็นยังไง
+s0986,ท่าคิกกิงหน้าตาเป็นยังไง,Kicking,19,19,translit,คิกกิง,ท่า{x}หน้าตาเป็นยังไง
+s0987,ขอดูท่าคิกกิง,Kicking,19,19,translit,คิกกิง,ขอดูท่า{x}
+s0988,ขอฝึกท่าคิกกิงค่ะ,Kicking,19,19,translit,คิกกิง,ขอฝึกท่า{x}ค่ะ
+s0989,ทดสอบท่าเตะคน,Kicking,19,19,colloquial,เตะคน,ทดสอบท่า{x}
+s0990,สอนทำสัญญาณ kick foul หน่อยครับ,Kicking,19,19,english,kick foul,สอนทำสัญญาณ{x}หน่อยครับ
+s0991,ไปที่ท่าการเตะคู่แข่ง,Kicking,19,19,formal,การเตะคู่แข่ง,ไปที่ท่า{x}
+s0992,ขอท่าเตะขาคนอื่น,Kicking,19,19,colloquial,เตะขาคนอื่น,ขอท่า{x}
+s0993,ขอฝึก kick foul อีกรอบ,Kicking,19,19,english,kick foul,ขอฝึก{x}อีกรอบ
+s0994,ท่าเตะขาคนอื่นหน้าตาเป็นยังไง,Kicking,19,19,colloquial,เตะขาคนอื่น,ท่า{x}หน้าตาเป็นยังไง
+s0995,วันนี้ขอซ้อมการเตะคู่แข่ง,Kicking,19,19,formal,การเตะคู่แข่ง,วันนี้ขอซ้อม{x}
+s0996,ขอฝึกท่าการเตะคู่แข่งค่ะ,Kicking,19,19,formal,การเตะคู่แข่ง,ขอฝึกท่า{x}ค่ะ
+s0997,practice kick foul,Kicking,19,19,english,kick foul,practice {x}
+s0998,ฝึก kicking,Kicking,19,19,english,kicking,ฝึก{x}
+s0999,ฝึก kick foul,Kicking,19,19,english,kick foul,ฝึก{x}
