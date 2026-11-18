@@ -94,7 +94,7 @@ export const MODEL_SPEC_INFO = {
   accuracy: 0.734,
   poseMap5095: 0.858,
   testPersons: 154,
-  maxUploadMb: 100,
+  maxUploadMb: 4.5,
   videoStride: 5,
   videoMaxSeconds: 30,
   wsIdleSeconds: 30,

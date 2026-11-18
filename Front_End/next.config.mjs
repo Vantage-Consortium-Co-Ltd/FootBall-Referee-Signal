@@ -1,10 +1,6 @@
-import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
-
-/** @type {(phase: string) => import('next').NextConfig} */
-const nextConfig = (phase) => ({
-  distDir:
-    process.env.NEXT_DIST_DIR ||
-    (phase === PHASE_DEVELOPMENT_SERVER ? ".next" : ".next-prod"),
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   reactStrictMode: true,
   typescript: {
     ignoreBuildErrors: false,
@@ -18,6 +14,6 @@ const nextConfig = (phase) => ({
     }
     return config;
   },
-});
+};
 
 export default nextConfig;
