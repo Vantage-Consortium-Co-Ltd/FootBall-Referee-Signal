@@ -5,8 +5,10 @@ export const dynamic = "force-dynamic";
 const DEFAULT_BASE_URL = "https://kitkhachon-xx--web.us-east.modal.run";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const baseUrl = (process.env.MODAL_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
-  const apiKey = process.env.FOOTBALL_API_KEY || "";
+  const baseUrl = (process.env.MODAL_API_BASE_URL || DEFAULT_BASE_URL)
+    .trim()
+    .replace(/\/+$/, "");
+  const apiKey = (process.env.FOOTBALL_API_KEY || "").trim();
 
   try {
     const incoming = await request.formData();

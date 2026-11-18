@@ -8,7 +8,9 @@ const DEFAULT_BASE_URL = "https://kitkhachon-xx--web.us-east.modal.run";
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 
 export async function GET(): Promise<NextResponse<ModalHealthResponse>> {
-  const baseUrl = (process.env.MODAL_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const baseUrl = (process.env.MODAL_API_BASE_URL || DEFAULT_BASE_URL)
+    .trim()
+    .replace(/\/+$/, "");
   const start = Date.now();
 
   try {

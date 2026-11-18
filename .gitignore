@@ -23,6 +23,10 @@ Data_Pipeline/output*/
 kaggle/
 config_kaggle.yaml
 
+# Secrets and Tokens
+token*
+.env*.local
+
 # Graphify
 graphify-out/
 .graphify/
