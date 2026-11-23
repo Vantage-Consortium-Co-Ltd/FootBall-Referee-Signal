@@ -798,6 +798,9 @@ export class RefereeStageController {
       this.abortPendingGlbLoad();
       this.switchToRig(this.proceduralRig);
       this.syncActiveRigVisuals();
+      if (!this.contextLost) {
+        this.renderer.render(this.scene, this.camera);
+      }
       this.callbacks?.onGlbStatusChange?.(
         "error",
         "ไม่พบที่อยู่ไฟล์โมเดล 3 มิติ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว"

@@ -273,7 +273,8 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
           errorMessage ??
             "ไม่สามารถโหลดโมเดล .glb ได้ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว"
         );
-      } else {
+        setRigMode("procedural");
+      } else if (status === "loading" || status === "ready") {
         setGlbError(null);
       }
     },
@@ -510,7 +511,9 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
                       aria-label="รีเซ็ตกลับเป็นโมเดลเริ่มต้น"
                       title="กลับไปใช้โมเดลเริ่มต้น"
                       onClick={handleResetCustomGlb}
-                      className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981]"
+                      className={`p-0.5 rounded transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                        isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                      }`}
                     >
                       <Google_Icon name="close" size={11} />
                     </button>
@@ -601,7 +604,7 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
               </div>
             )}
 
-            {glbStatus === "error" && glbError && (
+            {glbError && (
               <div
                 role="alert"
                 className={`pointer-events-auto max-w-full sm:max-w-lg rounded-xl px-2.5 py-1.5 border flex items-center gap-2 text-[11px] leading-snug shadow-sm backdrop-blur-md ${
@@ -620,7 +623,9 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
                   type="button"
                   aria-label="ปิดข้อความแจ้งเตือนโมเดล 3 มิติ"
                   onClick={handleDismissGlbError}
-                  className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  className={`p-0.5 rounded shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
                 >
                   <Google_Icon name="close" size={13} />
                 </button>
