@@ -355,7 +355,7 @@ export class RefereeStageController {
         : 1;
     this.renderer.setPixelRatio(pixelRatio);
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.08;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -500,14 +500,23 @@ export class RefereeStageController {
     this.state = nextState;
 
     if (signalChanged || effectiveMirrorChanged) {
-      this.transition = {
-        from: clonePose(this.currentPose),
-        elapsed: 0,
-        duration: POSE_CROSSFADE_DURATION_SEC,
-      };
-      this.clipTimeSec = nextState.reducedMotion
-        ? nextClip.peakT * nextClip.durationSec
-        : 0;
+      if (signalChanged) {
+        this.clipTimeSec =
+          nextState.reducedMotion || !nextState.isPlaying
+            ? nextClip.peakT * nextClip.durationSec
+            : 0;
+      } else if (nextState.reducedMotion) {
+        this.clipTimeSec = nextClip.peakT * nextClip.durationSec;
+      }
+
+      this.transition =
+        nextState.reducedMotion && !nextState.isPlaying
+          ? null
+          : {
+              from: clonePose(this.currentPose),
+              elapsed: 0,
+              duration: POSE_CROSSFADE_DURATION_SEC,
+            };
     } else if (
       nextState.reducedMotion &&
       !nextState.isPlaying &&
@@ -583,6 +592,13 @@ export class RefereeStageController {
   /** Restart the active signal animation from t = 0 with a smooth cross-fade. */
   public replay(): void {
     if (this.disposed) return;
+
+    if (this.state.reducedMotion && !this.state.isPlaying) {
+      const clip = getSignalAnimationClip(this.state.signal.id);
+      this.clipTimeSec = clip.peakT * clip.durationSec;
+      this.transition = null;
+      return;
+    }
 
     this.transition = {
       from: clonePose(this.currentPose),

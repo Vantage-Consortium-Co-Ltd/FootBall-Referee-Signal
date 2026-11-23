@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type {
   CameraPreset,
@@ -79,6 +79,15 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
   const [replaySeq, setReplaySeq] = useState<number>(0);
 
   const fullscreenBtnRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+
+  const closeFullscreen = useCallback(() => {
+    triggerCausalFeedback("tap");
+    setIsFullscreen(false);
+    window.requestAnimationFrame(() => {
+      fullscreenBtnRef.current?.focus();
+    });
+  }, []);
 
   const clip = getSignalAnimationClip(signal.id);
   const effectiveMirrored = clip.supportsMirror ? mirrored : false;
@@ -112,23 +121,63 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    const getFocusableElements = (): HTMLElement[] => {
+      const dialog = dialogRef.current;
+      if (!dialog) return [];
+      return Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.closest('[aria-hidden="true"]'));
+    };
+
+    const focusTimerId = window.requestAnimationFrame(() => {
+      if (fullscreenBtnRef.current && !fullscreenBtnRef.current.disabled) {
+        fullscreenBtnRef.current.focus();
+        return;
+      }
+      getFocusableElements()[0]?.focus();
+    });
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        triggerCausalFeedback("tap");
-        setIsFullscreen(false);
-        window.requestAnimationFrame(() => {
-          fullscreenBtnRef.current?.focus();
-        });
+        closeFullscreen();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusables = getFocusableElements();
+        if (focusables.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+
+        if (event.shiftKey) {
+          if (!active || !dialog.contains(active) || active === first) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else if (!active || !dialog.contains(active) || active === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
+      window.cancelAnimationFrame(focusTimerId);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isFullscreen]);
+  }, [isFullscreen, closeFullscreen]);
 
   const sendCameraPreset = (preset: Exclude<CameraPreset, "free">) => {
     triggerCausalFeedback("tap");
@@ -210,6 +259,7 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
       />
 
       <div
+        ref={dialogRef}
         role={isFullscreen ? "dialog" : "region"}
         aria-modal={isFullscreen ? true : undefined}
         aria-label={
@@ -221,8 +271,7 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
           isFullscreen
             ? (event) => {
                 if (event.target === event.currentTarget) {
-                  triggerCausalFeedback("tap");
-                  setIsFullscreen(false);
+                  closeFullscreen();
                 }
               }
             : undefined
@@ -256,9 +305,9 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
           />
 
           {/* Top HUD Row: Target Guidance Pill (left) + Camera & Fullscreen Controls (right) */}
-          <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 z-20 flex items-start justify-between gap-2 pointer-events-none">
+          <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 z-20 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
             <div
-              className={`pointer-events-auto min-w-0 rounded-xl px-2.5 py-1.5 flex flex-col gap-0.5 ${glassMaterialClass}`}
+              className={`pointer-events-auto min-w-0 max-w-full rounded-xl px-2.5 py-1.5 flex flex-col gap-0.5 ${glassMaterialClass}`}
             >
               <div className="flex items-center gap-1.5 flex-wrap text-[11px] apple-tabular">
                 <Google_Icon
@@ -280,12 +329,25 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
                   ค้าง ≥ {signal.minHoldSeconds}s
                 </span>
               </div>
-              <span className={`text-[10px] leading-tight ${mutedTextClass}`}>
-                ลากเพื่อหมุน 360°
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className={`text-[10px] leading-tight ${mutedTextClass}`}>
+                  ลากเพื่อหมุน 360°
+                </span>
+                {reducedMotion && (
+                  <span
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded-md border text-[10px] font-medium leading-none ${
+                      isDark
+                        ? "bg-amber-500/15 border-amber-400/35 text-amber-300"
+                        : "bg-amber-500/15 border-amber-500/40 text-amber-800"
+                    }`}
+                  >
+                    โหมดลดการเคลื่อนไหว
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="pointer-events-auto flex items-center gap-1.5 flex-wrap justify-end">
+            <div className="pointer-events-auto ml-auto flex items-center gap-1.5 flex-wrap justify-end">
               <div
                 role="group"
                 aria-label="มุมกล้อง 3 มิติ"

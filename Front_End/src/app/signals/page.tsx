@@ -68,10 +68,13 @@ export default function SignalsPage() {
               className="text-slate-400 dark:text-slate-500 absolute left-3 top-2.5 pointer-events-none"
             />
             <input
+              id="signal-search"
+              name="signal-search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อท่าหรือกติกา..."
+              aria-label="ค้นหาชื่อท่าหรือกติกา"
               className="w-full bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-400 transition"
             />
           </div>

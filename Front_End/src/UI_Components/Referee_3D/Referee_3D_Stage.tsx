@@ -177,6 +177,7 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
     <div className="relative w-full h-full">
       <div
         ref={containerRef}
+        role={showFallback ? undefined : "img"}
         aria-hidden={showFallback}
         aria-label={
           showFallback ? undefined : `แบบจำลอง 3 มิติท่าสัญญาณ ${signal.nameTh}`
