@@ -23,3 +23,12 @@ Data_Pipeline/output*/
 kaggle/
 config_kaggle.yaml
 poc_hand_refiner/
+
+# Secrets and Tokens
+token*
+.env*.local
+
+# Graphify
+graphify-out/
+.graphify/
+*graphify*

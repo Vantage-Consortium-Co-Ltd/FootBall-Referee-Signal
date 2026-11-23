@@ -1,0 +1,779 @@
+"use client";
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import type {
+  CameraPreset,
+  CardColor,
+  GlbLoadState,
+  PlaybackSpeed,
+  RigModelMode,
+  SignalClassInfo,
+} from "../../Data_Types/Referee_Types";
+import { getSignalAnimationClip } from "../../Core_Lib/Referee_3D/Signal_Poses";
+import { useTheme } from "../../Core_Lib/Theme_Context";
+import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
+import { Google_Icon } from "../Common/Google_Icon";
+import type { CameraCommand } from "./Referee_3D_Stage";
+
+const StageLoadingSkeleton: React.FC = () => (
+  <div
+    role="status"
+    aria-label="กำลังโหลดโมเดลผู้ตัดสิน 3 มิติ"
+    className="w-full h-full flex flex-col items-center justify-center gap-2.5 bg-[#F1F5F9] dark:bg-[#0B1118] text-slate-600 dark:text-slate-300"
+  >
+    <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#10B981]/15 border border-[#10B981]/35 text-[#10B981] animate-pulse">
+      <Google_Icon name="view_in_ar" size={22} />
+    </div>
+    <span className="text-xs font-medium tracking-tight">
+      กำลังเตรียมมุมมอง 3 มิติ...
+    </span>
+  </div>
+);
+
+const Referee_3D_Stage = dynamic(() => import("./Referee_3D_Stage"), {
+  ssr: false,
+  loading: () => <StageLoadingSkeleton />,
+});
+
+const DEFAULT_GLB_MODEL_URL = "/models/referee.glb";
+
+const RIG_MODEL_BUTTONS: ReadonlyArray<{
+  mode: RigModelMode;
+  label: string;
+  ariaLabel: string;
+}> = [
+  { mode: "procedural", label: "ผู้ตัดสิน 3D", ariaLabel: "ใช้ผู้ตัดสิน 3 มิติมาตรฐาน" },
+  { mode: "glb", label: "โมเดลสมจริง", ariaLabel: "ใช้โมเดลมนุษย์ 3 มิติสมจริง" },
+];
+
+const CAMERA_PRESET_BUTTONS: ReadonlyArray<{
+  preset: Exclude<CameraPreset, "free">;
+  label: string;
+  ariaLabel: string;
+}> = [
+  { preset: "front", label: "หน้า", ariaLabel: "มุมกล้องด้านหน้า" },
+  { preset: "side", label: "ข้าง", ariaLabel: "มุมกล้องด้านข้าง" },
+  { preset: "three_quarter", label: "เฉียง", ariaLabel: "มุมกล้องเฉียง 3/4" },
+];
+
+export interface Referee3DViewerProps {
+  signal: SignalClassInfo;
+  className?: string;
+  compact?: boolean;
+}
+
+/**
+ * Reusable interactive 3D IFAB referee signal viewer with Apple-inspired
+ * glassmorphic HUD controls, dynamic Three.js stage loading, and seamless
+ * single-instance fullscreen toggling.
+ */
+export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
+  signal,
+  className = "",
+  compact = false,
+}) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [speed, setSpeed] = useState<PlaybackSpeed>(1);
+  const [mirrored, setMirrored] = useState<boolean>(false);
+  const [cardColor, setCardColor] = useState<CardColor>("yellow");
+  const [showAngleGuide, setShowAngleGuide] = useState<boolean>(true);
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(false);
+  const [activePreset, setActivePreset] =
+    useState<Exclude<CameraPreset, "free">>("three_quarter");
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [cameraCommand, setCameraCommand] = useState<CameraCommand | null>(
+    null
+  );
+  const [replaySeq, setReplaySeq] = useState<number>(0);
+  const [rigMode, setRigMode] = useState<RigModelMode>("procedural");
+  const [customGlbUrl, setCustomGlbUrl] = useState<string | null>(null);
+  const [customGlbName, setCustomGlbName] = useState<string | null>(null);
+  const [glbStatus, setGlbStatus] = useState<GlbLoadState>("idle");
+  const [glbError, setGlbError] = useState<string | null>(null);
+
+  const fullscreenBtnRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const effectiveGlbUrl = customGlbUrl ?? DEFAULT_GLB_MODEL_URL;
+
+  const closeFullscreen = useCallback(() => {
+    triggerCausalFeedback("tap");
+    setIsFullscreen(false);
+    window.requestAnimationFrame(() => {
+      fullscreenBtnRef.current?.focus();
+    });
+  }, []);
+
+  const clip = getSignalAnimationClip(signal.id);
+  const effectiveMirrored = clip.supportsMirror ? mirrored : false;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    if (mq.matches) {
+      setIsPlaying(false);
+    }
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setReducedMotion(event.matches);
+      if (event.matches) {
+        setIsPlaying(false);
+      }
+    };
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (!clip.supportsMirror && mirrored) {
+      setMirrored(false);
+    }
+  }, [clip.supportsMirror, mirrored]);
+
+  useEffect(() => {
+    const urlToRevoke = customGlbUrl;
+    return () => {
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
+      }
+    };
+  }, [customGlbUrl]);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const getFocusableElements = (): HTMLElement[] => {
+      const dialog = dialogRef.current;
+      if (!dialog) return [];
+      return Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(
+        (el) =>
+          !el.closest('[aria-hidden="true"]') &&
+          el.tabIndex >= 0 &&
+          el.getClientRects().length > 0
+      );
+    };
+
+    const focusTimerId = window.requestAnimationFrame(() => {
+      if (fullscreenBtnRef.current && !fullscreenBtnRef.current.disabled) {
+        fullscreenBtnRef.current.focus();
+        return;
+      }
+      getFocusableElements()[0]?.focus();
+    });
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeFullscreen();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusables = getFocusableElements();
+        if (focusables.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+
+        if (event.shiftKey) {
+          if (!active || !dialog.contains(active) || active === first) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else if (!active || !dialog.contains(active) || active === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusTimerId);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isFullscreen, closeFullscreen]);
+
+  const sendCameraPreset = (preset: Exclude<CameraPreset, "free">) => {
+    triggerCausalFeedback("tap");
+    setActivePreset(preset);
+    setCameraCommand((prev) => ({
+      preset,
+      seq: (prev?.seq ?? 0) + 1,
+    }));
+  };
+
+  const handleTogglePlay = () => {
+    triggerCausalFeedback("tap");
+    setIsPlaying((prev) => !prev);
+  };
+
+  const handleReplay = () => {
+    triggerCausalFeedback("tap");
+    setIsPlaying(true);
+    setReplaySeq((prev) => prev + 1);
+  };
+
+  const handleToggleSpeed = () => {
+    triggerCausalFeedback("snap");
+    setSpeed((prev) => (prev === 1 ? 0.5 : 1));
+  };
+
+  const handleToggleMirror = () => {
+    if (!clip.supportsMirror) return;
+    triggerCausalFeedback("snap");
+    setMirrored((prev) => !prev);
+  };
+
+  const handleToggleCardColor = () => {
+    triggerCausalFeedback("snap");
+    setCardColor((prev) => (prev === "yellow" ? "red" : "yellow"));
+  };
+
+  const handleToggleAngleGuide = () => {
+    triggerCausalFeedback("snap");
+    setShowAngleGuide((prev) => !prev);
+  };
+
+  const handleToggleSkeleton = () => {
+    triggerCausalFeedback("snap");
+    setShowSkeleton((prev) => !prev);
+  };
+
+  const handleToggleFullscreen = () => {
+    triggerCausalFeedback("tap");
+    setIsFullscreen((prev) => !prev);
+  };
+
+  const handleGlbStatusChange = useCallback(
+    (status: GlbLoadState, errorMessage?: string) => {
+      setGlbStatus(status);
+      if (status === "error") {
+        setGlbError(
+          errorMessage ??
+            "ไม่สามารถโหลดโมเดล .glb ได้ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว"
+        );
+        setRigMode("procedural");
+      } else if (status === "loading" || status === "ready") {
+        setGlbError(null);
+      }
+    },
+    []
+  );
+
+  const handleSelectRigMode = (nextMode: RigModelMode) => {
+    if (nextMode === rigMode) return;
+    triggerCausalFeedback("snap");
+    setGlbError(null);
+    setRigMode(nextMode);
+  };
+
+  const handleOpenGlbPicker = () => {
+    triggerCausalFeedback("tap");
+    fileInputRef.current?.click();
+  };
+
+  const handleGlbFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    triggerCausalFeedback("tap");
+    const objectUrl = URL.createObjectURL(file);
+    setCustomGlbUrl(objectUrl);
+    setCustomGlbName(file.name);
+    setGlbError(null);
+    setRigMode("glb");
+  };
+
+  const handleResetCustomGlb = () => {
+    triggerCausalFeedback("tap");
+    setCustomGlbUrl(null);
+    setCustomGlbName(null);
+    setGlbError(null);
+  };
+
+  const handleDismissGlbError = () => {
+    triggerCausalFeedback("tap");
+    setGlbError(null);
+  };
+
+  const glassMaterialClass = isDark
+    ? "apple-material-dark text-slate-100"
+    : "apple-material-light text-slate-900";
+
+  const stageBorderClass = isDark
+    ? "border-white/10 bg-[#0B1118]"
+    : "border-slate-200/90 bg-[#F1F5F9]";
+
+  const mutedTextClass = isDark ? "text-slate-400" : "text-slate-500";
+
+  const inactiveChipClass = isDark
+    ? "border-transparent text-slate-300 hover:text-white hover:bg-white/[0.08]"
+    : "border-transparent text-slate-700 hover:text-slate-950 hover:bg-slate-900/[0.06]";
+
+  const activeEmeraldChipClass = isDark
+    ? "bg-[#10B981]/20 border-[#10B981]/50 text-emerald-300 font-semibold"
+    : "bg-[#10B981]/15 border-[#10B981]/45 text-emerald-800 font-semibold";
+
+  const inlineHeightClass = compact ? "h-[280px]" : "h-[340px] sm:h-[380px]";
+
+  return (
+    <div className={className}>
+      {/* Preserves inline flow height while the stage container expands into a fixed fullscreen modal */}
+      <div
+        aria-hidden="true"
+        className={isFullscreen ? `w-full rounded-2xl ${inlineHeightClass}` : "hidden"}
+      />
+
+      <div
+        ref={dialogRef}
+        role={isFullscreen ? "dialog" : "region"}
+        aria-modal={isFullscreen ? true : undefined}
+        aria-label={
+          isFullscreen
+            ? `มุมมอง 3 มิติเต็มหน้าจอ: ${signal.nameTh}`
+            : `มุมมอง 3 มิติ: ${signal.nameTh}`
+        }
+        onClick={
+          isFullscreen
+            ? (event) => {
+                if (event.target === event.currentTarget) {
+                  closeFullscreen();
+                }
+              }
+            : undefined
+        }
+        className={
+          isFullscreen
+            ? "fixed inset-0 z-50 p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md flex items-center justify-center"
+            : "w-full"
+        }
+      >
+        {/* Single mounted stage container keeps WebGL context, camera, and playback time intact across fullscreen toggles */}
+        <div
+          className={`relative w-full overflow-hidden rounded-2xl border transition-colors duration-200 ${stageBorderClass} ${
+            isFullscreen
+              ? "h-full max-w-6xl max-h-[92vh] shadow-2xl"
+              : inlineHeightClass
+          }`}
+        >
+          <Referee_3D_Stage
+            signal={signal}
+            isPlaying={isPlaying}
+            speed={speed}
+            mirrored={effectiveMirrored}
+            cardColor={cardColor}
+            showAngleGuide={showAngleGuide}
+            showSkeleton={showSkeleton}
+            theme={theme}
+            reducedMotion={reducedMotion}
+            rigMode={rigMode}
+            glbUrl={effectiveGlbUrl}
+            onGlbStatusChange={handleGlbStatusChange}
+            cameraCommand={cameraCommand}
+            replaySeq={replaySeq}
+          />
+
+          {/* Top HUD Row: Target Guidance + Model Switcher (left) & Camera + Fullscreen Controls (right) */}
+          <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 z-20 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
+            <div className="flex flex-col items-start gap-1.5 min-w-0 max-w-full">
+              <div
+                className={`pointer-events-auto min-w-0 max-w-full rounded-xl px-2.5 py-1.5 flex flex-col gap-0.5 ${glassMaterialClass}`}
+              >
+                <div className="flex items-center gap-1.5 flex-wrap text-[11px] apple-tabular">
+                  <Google_Icon
+                    name="view_in_ar"
+                    size={14}
+                    className="text-[#10B981]"
+                  />
+                  {signal.activeArm !== "none" && (
+                    <>
+                      <span className="font-semibold">
+                        มุมเป้าหมาย {signal.targetElevationDeg}°
+                      </span>
+                      <span aria-hidden="true" className="opacity-40">
+                        ·
+                      </span>
+                    </>
+                  )}
+                  <span className="font-medium">
+                    ค้าง ≥ {signal.minHoldSeconds}s
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`text-[10px] leading-tight ${mutedTextClass}`}>
+                    ลากเพื่อหมุน 360°
+                  </span>
+                  {reducedMotion && (
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded-md border text-[10px] font-medium leading-none ${
+                        isDark
+                          ? "bg-amber-500/15 border-amber-400/35 text-amber-300"
+                          : "bg-amber-500/15 border-amber-500/40 text-amber-800"
+                      }`}
+                    >
+                      โหมดลดการเคลื่อนไหว
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div
+                className={`pointer-events-auto min-w-0 max-w-full rounded-xl p-1 flex flex-wrap items-center gap-0.5 ${glassMaterialClass}`}
+              >
+                <div
+                  role="group"
+                  aria-label="รูปแบบโมเดล 3 มิติ"
+                  className="flex items-center gap-0.5"
+                >
+                  {RIG_MODEL_BUTTONS.map(({ mode, label, ariaLabel }) => {
+                    const isActive = rigMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        aria-pressed={isActive}
+                        aria-label={ariaLabel}
+                        onClick={() => handleSelectRigMode(mode)}
+                        className={`px-2 py-1 rounded-lg border text-[10px] sm:text-[11px] leading-none whitespace-nowrap apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                          isActive ? activeEmeraldChipClass : inactiveChipClass
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-px bg-current opacity-15 mx-0.5"
+                />
+
+                <input
+                  ref={fileInputRef}
+                  id="glb-file-upload"
+                  name="glb-file-upload"
+                  type="file"
+                  accept=".glb,.gltf"
+                  aria-label="นำเข้าไฟล์โมเดล 3D (.glb)"
+                  onChange={handleGlbFileChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  aria-label="นำเข้าไฟล์โมเดล 3D (.glb)"
+                  title="นำเข้าโมเดล MakeHuman / MPFB2 หรือมนุษย์ 3 มิติ (.glb)"
+                  onClick={handleOpenGlbPicker}
+                  className={`px-2 py-1 rounded-lg border text-[10px] sm:text-[11px] leading-none whitespace-nowrap inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${inactiveChipClass}`}
+                >
+                  <Google_Icon name="upload" size={13} />
+                  <span>นำเข้า .glb</span>
+                </button>
+
+                {customGlbName && (
+                  <span
+                    className={`inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-lg border text-[10px] leading-none ${
+                      isDark
+                        ? "bg-emerald-500/15 border-emerald-400/35 text-emerald-200"
+                        : "bg-emerald-500/10 border-emerald-500/35 text-emerald-800"
+                    }`}
+                  >
+                    <span
+                      className="truncate max-w-[96px] sm:max-w-[140px]"
+                      title={customGlbName}
+                    >
+                      {customGlbName}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="รีเซ็ตกลับเป็นโมเดลเริ่มต้น"
+                      title="กลับไปใช้โมเดลเริ่มต้น"
+                      onClick={handleResetCustomGlb}
+                      className={`p-0.5 rounded transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                        isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                      }`}
+                    >
+                      <Google_Icon name="close" size={11} />
+                    </button>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="pointer-events-auto ml-auto flex items-center gap-1.5 flex-wrap justify-end">
+              <div
+                role="group"
+                aria-label="มุมกล้อง 3 มิติ"
+                className={`rounded-xl p-1 flex items-center gap-0.5 ${glassMaterialClass}`}
+              >
+                {CAMERA_PRESET_BUTTONS.map(({ preset, label, ariaLabel }) => {
+                  const isActive = activePreset === preset;
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      aria-pressed={isActive}
+                      aria-label={ariaLabel}
+                      onClick={() => sendCameraPreset(preset)}
+                      className={`px-2 py-1 rounded-lg border text-[11px] leading-none apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                        isActive ? activeEmeraldChipClass : inactiveChipClass
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-px bg-current opacity-15 mx-0.5"
+                />
+                <button
+                  type="button"
+                  aria-label="รีเซ็ตมุมกล้อง"
+                  title="รีเซ็ตมุมกล้อง"
+                  onClick={() => sendCameraPreset("three_quarter")}
+                  className={`px-2 py-1 rounded-lg border text-[11px] leading-none inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${inactiveChipClass}`}
+                >
+                  <Google_Icon name="refresh" size={13} />
+                  <span>รีเซ็ต</span>
+                </button>
+              </div>
+
+              <button
+                ref={fullscreenBtnRef}
+                type="button"
+                aria-pressed={isFullscreen}
+                aria-label={
+                  isFullscreen ? "ออกจากโหมดเต็มหน้าจอ" : "ขยายเต็มหน้าจอ"
+                }
+                title={
+                  isFullscreen
+                    ? "ออกจากโหมดเต็มหน้าจอ (Esc)"
+                    : "ขยายเต็มหน้าจอ"
+                }
+                onClick={handleToggleFullscreen}
+                className={`rounded-xl p-2 border apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${glassMaterialClass} ${
+                  isFullscreen
+                    ? "border-[#10B981]/50 text-[#10B981]"
+                    : "hover:border-[#10B981]/40"
+                }`}
+              >
+                <Google_Icon
+                  name={isFullscreen ? "fullscreen_exit" : "fullscreen"}
+                  size={16}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Status Notices + Floating Glass Dock */}
+          <div className="absolute bottom-2.5 inset-x-2.5 sm:bottom-3 sm:inset-x-3 z-20 flex flex-col items-center gap-1.5 pointer-events-none">
+            {rigMode === "glb" && glbStatus === "loading" && (
+              <div
+                role="status"
+                aria-live="polite"
+                className={`pointer-events-none rounded-full px-3 py-1 flex items-center gap-2 text-[11px] font-medium ${glassMaterialClass}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="w-2 h-2 rounded-full bg-[#10B981] motion-safe:animate-pulse"
+                />
+                <span>กำลังโหลดโมเดล 3D...</span>
+              </div>
+            )}
+
+            {glbError && (
+              <div
+                role="alert"
+                className={`pointer-events-auto max-w-full sm:max-w-lg rounded-xl px-2.5 py-1.5 border flex items-center gap-2 text-[11px] leading-snug shadow-sm backdrop-blur-md ${
+                  isDark
+                    ? "bg-amber-950/90 border-amber-400/40 text-amber-200"
+                    : "bg-amber-50/95 border-amber-500/45 text-amber-900"
+                }`}
+              >
+                <Google_Icon
+                  name="warning"
+                  size={14}
+                  className="text-amber-500 shrink-0"
+                />
+                <span className="min-w-0 flex-1">{glbError}</span>
+                <button
+                  type="button"
+                  aria-label="ปิดข้อความแจ้งเตือนโมเดล 3 มิติ"
+                  onClick={handleDismissGlbError}
+                  className={`p-0.5 rounded shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <Google_Icon name="close" size={13} />
+                </button>
+              </div>
+            )}
+
+            <div
+              role="toolbar"
+              aria-label="ควบคุมการแสดงผลท่าสัญญาณ 3 มิติ"
+              className={`pointer-events-auto max-w-full rounded-2xl px-2 py-1.5 flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 ${glassMaterialClass}`}
+            >
+              <button
+                type="button"
+                aria-pressed={isPlaying}
+                aria-label={isPlaying ? "หยุดเล่นชั่วคราว" : "เล่นท่าสัญญาณ"}
+                title={isPlaying ? "หยุดชั่วคราว" : "เล่น"}
+                onClick={handleTogglePlay}
+                className="px-2.5 py-1.5 rounded-xl bg-[#10B981] hover:bg-emerald-400 text-slate-950 font-semibold text-xs inline-flex items-center justify-center shadow-sm shadow-[#10B981]/25 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981]"
+              >
+                <Google_Icon
+                  name={isPlaying ? "pause" : "play_arrow"}
+                  size={16}
+                />
+              </button>
+
+              <button
+                type="button"
+                aria-label="เล่นซ้ำตั้งแต่เริ่มต้น"
+                title="เล่นซ้ำ"
+                onClick={handleReplay}
+                className={`px-2 py-1.5 rounded-xl border text-[11px] inline-flex items-center justify-center apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${inactiveChipClass}`}
+              >
+                <Google_Icon name="replay" size={15} />
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={speed === 0.5}
+                aria-label={`ความเร็วการเล่น ${speed}x สลับระหว่าง 1x และ 0.5x`}
+                title={
+                  speed === 1
+                    ? "สลับเป็นภาพช้า 0.5x"
+                    : "สลับเป็นความเร็วปกติ 1x"
+                }
+                onClick={handleToggleSpeed}
+                className={`px-2 py-1 rounded-xl border text-[11px] apple-tabular apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                  speed === 0.5 ? activeEmeraldChipClass : inactiveChipClass
+                }`}
+              >
+                {speed === 0.5 ? "0.5x" : "1x"}
+              </button>
+
+              <span
+                aria-hidden="true"
+                className="hidden sm:block h-4 w-px bg-current opacity-15 mx-0.5"
+              />
+
+              <button
+                type="button"
+                disabled={!clip.supportsMirror}
+                aria-pressed={effectiveMirrored}
+                aria-label={
+                  clip.supportsMirror
+                    ? effectiveMirrored
+                      ? "สลับกลับเป็นแขนขวา"
+                      : "สลับเป็นแขนซ้าย"
+                    : "ท่านี้ไม่รองรับการสลับข้างแขน"
+                }
+                title={
+                  clip.supportsMirror
+                    ? "สลับข้างแขน (ขวา / ซ้าย)"
+                    : "ท่านี้ไม่รองรับการสลับข้างแขน"
+                }
+                onClick={handleToggleMirror}
+                className={`px-2 py-1 rounded-xl border text-[11px] inline-flex items-center gap-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                  !clip.supportsMirror
+                    ? "border-transparent opacity-40 cursor-not-allowed"
+                    : effectiveMirrored
+                    ? `apple-pressable ${activeEmeraldChipClass}`
+                    : `apple-pressable ${inactiveChipClass}`
+                }`}
+              >
+                <Google_Icon name="swap_horiz" size={14} />
+                <span>{effectiveMirrored ? "แขนซ้าย" : "แขนขวา"}</span>
+              </button>
+
+              {clip.supportsCardToggle && (
+                <button
+                  type="button"
+                  aria-pressed={cardColor === "red"}
+                  aria-label={`สีใบคาดโทษปัจจุบัน ${
+                    cardColor === "yellow" ? "ใบเหลือง" : "ใบแดง"
+                  } กดเพื่อสลับ`}
+                  title="สลับสีใบเหลือง / ใบแดง"
+                  onClick={handleToggleCardColor}
+                  className={`px-2 py-1 rounded-xl border text-[11px] font-medium inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                    cardColor === "red"
+                      ? isDark
+                        ? "bg-red-500/20 border-red-400/50 text-red-300"
+                        : "bg-red-500/15 border-red-500/45 text-red-700"
+                      : isDark
+                      ? "bg-amber-500/20 border-amber-400/50 text-amber-300"
+                      : "bg-amber-500/15 border-amber-500/45 text-amber-800"
+                  }`}
+                >
+                  <Google_Icon name="style" size={14} />
+                  <span>{cardColor === "yellow" ? "ใบเหลือง" : "ใบแดง"}</span>
+                </button>
+              )}
+
+              <span
+                aria-hidden="true"
+                className="hidden sm:block h-4 w-px bg-current opacity-15 mx-0.5"
+              />
+
+              <button
+                type="button"
+                aria-pressed={showAngleGuide}
+                aria-label="แสดงหรือซ่อนไกด์องศา"
+                title="ไกด์องศาเป้าหมาย"
+                onClick={handleToggleAngleGuide}
+                className={`px-2 py-1 rounded-xl border text-[11px] inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                  showAngleGuide ? activeEmeraldChipClass : inactiveChipClass
+                }`}
+              >
+                <Google_Icon name="straighten" size={14} />
+                <span>ไกด์องศา</span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={showSkeleton}
+                aria-label="แสดงหรือซ่อนโครงกระดูก AI"
+                title="โครงกระดูก AI 17 จุด"
+                onClick={handleToggleSkeleton}
+                className={`px-2 py-1 rounded-xl border text-[11px] inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                  showSkeleton ? activeEmeraldChipClass : inactiveChipClass
+                }`}
+              >
+                <Google_Icon name="accessibility_new" size={14} />
+                <span>โครงกระดูก AI</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Referee_3D_Viewer;
