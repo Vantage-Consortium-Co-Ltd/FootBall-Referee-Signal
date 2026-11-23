@@ -11,7 +11,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type {
   CameraPreset,
   CardColor,
+  GlbLoadState,
   PlaybackSpeed,
+  RigModelMode,
   SignalClassInfo,
 } from "../../Data_Types/Referee_Types";
 import type { ResolvedPose } from "./Pose_Types";
@@ -24,6 +26,7 @@ import {
   buildRefereeRig,
   type RefereeRigHandle,
 } from "./Referee_Rig_Builder";
+import { loadGlbRefereeRig } from "./GLB_Rig_Adapter";
 
 export type StageTheme = "dark" | "light";
 
@@ -37,11 +40,14 @@ export interface StageState {
   showSkeleton: boolean;
   theme: StageTheme;
   reducedMotion: boolean;
+  rigMode: RigModelMode;
+  glbUrl: string;
 }
 
 export interface StageCallbacks {
   onContextLost?: () => void;
   onContextRestored?: () => void;
+  onGlbStatusChange?: (status: GlbLoadState, errorMessage?: string) => void;
 }
 
 interface ThemePalette {
@@ -145,6 +151,24 @@ function easeOutCubic(t: number): number {
 
 function clonePose(pose: ResolvedPose): ResolvedPose {
   return blendPoses(pose, pose, 0);
+}
+
+function isAbortError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const maybeErr = err as { name?: unknown; code?: unknown };
+  return maybeErr.name === "AbortError" || maybeErr.code === 20;
+}
+
+function formatGlbLoadError(err: unknown): string {
+  if (err instanceof Error) {
+    if (err.message === "GLB_UNSUPPORTED_SKELETON") {
+      return "ไม่พบโครงกระดูกมนุษย์มาตรฐานในไฟล์ .glb นี้ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว";
+    }
+    if (/Failed to load GLB model/i.test(err.message)) {
+      return "ไม่สามารถโหลดไฟล์โมเดล 3 มิติได้ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว";
+    }
+  }
+  return "ไฟล์โมเดล .glb ไม่สมบูรณ์หรือไม่รองรับ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว";
 }
 
 function createFrontChevronGeometry(): THREE.BufferGeometry {
@@ -298,7 +322,12 @@ export class RefereeStageController {
   private readonly rimLight: THREE.DirectionalLight;
   private readonly hemiLight: THREE.HemisphereLight;
   private readonly floorBundle: PitchFloorBundle;
-  private readonly rig: RefereeRigHandle;
+  private readonly proceduralRig: RefereeRigHandle;
+  private glbRig: RefereeRigHandle | null = null;
+  private loadedGlbUrl: string | null = null;
+  private activeRig: RefereeRigHandle;
+  private glbLoadSeq = 0;
+  private glbAbortController: AbortController | null = null;
 
   private state: StageState;
   private currentPose: ResolvedPose;
@@ -438,11 +467,12 @@ export class RefereeStageController {
     this.floorBundle = buildTacticalPitchFloor();
     this.scene.add(this.floorBundle.group);
 
-    this.rig = buildRefereeRig();
-    this.scene.add(this.rig.root, this.rig.overlayRoot);
+    this.proceduralRig = buildRefereeRig();
+    this.activeRig = this.proceduralRig;
+    this.scene.add(this.proceduralRig.root, this.proceduralRig.overlayRoot);
 
     this.applyTheme(this.state.theme);
-    this.rig.setCardColor(this.state.cardColor);
+    this.activeRig.setCardColor(this.state.cardColor);
     this.syncOverlayOptions();
 
     const initialClip = getSignalAnimationClip(this.state.signal.id);
@@ -456,7 +486,7 @@ export class RefereeStageController {
       initialNormT,
       effectiveMirrored
     );
-    this.rig.applyPose(this.currentPose, effectiveMirrored, 0);
+    this.activeRig.applyPose(this.currentPose, effectiveMirrored, 0);
 
     this.renderer.setSize(width, height, false);
     this.renderer.render(this.scene, this.camera);
@@ -478,6 +508,10 @@ export class RefereeStageController {
     }
 
     this.startLoop();
+
+    if (this.state.rigMode === "glb") {
+      this.activateGlbRig(this.state.glbUrl);
+    }
   }
 
   /** Incrementally merge updated viewer state, triggering pose cross-fades and theme sync. */
@@ -526,12 +560,15 @@ export class RefereeStageController {
       this.transition = null;
     }
 
+    const rigModeChanged = nextState.rigMode !== prevState.rigMode;
+    const glbUrlChanged = nextState.glbUrl !== prevState.glbUrl;
+
     if (nextState.theme !== prevState.theme) {
       this.applyTheme(nextState.theme);
     }
 
     if (nextState.cardColor !== prevState.cardColor) {
-      this.rig.setCardColor(nextState.cardColor);
+      this.activeRig.setCardColor(nextState.cardColor);
     }
 
     if (
@@ -544,6 +581,14 @@ export class RefereeStageController {
       nextState.signal.minElevationDeg !== prevState.signal.minElevationDeg
     ) {
       this.syncOverlayOptions();
+    }
+
+    if (nextState.rigMode === "procedural") {
+      if (rigModeChanged) {
+        this.activateProceduralRig();
+      }
+    } else if (rigModeChanged || glbUrlChanged) {
+      this.activateGlbRig(nextState.glbUrl);
     }
   }
 
@@ -613,6 +658,7 @@ export class RefereeStageController {
     if (this.disposed) return;
     this.disposed = true;
 
+    this.abortPendingGlbLoad();
     this.stopLoop();
 
     if (this.resizeObserver) {
@@ -635,7 +681,8 @@ export class RefereeStageController {
     this.controls.removeEventListener("start", this.handleControlsStart);
     this.controls.dispose();
 
-    this.rig.dispose();
+    this.proceduralRig.dispose();
+    this.disposeGlbRig();
 
     for (const geo of this.floorBundle.geometries) {
       geo.dispose();
@@ -684,7 +731,7 @@ export class RefereeStageController {
 
   private syncOverlayOptions(): void {
     const clip = getSignalAnimationClip(this.state.signal.id);
-    this.rig.setOverlayOptions({
+    this.activeRig.setOverlayOptions({
       showAngleGuide: this.state.showAngleGuide,
       showSkeleton: this.state.showSkeleton,
       highlightArms: clip.highlightArms,
@@ -693,6 +740,136 @@ export class RefereeStageController {
       minElevationDeg: this.state.signal.minElevationDeg,
       mirrored: this.getEffectiveMirrored(),
     });
+  }
+
+  private abortPendingGlbLoad(): void {
+    this.glbLoadSeq += 1;
+    if (this.glbAbortController) {
+      this.glbAbortController.abort();
+      this.glbAbortController = null;
+    }
+  }
+
+  private disposeGlbRig(): void {
+    if (!this.glbRig) return;
+    this.scene.remove(this.glbRig.root, this.glbRig.overlayRoot);
+    this.glbRig.dispose();
+    this.glbRig = null;
+    this.loadedGlbUrl = null;
+  }
+
+  private switchToRig(targetRig: RefereeRigHandle): void {
+    this.activeRig = targetRig;
+    this.proceduralRig.root.visible = targetRig === this.proceduralRig;
+    this.proceduralRig.overlayRoot.visible = targetRig === this.proceduralRig;
+    if (this.glbRig) {
+      this.glbRig.root.visible = targetRig === this.glbRig;
+      this.glbRig.overlayRoot.visible = targetRig === this.glbRig;
+    }
+  }
+
+  private syncActiveRigVisuals(): void {
+    this.activeRig.setCardColor(this.state.cardColor);
+    const whistleTime =
+      this.state.reducedMotion && !this.state.isPlaying
+        ? 0
+        : this.totalElapsedSec;
+    this.activeRig.applyPose(
+      this.currentPose,
+      this.getEffectiveMirrored(),
+      whistleTime
+    );
+    this.syncOverlayOptions();
+  }
+
+  private activateProceduralRig(): void {
+    this.abortPendingGlbLoad();
+    this.switchToRig(this.proceduralRig);
+    this.syncActiveRigVisuals();
+    if (!this.contextLost) {
+      this.renderer.render(this.scene, this.camera);
+    }
+    this.callbacks?.onGlbStatusChange?.("idle");
+  }
+
+  private activateGlbRig(url: string): void {
+    const targetUrl = url.trim();
+    if (!targetUrl) {
+      this.abortPendingGlbLoad();
+      this.switchToRig(this.proceduralRig);
+      this.syncActiveRigVisuals();
+      this.callbacks?.onGlbStatusChange?.(
+        "error",
+        "ไม่พบที่อยู่ไฟล์โมเดล 3 มิติ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว"
+      );
+      return;
+    }
+
+    if (this.glbRig && this.loadedGlbUrl === targetUrl) {
+      this.abortPendingGlbLoad();
+      this.switchToRig(this.glbRig);
+      this.syncActiveRigVisuals();
+      if (!this.contextLost) {
+        this.renderer.render(this.scene, this.camera);
+      }
+      this.callbacks?.onGlbStatusChange?.("ready");
+      return;
+    }
+
+    this.abortPendingGlbLoad();
+    const seq = this.glbLoadSeq;
+    const abortController = new AbortController();
+    this.glbAbortController = abortController;
+
+    // Keep procedural rig visible while loading or when falling back from an invalid GLB
+    this.switchToRig(this.proceduralRig);
+    this.disposeGlbRig();
+    this.syncActiveRigVisuals();
+    if (!this.contextLost) {
+      this.renderer.render(this.scene, this.camera);
+    }
+    this.callbacks?.onGlbStatusChange?.("loading");
+
+    loadGlbRefereeRig(targetUrl, abortController.signal)
+      .then((rig) => {
+        if (
+          this.disposed ||
+          seq !== this.glbLoadSeq ||
+          abortController.signal.aborted
+        ) {
+          rig.dispose();
+          return;
+        }
+
+        this.glbAbortController = null;
+        this.glbRig = rig;
+        this.loadedGlbUrl = targetUrl;
+        this.scene.add(rig.root, rig.overlayRoot);
+        this.switchToRig(rig);
+        this.syncActiveRigVisuals();
+        if (!this.contextLost) {
+          this.renderer.render(this.scene, this.camera);
+        }
+        this.callbacks?.onGlbStatusChange?.("ready");
+      })
+      .catch((err: unknown) => {
+        if (
+          this.disposed ||
+          seq !== this.glbLoadSeq ||
+          abortController.signal.aborted ||
+          isAbortError(err)
+        ) {
+          return;
+        }
+
+        this.glbAbortController = null;
+        this.switchToRig(this.proceduralRig);
+        this.syncActiveRigVisuals();
+        if (!this.contextLost) {
+          this.renderer.render(this.scene, this.camera);
+        }
+        this.callbacks?.onGlbStatusChange?.("error", formatGlbLoadError(err));
+      });
   }
 
   private measureContainer(): { width: number; height: number } {
@@ -810,7 +987,7 @@ export class RefereeStageController {
       this.state.reducedMotion && !this.state.isPlaying
         ? 0
         : this.totalElapsedSec;
-    this.rig.applyPose(finalPose, effectiveMirrored, whistleTime);
+    this.activeRig.applyPose(finalPose, effectiveMirrored, whistleTime);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -896,7 +1073,7 @@ export class RefereeStageController {
     if (this.disposed) return;
     this.contextLost = false;
     this.applyTheme(this.state.theme);
-    this.rig.setCardColor(this.state.cardColor);
+    this.activeRig.setCardColor(this.state.cardColor);
     this.syncOverlayOptions();
     this.syncSize();
     this.stepPoseAndRender(0);

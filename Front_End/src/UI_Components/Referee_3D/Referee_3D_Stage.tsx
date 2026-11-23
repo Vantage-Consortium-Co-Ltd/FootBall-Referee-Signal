@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import type {
   CameraPreset,
   CardColor,
+  GlbLoadState,
   PlaybackSpeed,
+  RigModelMode,
   SignalClassInfo,
 } from "../../Data_Types/Referee_Types";
 import {
@@ -29,6 +31,9 @@ export interface Referee3DStageProps {
   showSkeleton: boolean;
   theme: StageTheme;
   reducedMotion: boolean;
+  rigMode: RigModelMode;
+  glbUrl: string;
+  onGlbStatusChange?: (status: GlbLoadState, errorMessage?: string) => void;
   cameraCommand: CameraCommand | null;
   replaySeq: number;
 }
@@ -49,6 +54,9 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
   showSkeleton,
   theme,
   reducedMotion,
+  rigMode,
+  glbUrl,
+  onGlbStatusChange,
   cameraCommand,
   replaySeq,
 }) => {
@@ -70,6 +78,8 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
     showSkeleton,
     theme,
     reducedMotion,
+    rigMode,
+    glbUrl,
   });
   latestStateRef.current = {
     signal,
@@ -81,7 +91,12 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
     showSkeleton,
     theme,
     reducedMotion,
+    rigMode,
+    glbUrl,
   };
+
+  const onGlbStatusChangeRef = useRef(onGlbStatusChange);
+  onGlbStatusChangeRef.current = onGlbStatusChange;
 
   const latestReplaySeqRef = useRef<number>(replaySeq);
   latestReplaySeqRef.current = replaySeq;
@@ -106,6 +121,9 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
           },
           onContextRestored: () => {
             setContextLost(false);
+          },
+          onGlbStatusChange: (status, errorMessage) => {
+            onGlbStatusChangeRef.current?.(status, errorMessage);
           },
         }
       );
@@ -139,6 +157,8 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
       showSkeleton,
       theme,
       reducedMotion,
+      rigMode,
+      glbUrl,
     });
   }, [
     signal,
@@ -150,6 +170,8 @@ export const Referee_3D_Stage: React.FC<Referee3DStageProps> = ({
     showSkeleton,
     theme,
     reducedMotion,
+    rigMode,
+    glbUrl,
   ]);
 
   useEffect(() => {

@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import type {
   CameraPreset,
   CardColor,
+  GlbLoadState,
   PlaybackSpeed,
+  RigModelMode,
   SignalClassInfo,
 } from "../../Data_Types/Referee_Types";
 import { getSignalAnimationClip } from "../../Core_Lib/Referee_3D/Signal_Poses";
@@ -33,6 +35,17 @@ const Referee_3D_Stage = dynamic(() => import("./Referee_3D_Stage"), {
   ssr: false,
   loading: () => <StageLoadingSkeleton />,
 });
+
+const DEFAULT_GLB_MODEL_URL = "/models/referee.glb";
+
+const RIG_MODEL_BUTTONS: ReadonlyArray<{
+  mode: RigModelMode;
+  label: string;
+  ariaLabel: string;
+}> = [
+  { mode: "procedural", label: "ผู้ตัดสิน 3D", ariaLabel: "ใช้ผู้ตัดสิน 3 มิติมาตรฐาน" },
+  { mode: "glb", label: "โมเดลสมจริง", ariaLabel: "ใช้โมเดลมนุษย์ 3 มิติสมจริง" },
+];
 
 const CAMERA_PRESET_BUTTONS: ReadonlyArray<{
   preset: Exclude<CameraPreset, "free">;
@@ -77,9 +90,17 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
     null
   );
   const [replaySeq, setReplaySeq] = useState<number>(0);
+  const [rigMode, setRigMode] = useState<RigModelMode>("procedural");
+  const [customGlbUrl, setCustomGlbUrl] = useState<string | null>(null);
+  const [customGlbName, setCustomGlbName] = useState<string | null>(null);
+  const [glbStatus, setGlbStatus] = useState<GlbLoadState>("idle");
+  const [glbError, setGlbError] = useState<string | null>(null);
 
   const fullscreenBtnRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const effectiveGlbUrl = customGlbUrl ?? DEFAULT_GLB_MODEL_URL;
 
   const closeFullscreen = useCallback(() => {
     triggerCausalFeedback("tap");
@@ -117,6 +138,15 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
   }, [clip.supportsMirror, mirrored]);
 
   useEffect(() => {
+    const urlToRevoke = customGlbUrl;
+    return () => {
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
+      }
+    };
+  }, [customGlbUrl]);
+
+  useEffect(() => {
     if (!isFullscreen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -128,7 +158,12 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
         dialog.querySelectorAll<HTMLElement>(
           'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
         )
-      ).filter((el) => !el.closest('[aria-hidden="true"]'));
+      ).filter(
+        (el) =>
+          !el.closest('[aria-hidden="true"]') &&
+          el.tabIndex >= 0 &&
+          el.getClientRects().length > 0
+      );
     };
 
     const focusTimerId = window.requestAnimationFrame(() => {
@@ -230,6 +265,58 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
     setIsFullscreen((prev) => !prev);
   };
 
+  const handleGlbStatusChange = useCallback(
+    (status: GlbLoadState, errorMessage?: string) => {
+      setGlbStatus(status);
+      if (status === "error") {
+        setGlbError(
+          errorMessage ??
+            "ไม่สามารถโหลดโมเดล .glb ได้ — สลับกลับไปใช้ผู้ตัดสิน 3D มาตรฐานให้แล้ว"
+        );
+      } else {
+        setGlbError(null);
+      }
+    },
+    []
+  );
+
+  const handleSelectRigMode = (nextMode: RigModelMode) => {
+    if (nextMode === rigMode) return;
+    triggerCausalFeedback("snap");
+    setGlbError(null);
+    setRigMode(nextMode);
+  };
+
+  const handleOpenGlbPicker = () => {
+    triggerCausalFeedback("tap");
+    fileInputRef.current?.click();
+  };
+
+  const handleGlbFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    triggerCausalFeedback("tap");
+    const objectUrl = URL.createObjectURL(file);
+    setCustomGlbUrl(objectUrl);
+    setCustomGlbName(file.name);
+    setGlbError(null);
+    setRigMode("glb");
+  };
+
+  const handleResetCustomGlb = () => {
+    triggerCausalFeedback("tap");
+    setCustomGlbUrl(null);
+    setCustomGlbName(null);
+    setGlbError(null);
+  };
+
+  const handleDismissGlbError = () => {
+    triggerCausalFeedback("tap");
+    setGlbError(null);
+  };
+
   const glassMaterialClass = isDark
     ? "apple-material-dark text-slate-100"
     : "apple-material-light text-slate-900";
@@ -300,48 +387,133 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
             showSkeleton={showSkeleton}
             theme={theme}
             reducedMotion={reducedMotion}
+            rigMode={rigMode}
+            glbUrl={effectiveGlbUrl}
+            onGlbStatusChange={handleGlbStatusChange}
             cameraCommand={cameraCommand}
             replaySeq={replaySeq}
           />
 
-          {/* Top HUD Row: Target Guidance Pill (left) + Camera & Fullscreen Controls (right) */}
+          {/* Top HUD Row: Target Guidance + Model Switcher (left) & Camera + Fullscreen Controls (right) */}
           <div className="absolute top-2.5 inset-x-2.5 sm:top-3 sm:inset-x-3 z-20 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
-            <div
-              className={`pointer-events-auto min-w-0 max-w-full rounded-xl px-2.5 py-1.5 flex flex-col gap-0.5 ${glassMaterialClass}`}
-            >
-              <div className="flex items-center gap-1.5 flex-wrap text-[11px] apple-tabular">
-                <Google_Icon
-                  name="view_in_ar"
-                  size={14}
-                  className="text-[#10B981]"
-                />
-                {signal.activeArm !== "none" && (
-                  <>
-                    <span className="font-semibold">
-                      มุมเป้าหมาย {signal.targetElevationDeg}°
+            <div className="flex flex-col items-start gap-1.5 min-w-0 max-w-full">
+              <div
+                className={`pointer-events-auto min-w-0 max-w-full rounded-xl px-2.5 py-1.5 flex flex-col gap-0.5 ${glassMaterialClass}`}
+              >
+                <div className="flex items-center gap-1.5 flex-wrap text-[11px] apple-tabular">
+                  <Google_Icon
+                    name="view_in_ar"
+                    size={14}
+                    className="text-[#10B981]"
+                  />
+                  {signal.activeArm !== "none" && (
+                    <>
+                      <span className="font-semibold">
+                        มุมเป้าหมาย {signal.targetElevationDeg}°
+                      </span>
+                      <span aria-hidden="true" className="opacity-40">
+                        ·
+                      </span>
+                    </>
+                  )}
+                  <span className="font-medium">
+                    ค้าง ≥ {signal.minHoldSeconds}s
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`text-[10px] leading-tight ${mutedTextClass}`}>
+                    ลากเพื่อหมุน 360°
+                  </span>
+                  {reducedMotion && (
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded-md border text-[10px] font-medium leading-none ${
+                        isDark
+                          ? "bg-amber-500/15 border-amber-400/35 text-amber-300"
+                          : "bg-amber-500/15 border-amber-500/40 text-amber-800"
+                      }`}
+                    >
+                      โหมดลดการเคลื่อนไหว
                     </span>
-                    <span aria-hidden="true" className="opacity-40">
-                      ·
-                    </span>
-                  </>
-                )}
-                <span className="font-medium">
-                  ค้าง ≥ {signal.minHoldSeconds}s
-                </span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className={`text-[10px] leading-tight ${mutedTextClass}`}>
-                  ลากเพื่อหมุน 360°
-                </span>
-                {reducedMotion && (
+
+              <div
+                className={`pointer-events-auto min-w-0 max-w-full rounded-xl p-1 flex flex-wrap items-center gap-0.5 ${glassMaterialClass}`}
+              >
+                <div
+                  role="group"
+                  aria-label="รูปแบบโมเดล 3 มิติ"
+                  className="flex items-center gap-0.5"
+                >
+                  {RIG_MODEL_BUTTONS.map(({ mode, label, ariaLabel }) => {
+                    const isActive = rigMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        aria-pressed={isActive}
+                        aria-label={ariaLabel}
+                        onClick={() => handleSelectRigMode(mode)}
+                        className={`px-2 py-1 rounded-lg border text-[10px] sm:text-[11px] leading-none whitespace-nowrap apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${
+                          isActive ? activeEmeraldChipClass : inactiveChipClass
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-px bg-current opacity-15 mx-0.5"
+                />
+
+                <input
+                  ref={fileInputRef}
+                  id="glb-file-upload"
+                  name="glb-file-upload"
+                  type="file"
+                  accept=".glb,.gltf"
+                  aria-label="นำเข้าไฟล์โมเดล 3D (.glb)"
+                  onChange={handleGlbFileChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  aria-label="นำเข้าไฟล์โมเดล 3D (.glb)"
+                  title="นำเข้าโมเดล MakeHuman / MPFB2 หรือมนุษย์ 3 มิติ (.glb)"
+                  onClick={handleOpenGlbPicker}
+                  className={`px-2 py-1 rounded-lg border text-[10px] sm:text-[11px] leading-none whitespace-nowrap inline-flex items-center gap-1 apple-pressable transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] ${inactiveChipClass}`}
+                >
+                  <Google_Icon name="upload" size={13} />
+                  <span>นำเข้า .glb</span>
+                </button>
+
+                {customGlbName && (
                   <span
-                    className={`inline-flex items-center px-1.5 py-0.5 rounded-md border text-[10px] font-medium leading-none ${
+                    className={`inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-lg border text-[10px] leading-none ${
                       isDark
-                        ? "bg-amber-500/15 border-amber-400/35 text-amber-300"
-                        : "bg-amber-500/15 border-amber-500/40 text-amber-800"
+                        ? "bg-emerald-500/15 border-emerald-400/35 text-emerald-200"
+                        : "bg-emerald-500/10 border-emerald-500/35 text-emerald-800"
                     }`}
                   >
-                    โหมดลดการเคลื่อนไหว
+                    <span
+                      className="truncate max-w-[96px] sm:max-w-[140px]"
+                      title={customGlbName}
+                    >
+                      {customGlbName}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="รีเซ็ตกลับเป็นโมเดลเริ่มต้น"
+                      title="กลับไปใช้โมเดลเริ่มต้น"
+                      onClick={handleResetCustomGlb}
+                      className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981]"
+                    >
+                      <Google_Icon name="close" size={11} />
+                    </button>
                   </span>
                 )}
               </div>
@@ -413,8 +585,48 @@ export const Referee_3D_Viewer: React.FC<Referee3DViewerProps> = ({
             </div>
           </div>
 
-          {/* Bottom Floating Glass Dock */}
-          <div className="absolute bottom-2.5 inset-x-2.5 sm:bottom-3 sm:inset-x-3 z-20 flex justify-center pointer-events-none">
+          {/* Bottom Status Notices + Floating Glass Dock */}
+          <div className="absolute bottom-2.5 inset-x-2.5 sm:bottom-3 sm:inset-x-3 z-20 flex flex-col items-center gap-1.5 pointer-events-none">
+            {rigMode === "glb" && glbStatus === "loading" && (
+              <div
+                role="status"
+                aria-live="polite"
+                className={`pointer-events-none rounded-full px-3 py-1 flex items-center gap-2 text-[11px] font-medium ${glassMaterialClass}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="w-2 h-2 rounded-full bg-[#10B981] motion-safe:animate-pulse"
+                />
+                <span>กำลังโหลดโมเดล 3D...</span>
+              </div>
+            )}
+
+            {glbStatus === "error" && glbError && (
+              <div
+                role="alert"
+                className={`pointer-events-auto max-w-full sm:max-w-lg rounded-xl px-2.5 py-1.5 border flex items-center gap-2 text-[11px] leading-snug shadow-sm backdrop-blur-md ${
+                  isDark
+                    ? "bg-amber-950/90 border-amber-400/40 text-amber-200"
+                    : "bg-amber-50/95 border-amber-500/45 text-amber-900"
+                }`}
+              >
+                <Google_Icon
+                  name="warning"
+                  size={14}
+                  className="text-amber-500 shrink-0"
+                />
+                <span className="min-w-0 flex-1">{glbError}</span>
+                <button
+                  type="button"
+                  aria-label="ปิดข้อความแจ้งเตือนโมเดล 3 มิติ"
+                  onClick={handleDismissGlbError}
+                  className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  <Google_Icon name="close" size={13} />
+                </button>
+              </div>
+            )}
+
             <div
               role="toolbar"
               aria-label="ควบคุมการแสดงผลท่าสัญญาณ 3 มิติ"

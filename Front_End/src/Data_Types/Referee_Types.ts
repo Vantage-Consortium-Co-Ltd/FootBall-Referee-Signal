@@ -13,6 +13,10 @@ export type CardColor = "yellow" | "red";
 
 export type PlaybackSpeed = 0.5 | 1;
 
+export type RigModelMode = "procedural" | "glb";
+
+export type GlbLoadState = "idle" | "loading" | "ready" | "error";
+
 export const F1_ZERO_LIMITED_CLASSES = ["Offside", "Goal", "Elbowing"] as const;
 
 export interface SignalClassInfo {
