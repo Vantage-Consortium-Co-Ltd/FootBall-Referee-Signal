@@ -1,4 +1,5 @@
 import {
+  ActiveArm,
   F1_ZERO_LIMITED_CLASSES,
   GestureCategory,
   SignalClassInfo,
@@ -11,10 +12,23 @@ interface RawIfabSignalEntry {
   nameTh: string;
   ifabLaw: string;
   category: GestureCategory;
+  activeArm?: ActiveArm;
+  targetElevationDeg?: number;
+  minElevationDeg?: number;
+  targetStraightnessDeg?: number;
+  minStraightnessDeg?: number;
+  minHoldSeconds?: number;
   descriptionTh: string;
   descriptionEn: string;
   coachingTips: string[];
 }
+
+const VALID_ACTIVE_ARMS: ReadonlySet<string> = new Set<ActiveArm>([
+  "none",
+  "right",
+  "either",
+  "both",
+]);
 
 export const IFAB_SIGNAL_CLASSES: SignalClassInfo[] = (
   ifabSignalsData as RawIfabSignalEntry[]
@@ -24,6 +38,15 @@ export const IFAB_SIGNAL_CLASSES: SignalClassInfo[] = (
   nameTh: entry.nameTh,
   ifabLaw: entry.ifabLaw,
   category: entry.category,
+  activeArm:
+    entry.activeArm && VALID_ACTIVE_ARMS.has(entry.activeArm)
+      ? entry.activeArm
+      : "none",
+  targetElevationDeg: entry.targetElevationDeg ?? 90,
+  minElevationDeg: entry.minElevationDeg ?? 60,
+  targetStraightnessDeg: entry.targetStraightnessDeg ?? 160,
+  minStraightnessDeg: entry.minStraightnessDeg ?? 120,
+  minHoldSeconds: entry.minHoldSeconds ?? 1.2,
   descriptionTh: entry.descriptionTh,
   descriptionEn: entry.descriptionEn,
   coachingTips: Array.isArray(entry.coachingTips) ? entry.coachingTips : [],

@@ -5,6 +5,14 @@
 
 export type GestureCategory = "restarts" | "fouls" | "match_control" | "offside";
 
+export type ActiveArm = "none" | "right" | "either" | "both";
+
+export type CameraPreset = "front" | "side" | "three_quarter" | "free";
+
+export type CardColor = "yellow" | "red";
+
+export type PlaybackSpeed = 0.5 | 1;
+
 export const F1_ZERO_LIMITED_CLASSES = ["Offside", "Goal", "Elbowing"] as const;
 
 export interface SignalClassInfo {
@@ -13,6 +21,12 @@ export interface SignalClassInfo {
   nameTh: string;
   ifabLaw: string;
   category: GestureCategory;
+  activeArm: ActiveArm;
+  targetElevationDeg: number;
+  minElevationDeg: number;
+  targetStraightnessDeg: number;
+  minStraightnessDeg: number;
+  minHoldSeconds: number;
   descriptionTh: string;
   descriptionEn: string;
   coachingTips: string[];
