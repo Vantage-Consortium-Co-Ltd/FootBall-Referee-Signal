@@ -6,9 +6,21 @@ import {
   formatSignalEnglishName,
   IFAB_SIGNAL_CLASSES,
 } from "../../Core_Lib/Ifab_Rules_Catalog";
-import { GestureCategory, SignalClassInfo } from "../../Data_Types/Referee_Types";
+import {
+  ActiveArm,
+  GestureCategory,
+  SignalClassInfo,
+} from "../../Data_Types/Referee_Types";
 import { Google_Icon } from "../../UI_Components/Common/Google_Icon";
+import { Referee_3D_Viewer } from "../../UI_Components/Referee_3D";
 import { triggerCausalFeedback } from "../../Core_Lib/Apple_Spring_Engine";
+
+const ACTIVE_ARM_LABELS: Record<ActiveArm, string> = {
+  none: "ท่าเตรียม (ปล่อยข้างตัว)",
+  right: "แขนขวา",
+  either: "แขนซ้ายหรือขวา",
+  both: "แขนทั้งสองข้าง",
+};
 
 const CATEGORIES: { id: GestureCategory | "all"; label: string }[] = [
   { id: "all", label: "ทั้งหมด (20)" },
@@ -149,6 +161,54 @@ export default function SignalsPage() {
                     อยู่ระหว่างเพิ่มข้อมูลฝึกสอน
                   </span>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Referee_3D_Viewer signal={selectedClass} />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    แขนหลัก
+                  </div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5 leading-snug">
+                    {ACTIVE_ARM_LABELS[selectedClass.activeArm]}
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    มุมยกเป้าหมาย
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 tabular-nums">
+                    {selectedClass.targetElevationDeg}°
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
+                    ขั้นต่ำ {selectedClass.minElevationDeg}°
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    ความเหยียดแขน
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 tabular-nums">
+                    {selectedClass.targetStraightnessDeg}°
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
+                    ขั้นต่ำ {selectedClass.minStraightnessDeg}°
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    ระยะเวลาค้างท่า
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mt-0.5 tabular-nums">
+                    ≥ {selectedClass.minHoldSeconds} วินาที
+                  </div>
+                </div>
               </div>
             </div>
 
