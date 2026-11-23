@@ -1,1 +1,0 @@
-pythainlp>=5.0
