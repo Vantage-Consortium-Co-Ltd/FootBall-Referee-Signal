@@ -96,9 +96,9 @@ log_model:
 inference:
   host: 127.0.0.1
   port: 8000
-  model_path: Train/model_output_version/results_c2/runs/one_stage/best_overall.pt
-  device: cpu                                   # "0" = first GPU (needs CUDA). cpu runs anywhere, incl. Modal free tier
-  imgsz: 640
+  model_path: Train/model_output_version/results_v3/runs_v3/notflip/best_overall.pt
+  device: cpu                                   # "0" = first GPU (needs CUDA). cpu runs anywhere. On Modal, modal.gpu set => device "0" automatically
+  imgsz: 960
   conf: 0.25
   fp16: true                                    # FP16 on GPU: faster, less memory (ignored on cpu)
   max_upload_mb: 100
@@ -107,12 +107,18 @@ inference:
   video:
     stride: 5                                   # run the model on every Nth frame
     max_seconds: 30                             # longer videos are cut
+  rate_limit:                                   # in-memory, per container (fine while modal.max_containers is 1); over the limit -> HTTP 429
+    image_per_min: 30                           # /predict/image, per client IP
+    video_per_min: 3                            # /predict/video, per client IP
+    ws_connections_per_ip: 2                    # simultaneous /ws/webcam connections per client IP
+    ws_fps: 10                                  # max frames per second per WebSocket; faster frames are answered with an error, not run
+    max_concurrent: 4                           # inferences running at once, whole service; the rest get 429 / {"error": "busy"} at once
 
 
 # ============================================================ 5. MODAL (python -m modal deploy Inference/modalApp.py)
 modal:
   app_name: football-signal                     # environment = the workspace default (main)
-  gpu: null                                     # T4 | L4 | ... ; null = CPU (Modal requires a payment method for GPUs)
+  gpu: T4                                       # T4 | L4 | ... ; null = CPU (Modal requires a payment method for GPUs)
   scaledown_window: 60                          # seconds a container stays up after the last request (billed while idle!)
   max_containers: 1                             # hard cap so a burst of requests cannot burn the free credits
   secret_name: football-signal-api-key          # Modal Secret that provides FOOTBALL_API_KEY

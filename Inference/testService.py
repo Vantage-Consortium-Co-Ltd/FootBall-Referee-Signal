@@ -77,4 +77,21 @@ with TestClient(create_app(cfg)) as c:
             raise AssertionError("idle websocket must be closed")
         except WebSocketDisconnect:
             pass
+# rate limits: per-IP requests/minute, WebSocket connections per IP, service-wide concurrency
+os.environ.pop(cfg.api_key_env, None)
+cfg.ws_idle_seconds = 30
+cfg.rate_limit.image_per_min, cfg.rate_limit.ws_connections_per_ip = 2, 1
+with TestClient(create_app(cfg)) as c:
+    codes = [c.post("/predict/image", files={"file": ("a.jpg", jpg)}).status_code for _ in range(3)]
+    assert codes == [200, 200, 429], codes
+    assert c.get("/health").status_code == 200  # never limited
+    with c.websocket_connect("/ws/webcam"):
+        try:
+            with c.websocket_connect("/ws/webcam"):
+                raise AssertionError("second connection from the same IP must be refused")
+        except WebSocketDisconnect:
+            pass
+cfg.rate_limit.image_per_min, cfg.rate_limit.max_concurrent = 100, 0
+with TestClient(create_app(cfg)) as c:
+    assert c.post("/predict/image", files={"file": ("a.jpg", jpg)}).status_code == 429  # busy: refused at once, not queued
 print("ALL TESTS PASSED:", d[0]["label"], d[0]["confidence"])

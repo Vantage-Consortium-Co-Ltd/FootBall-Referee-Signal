@@ -15,7 +15,7 @@ M, INF, REF = CFG["modal"], CFG["inference"], CFG["refine"]
 
 image = (
     modal.Image.debian_slim(python_version=M["python_version"])
-    .apt_install("libgl1", "libglib2.0-0")  # opencv
+    .apt_install("libgl1", "libglib2.0-0", "libegl1", "libgles2")  # opencv; mediapipe (hand refiner) loads libEGL/libGLESv2
     .pip_install("torch", "torchvision", "ultralytics", "fastapi", "python-multipart", "pyyaml", "mediapipe", "scikit-learn", "joblib")
     .add_local_dir(str(ROOT / "Inference"), "/app/Inference", ignore=["**/__pycache__", "testService.py", "testRefine.py", "modalApp.py"])
     .add_local_dir(str(ROOT / "config"), "/app/config")
@@ -35,4 +35,7 @@ def web():
     from app.service import create_app
     from utils.loadUtils import load_config
 
-    return create_app(load_config())
+    cfg = load_config()
+    if M["gpu"]:
+        cfg.device = "0"  # the container has a GPU: use it (locally device stays as in config)
+    return create_app(cfg)
